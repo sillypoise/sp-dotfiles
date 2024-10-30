@@ -1,3 +1,4 @@
+---
 - name: Confirm 1Password CLI Authentication
   ansible.builtin.command: "op vault list"
   register: op_auth_check
@@ -13,5 +14,4 @@
 
 - name: Display Test Item Content
   ansible.builtin.debug:
-  var: op_test_item.stdout
-
+    var: op_test_item.stdout
