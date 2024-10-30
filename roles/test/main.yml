@@ -1,0 +1,25 @@
+---
+- name: Test 1Password CLI Access
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  pre_tasks:
+    - name: Confirm 1Password CLI Authentication
+      ansible.builtin.command: "op vault list"
+      register: op_auth_check
+      changed_when: false
+      failed_when: op_auth_check.rc != 0
+      ignore_errors: false
+
+  tasks:
+    - name: Fetch Test Item from 1Password Vault
+      ansible.builtin.command: "op read 'op://sp-dev/test'"
+      register: op_test_item
+      changed_when: false
+      no_log: true
+
+    - name: Display Test Item Content
+      ansible.builtin.debug:
+        var: op_test_item.stdout
+
