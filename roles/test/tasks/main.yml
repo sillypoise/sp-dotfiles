@@ -10,7 +10,6 @@
   ansible.builtin.command: "op read 'op://sp-dev/test'"
   register: op_test_item
   changed_when: false
-  no_log: true
 
 - name: Display Test Item Content
   ansible.builtin.debug:
