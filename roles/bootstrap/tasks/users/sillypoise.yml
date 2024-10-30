@@ -18,13 +18,13 @@
     name: ansible
     state: present
 
-# - name: users | sillypoise | install zsh
-#   tags:
-#     - bootstrap
-#     - packages
-#   ansible.builtin.pacman:
-#     name: zsh
-#     state: present
+- name: users | sillypoise | install zsh
+  tags:
+    - bootstrap
+    - packages
+  ansible.builtin.pacman:
+    name: zsh
+    state: present
 
 - name: users | sillypoise | create user
   tags:
