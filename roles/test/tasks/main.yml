@@ -7,7 +7,7 @@
   ignore_errors: false
 
 - name: Fetch Test Item from 1Password Vault
-  ansible.builtin.command: "op read 'op://sp-dev/test'"
+  ansible.builtin.command: "op://sp-dev/test/password"
   register: op_test_item
   changed_when: false
 
