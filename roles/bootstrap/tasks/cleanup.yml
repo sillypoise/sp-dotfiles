@@ -1,1 +1,14 @@
-## Cleanup dotfiles mess
+- name: "Cleanup | Remove root's .dotfiles log"
+  ansible.builtin.file:
+    path: "/root/.dotfiles.log"
+    state: absent
+
+- name: "Cleanup | Remove root's .dotfiles directory"
+  ansible.builtin.file:
+    path: "/root/.dotfiles"
+    state: absent
+
+- name: "Cleanup | Remove root's .dotfiles_run marker file"
+  ansible.builtin.file:
+    path: "/root/.dotfiles_run"
+    state: absent

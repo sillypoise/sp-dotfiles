@@ -42,7 +42,6 @@ OP_VAULT_SECRET=""
 ID=""
 DOTFILES_LOG="$HOME/.dotfiles.log"
 DOTFILES_DIR="$HOME/.dotfiles"
-SSH_DIR="$HOME/.ssh"
 IS_FIRST_RUN="$HOME/.dotfiles_run"
 
 # Function to display tasks
