@@ -14,3 +14,9 @@
 - name: Display Test Item Content
   ansible.builtin.debug:
     var: op_test_item.stdout
+
+- name: Inject 1Password Secret into File
+  ansible.builtin.command:
+    cmd: "op inject -i /home/sillypoise/.vault_key_passwd.tpl -o /home/sillypoise/.vault_key_passwd -f"
+  changed_when: false
+  register: op_inject_result
