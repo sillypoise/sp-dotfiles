@@ -129,15 +129,6 @@ function confirmVaultAccess() {
 # Initial Arch Linux setup
 arch_setup
 
-# SSH Key setup if not already present
-if ! [[ -f "$SSH_DIR/authorized_keys" ]]; then
-    __task "Generating SSH keys"
-    _cmd "mkdir -p $SSH_DIR"
-    _cmd "chmod 700 $SSH_DIR"
-    _cmd "ssh-keygen -b 4096 -t rsa -f $SSH_DIR/id_rsa -N '' -C $USER@$HOSTNAME"
-    _cmd "cat $SSH_DIR/id_rsa.pub >> $SSH_DIR/authorized_keys"
-fi
-
 # Clone or update the dotfiles repo
 if ! [[ -d "$DOTFILES_DIR" ]]; then
     __task "Cloning repository"
