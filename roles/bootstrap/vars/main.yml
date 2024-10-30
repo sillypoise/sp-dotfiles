@@ -1,0 +1,5 @@
+sudo_group: wheel
+sillypoise_passwd: $6$VLa1CaTzt1XdFtnY$W1CwxzKhQXi840Ed/wkdLwGIghWDj9PymTfpS/7iNs4aXYawIBto1VXfVZs0FCUPh8j3xYM5jjKr9EZnTnJMg0
+openssh:
+  sftp_path: /usr/lib/ssh/sftp-server
+  service: sshd

@@ -1,0 +1,98 @@
+- name: users | sillypoise | create group
+  tags:
+    - bootstrap
+    - groups
+    - sillypoise
+    - users
+  group:
+    name: sillypoise
+    state: present
+
+- name: users | ansible | create group
+  tags:
+    - bootstrap
+    - groups
+    - ansible
+    - users
+  group:
+    name: ansible
+    state: present
+
+# - name: users | sillypoise | install zsh
+#   tags:
+#     - bootstrap
+#     - packages
+#   ansible.builtin.pacman:
+#     name: zsh
+#     state: present
+
+- name: users | sillypoise | create user
+  tags:
+    - bootstrap
+    - sillypoise
+    - sudo
+    - users
+  user:
+    name: sillypoise
+    group: sillypoise
+    groups:
+      - ansible
+      - "{{ sudo_group }}"
+    state: present
+    comment: "sillypoise"
+    shell: /bin/zsh
+    password: "{{ sillypoise_passwd }}"
+
+- name: users | sillypoise | create .ssh directory
+  tags:
+    - bootstrap
+    - ssh
+    - users
+    - dotfiles
+    - configure
+  ansible.builtin.file:
+    path: /home/sillypoise/.ssh
+    state: directory
+    owner: sillypoise
+    group: sillypoise
+    mode: '0700'
+
+- name: users | sillypoise | add sudoers file
+  tags:
+    - bootstrap
+    - sudo
+    - users
+    - configure
+  ansible.builtin.copy:
+    src: users/sudoers_sillypoise
+    dest: /etc/sudoers.d/sillypoise
+    owner: root
+    group: root
+    mode: '0440'
+
+- name: users | sillypoise | add public key
+  tags:
+    - bootstrap
+    - dotfiles
+    - sillypoise
+    - ssh
+    - ssh-keys
+    - users
+  authorized_key:
+    user: sillypoise
+    key: "{{ item }}"
+  with_file:
+    - users/sillypoise/ssh/sp_work_ed25519.pub
+  notify: restart_sshd
+
+# - name: users | sillypoise | import ansible password op tpl file
+#   tags:
+#     - secrets
+#     - op
+#     - template
+#   copy:
+#     src: users/vault_key_passwd
+#     dest: /home/sillypoise/.vault_key_passwd.tpl
+#     owner: sillypoise
+#     group: sillypoise
+#     mode: 0600
