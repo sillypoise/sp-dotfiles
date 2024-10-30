@@ -141,7 +141,7 @@ fi
 # Clone or update the dotfiles repo
 if ! [[ -d "$DOTFILES_DIR" ]]; then
     __task "Cloning repository"
-    _cmd "git clone --quiet https://github.com/TechDufus/dotfiles.git $DOTFILES_DIR"
+    _cmd "git clone --quiet https://github.com/sillypoise/sp-dotfiles.git $DOTFILES_DIR"
 else
     __task "Updating repository"
     _cmd "git -C $DOTFILES_DIR pull --quiet"
