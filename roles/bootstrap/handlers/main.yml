@@ -2,4 +2,3 @@
   service:
     name: "{{ openssh.service }}"
     state: restarted
-
