@@ -27,17 +27,22 @@ function secret() {
   fi
 
   # set -c
-  if [[ "$clear_env" == true ]]; then
+if [[ "$clear_env" == true ]]; then
     __task "Detecting secret vars..."
     local secret_vars=($(grep -o '^\s*export\s\+\w\+' "$HOME/.config/zsh/vars.secret" | awk '{print $2}'))
     for var in "${secret_vars[@]}"; do
+      # Skip unsetting OP_SERVICE_ACCOUNT_TOKEN
+      if [[ "$var" == "OP_SERVICE_ACCOUNT_TOKEN" ]]; then
+          __task "${RIGHT_ANGLE}${GREEN} Skipping: ${YELLOW}$var"
+          continue
+      fi
       __task "${RIGHT_ANGLE}${GREEN} Unsetting: ${YELLOW}$var"
       unset "$var"
     done
     _task_done
     unset SECRETS_ALREADY_LOADED
     return
-  fi
+fi
 
   # loading when already loaded (skip)
   if [ -n "$SECRETS_ALREADY_LOADED" ] && [ "$SECRETS_ALREADY_LOADED" = true ]; then
