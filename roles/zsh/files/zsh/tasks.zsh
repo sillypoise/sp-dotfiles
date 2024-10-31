@@ -3,9 +3,9 @@
 # Generate a timestamped log file name
 #   Usage: LOG=$(generate_log)
 #   Returns: the log file name as a string
-# generate_log() {
-#     mktemp -t "shell._task_XXXXXXXX"
-# }
+generate_log() {
+    mktemp -t "shell._task_XXXXXXXX"
+}
 
 
 # _task colorize the given argument with spacing
