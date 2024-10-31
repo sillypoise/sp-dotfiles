@@ -89,55 +89,32 @@ function _task_done {
 }
 
 function arch_setup() {
-    # Clean the package cache
-    __task "Cleaning package cache"
-    _cmd "sudo pacman -Scc --noconfirm"
-
-    # Update Arch Linux keyring
-    __task "Updating Arch Linux keyring"
-    _cmd "sudo pacman -Sy archlinux-keyring --noconfirm"
-
-    # Install Ansible if not already installed
-    if ! [ -x "$(command -v ansible)" ]; then
-        __task "Installing Ansible"
-        _cmd "sudo pacman -Sy --noconfirm"
-        _cmd "sudo pacman -S --noconfirm ansible"
-        _cmd "sudo pacman -S --noconfirm python-argcomplete"
+    # Check for package cache and clear only if needed
+    if [ "$(ls -A /var/cache/pacman/pkg)" ]; then
+        __task "Cleaning package cache"
+        _cmd "sudo pacman -Scc --noconfirm"
     fi
 
-    # Install Python3 if not already installed
-    if ! pacman -Q python3 >/dev/null 2>&1; then
-        __task "Installing Python3"
-        _cmd "sudo pacman -S --noconfirm python3"
+    # Update Arch Linux keyring only if it hasn't been updated recently
+    if ! sudo pacman -Qi archlinux-keyring >/dev/null 2>&1; then
+        __task "Updating Arch Linux keyring"
+        _cmd "sudo pacman -Sy archlinux-keyring --noconfirm"
     fi
 
-    # Install Python3 Pip if not already installed
-    if ! pacman -Q python-pip >/dev/null 2>&1; then
-        __task "Installing Python3 Pip"
-        _cmd "sudo pacman -S --noconfirm python-pip"
-    fi
+    # Install essential packages if not present
+    packages=("ansible" "python3" "python-pip" "python-watchdog" "openssh" "git")
+    for pkg in "${packages[@]}"; do
+        if ! pacman -Q "$pkg" >/dev/null 2>&1; then
+            __task "Installing $pkg"
+            _cmd "sudo pacman -S --noconfirm $pkg"
+        fi
+    done
 
-    # Install Watchdog for Python3 if not already installed
-    if ! pip3 list | grep watchdog >/dev/null 2>&1; then
-        __task "Installing Python3 Watchdog"
-        _cmd "sudo pacman -S --noconfirm python-watchdog"
+    # Set locale if it hasn’t been configured
+    if [ "$(localectl status | grep 'LANG=en_US.UTF-8')" == "" ]; then
+        __task "Setting Locale"
+        _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
     fi
-
-    # Install OpenSSH if not already installed
-    if ! pacman -Q openssh >/dev/null 2>&1; then
-        __task "Installing OpenSSH"
-        _cmd "sudo pacman -S --noconfirm openssh"
-    fi
-
-    # Install Git if not already installed
-    if ! pacman -Q git >/dev/null 2>&1; then
-        __task "Installing Git"
-        _cmd "sudo pacman -S --noconfirm git"
-    fi
-
-    # Set the system locale
-    __task "Setting Locale"
-    _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
 }
 
 # 1Password CLI access confirmation
