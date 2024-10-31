@@ -12,6 +12,16 @@ addToPathFront() {
     fi
 }
 
+sourceIfExists() {
+    local path="$1"
+    if [ -e "$path" ]; then
+        . "$path"
+        echo "Sourced $path"
+    else
+        echo "Warning: $path not found, skipping."
+    fi
+}
+
 # change_background() {
 #     dconf write /org/mate/desktop/background/picture-filename "'$HOME/anime/$(ls ~/anime| fzf)'"
 # }
