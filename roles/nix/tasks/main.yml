@@ -8,14 +8,13 @@
     - system
     - setup
 
-# - name: system setup | nix | source nix environment
-#   shell: . /etc/profile.d/nix.sh
-#   changed_when: false
-#   tags:
-#     - nix
-#     - environment
-#   when: ansible_distribution == "Fedora"
-#
+- name: system setup | nix | source nix environment
+  shell: . /etc/profile.d/nix.sh
+  changed_when: false
+  tags:
+    - nix
+    - environment
+
 # - name: system setup | nix | add home-manager channel
 #   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-23.05.tar.gz home-manager
 #   tags:
