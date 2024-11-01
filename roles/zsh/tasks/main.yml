@@ -12,24 +12,24 @@
     directory_mode: "0755"
     force: true
 
-- name: "Inject OP perm token"
-  ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/op_token.tpl -o {{ ansible_user_dir }}/.config/zsh/op_token.zsh -f"
-  register: inject_result
-  no_log: true
-  tags:
-    - secrets
-    - op
-
-- name: Ensure op_token.zsh has secure permissions
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/op_token.zsh"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: '0600'
-
-- name: Ensure vars.secret has secure permissions
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/vars.secret"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: '0600'
+# - name: "Inject OP perm token"
+#   ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/op_token.tpl -o {{ ansible_user_dir }}/.config/zsh/op_token.zsh -f"
+#   register: inject_result
+#   no_log: true
+#   tags:
+#     - secrets
+#     - op
+#
+# - name: Ensure op_token.zsh has secure permissions
+#   ansible.builtin.file:
+#     path: "{{ ansible_user_dir }}/.config/zsh/op_token.zsh"
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: '0600'
+#
+# - name: Ensure vars.secret has secure permissions
+#   ansible.builtin.file:
+#     path: "{{ ansible_user_dir }}/.config/zsh/vars.secret"
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: '0600'
