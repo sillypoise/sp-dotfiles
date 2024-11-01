@@ -48,7 +48,7 @@
 
 - name: system setup | nix | copy home-manager configuration file
   copy:
-    src: "users/{{ host_user }}/home.nix"
+    src: "{{ host_user }}/home.nix"
     dest: "{{ ansible_user_dir }}/.config/nixpkgs/home.nix"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
