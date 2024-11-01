@@ -1,0 +1,12 @@
+- name: "Fetch {{ ansible_user }} passwd"
+  ansible.builtin.command:
+    cmd: "op read 'op://sp-dev/user/password'"
+  register: new_password
+  no_log: true
+
+- name: "Set passwd for sillypoise"
+  ansible.builtin.user:
+    name: sillypoise
+    password: "{{ new_password.stdout }}"
+  become: true
+  no_log: true
