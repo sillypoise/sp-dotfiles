@@ -89,17 +89,6 @@ function _task_done {
 }
 
 function arch_setup() {
-    # Check for package cache and clear only if needed
-    if [ "$(ls -A /var/cache/pacman/pkg)" ]; then
-        __task "Cleaning package cache"
-        _cmd "sudo pacman -Scc --noconfirm"
-    fi
-
-    # Update Arch Linux keyring only if it hasn't been updated recently
-    if ! sudo pacman -Qi archlinux-keyring >/dev/null 2>&1; then
-        __task "Updating Arch Linux keyring"
-        _cmd "sudo pacman -Sy archlinux-keyring --noconfirm"
-    fi
 
     # Run a full system upgrade if there are pending updates
     __task "Checking for system updates"
