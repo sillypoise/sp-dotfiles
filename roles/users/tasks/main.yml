@@ -2,7 +2,7 @@
   ansible.builtin.command:
     cmd: "op read 'op://sp-dev/user/hashed'"
   register: new_password
-  no_log: true
+  # no_log: true
 # TODO: non-idempotent
   # changed_when: false
 
