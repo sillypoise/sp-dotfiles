@@ -4,6 +4,7 @@
     dest: "{{ ansible_user_dir }}/.zshrc"
     mode: "0644"
 
+# TODO: non-idempotent because we inject a new file each time
 - name: "zsh | copy custom zsh config"
   ansible.builtin.copy:
     dest: "{{ ansible_user_dir }}/.config/"
@@ -11,11 +12,10 @@
     mode: "0644"
     directory_mode: "0755"
     force: true
-  ## TODO: This will always change because we inject a new file each time, so maybe it's a good idea to separate directories
   changed_when: false
 
-- name: "Inject OP perm token"
-  ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/op_token.tpl -o {{ ansible_user_dir }}/.config/zsh/op_token.zsh -f"
+- name: "zsh | inject secrets"
+  ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/vars.secret.tpl -o {{ ansible_user_dir }}/.config/zsh/vars.secret -f"
   register: inject_result
   no_log: true
   tags:
