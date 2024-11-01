@@ -89,10 +89,6 @@ function _task_done {
 }
 
 function arch_setup() {
-    # Clean the package cache
-    __task "Cleaning package cache"
-    _cmd "sudo pacman -Scc --noconfirm"
-
     # Update Arch Linux keyring
     __task "Updating Arch Linux keyring"
     _cmd "sudo pacman -Sy archlinux-keyring --noconfirm"
