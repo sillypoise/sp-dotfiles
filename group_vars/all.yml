@@ -1,6 +1,6 @@
 default_roles:
   - zsh
-  - nix
+  # - nix
   - users 
   - test
 exclude_roles:
