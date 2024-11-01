@@ -2,4 +2,4 @@
 
 addToPath $HOME/.dotfiles/bin
 
-sourceIfExists "/nix/var/nix/profiles/default"
+sourceIfExists "/etc/profile.d/nix.sh"

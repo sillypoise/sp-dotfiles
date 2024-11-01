@@ -59,7 +59,7 @@
     - packages
 
 - name: system setup | nix | install packages via home-manager
-  shell: sudo -i -u sillypoise home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix
+  shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix"
   tags:
     - nix
     - home-manager
