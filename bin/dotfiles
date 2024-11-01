@@ -115,6 +115,12 @@ function debian_setup() {
             _cmd "sudo apt-get install -y python3-watchdog"
         fi
     fi
+
+    # Set the system locale if not already configured
+    if [ "$(localectl status | grep 'LANG=en_US.UTF-8')" == "" ]; then
+        __task "Setting Locale"
+        _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
+    fi
 }
 
 # 1Password CLI access confirmation
