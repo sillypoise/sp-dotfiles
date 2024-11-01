@@ -36,7 +36,3 @@ export RIGHT_ANGLE="${GREEN}\xE2\x88\x9F${NC}"
 
 export DF_HOME="$HOME/dev/raft/data-fabric"
 export DFDEV_GIT_PROTOCOL="ssh"
-
-# OP
-MY_ACCOUNT="my.1password.com"
-export OP_SERVICE_ACCOUNT_TOKEN=$(op read --account $MY_ACCOUNT "op://sp-dev/kspuqxv7awvy4k2bvqaw57lcdy/credential")
