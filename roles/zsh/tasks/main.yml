@@ -20,14 +20,14 @@
     - secrets
     - op
 
-- name: "Set secure permissions for injected token file"
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/op_token.zsh"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0600"
-
-- name: Confirm op_token.zsh permissions are set to 0600
-  ansible.builtin.debug:
-    msg: "Permissions for op_token.zsh are secure."
-  when: token_file_permission_check.changed
+# - name: "Set secure permissions for injected token file"
+#   ansible.builtin.file:
+#     path: "{{ ansible_user_dir }}/.config/zsh/op_token.zsh"
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: "0600"
+#
+# - name: Confirm op_token.zsh permissions are set to 0600
+#   ansible.builtin.debug:
+#     msg: "Permissions for op_token.zsh are secure."
+#   when: token_file_permission_check.changed
