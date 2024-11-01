@@ -11,3 +11,23 @@
     mode: "0644"
     directory_mode: "0755"
     force: true
+
+- name: "Inject OP perm token"
+  ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/op_token.tpl -o {{ ansible_user_dir }}/.config/zsh/op_token.zsh -f"
+  register: inject_result
+  no_log: true
+  tags:
+    - secrets
+    - op
+
+- name: "Set secure permissions for injected token file"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.config/zsh/op_token.zsh"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+
+- name: Confirm op_token.zsh permissions are set to 0600
+  ansible.builtin.debug:
+    msg: "Permissions for op_token.zsh are secure."
+  when: token_file_permission_check.changed
