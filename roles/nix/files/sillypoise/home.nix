@@ -1,5 +1,8 @@
 { config, pkgs, ... }:
 
+# Enable Home Manager
+home.stateVersion = "24.05"; # Change this to the appropriate version if needed
+
 {
   # Package Management
   home.packages = with pkgs; [
