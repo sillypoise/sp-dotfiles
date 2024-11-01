@@ -104,7 +104,6 @@ function arch_setup() {
         _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
     fi
 }
-
 # 1Password CLI access confirmation
 function confirmVaultAccess() {
     __task "Checking for 1Password CLI"
