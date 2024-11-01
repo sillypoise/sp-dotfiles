@@ -10,7 +10,8 @@
 
 - name: system setup | nix | source nix environment
   shell: . /etc/profile.d/nix.sh
-  changed_when: false
+# TODO: non-idempotent
+  # changed_when: false
   tags:
     - nix
     - environment

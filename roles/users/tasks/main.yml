@@ -1,10 +1,10 @@
-- name: "Fetch {{ ansible_user }} passwd"
+- name: "Fetch {{ host_user }} passwd"
   ansible.builtin.command:
     cmd: "op read 'op://sp-dev/user/hashed'"
   register: new_password
   no_log: true
 # TODO: non-idempotent
-  changed_when: false
+  # changed_when: false
 
 - name: "Set passwd for sillypoise"
   ansible.builtin.user:
