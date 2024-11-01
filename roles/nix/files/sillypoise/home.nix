@@ -1,7 +1,9 @@
-# { config, pkgs, ... }:
+{ config, pkgs, ... }:
+
 {
-    # Enable Home Manager
-    home.stateVersion = "24.05"; # Change this to the appropriate version if needed
+    # Required state version for compatibility
+    home.stateVersion = "24.05";  # Adjust according to your Home Manager release
+
     # Package Management
     home.packages = with pkgs; [
         neovim
@@ -34,5 +36,4 @@
         zoxide
     ];
 }
-
 
