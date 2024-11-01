@@ -33,14 +33,3 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0600'
-
-- name:  remove template file after injection
-  ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/op_token.tpl"
-    state: absent
-  tags:
-    - secrets
-    - op
-    - cleanup
-  when:
-    - inject_result.rc == 0
