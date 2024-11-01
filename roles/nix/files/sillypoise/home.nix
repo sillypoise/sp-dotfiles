@@ -4,6 +4,9 @@
     # Required state version for compatibility
     home.stateVersion = "24.05";  # Adjust according to your Home Manager release
 
+    # Define the username for the Home Manager configuration
+    home.username = "sillypoise";
+
     # Package Management
     home.packages = with pkgs; [
         neovim
