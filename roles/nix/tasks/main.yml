@@ -16,12 +16,11 @@
     - nix
     - environment
 
-# - name: system setup | nix | add home-manager channel
-#   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-23.05.tar.gz home-manager
-#   tags:
-#     - nix
-#     - home-manager
-#   when: ansible_distribution == "Fedora"
+- name: system setup | nix | add home-manager channel
+  shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-23.05.tar.gz home-manager
+  tags:
+    - nix
+    - home-manager
 #
 # - name: system setup | nix | update nix channels
 #   shell: nix-channel --update
