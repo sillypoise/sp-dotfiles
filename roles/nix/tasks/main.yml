@@ -46,22 +46,22 @@
     - nix
     - home-manager
 
-# - name: system setup | nix | copy home-manager configuration file
-#   copy:
-#     src: users/sillypoise/nix/home.nix
-#     dest: /home/sillypoise/.config/nixpkgs/home.nix
-#     owner: sillypoise
-#     group: sillypoise
-#     mode: '0644'
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
-#
-# - name: system setup | nix | install packages via home-manager
-#   shell: sudo -i -u sillypoise home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
-#
+- name: system setup | nix | copy home-manager configuration file
+  copy:
+    src: "users/{{ host_user }}/home.nix"
+    dest: "{{ ansible_user_dir }}/.config/nixpkgs/home.nix"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0644'
+  tags:
+    - nix
+    - home-manager
+    - packages
+
+- name: system setup | nix | install packages via home-manager
+  shell: sudo -i -u sillypoise home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix
+  tags:
+    - nix
+    - home-manager
+    - packages
+
