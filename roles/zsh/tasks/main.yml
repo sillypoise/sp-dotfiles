@@ -21,6 +21,8 @@
   tags:
     - secrets
     - op
+# TODO: non-idempotent
+  changed_when: false
 
 - name: Ensure op_token.zsh has secure permissions
   ansible.builtin.file:
