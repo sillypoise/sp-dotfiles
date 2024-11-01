@@ -28,8 +28,8 @@
     - nix
     - home-manager
 
-- name: system setup | nix | install home-manager
-  shell: nix-shell '<home-manager>' -A install
+- name: system setup | nix | install home-manager into profile
+  shell: nix-env -iA nixpkgs.home-manager
   tags:
     - nix
     - home-manager
