@@ -89,6 +89,9 @@ function _task_done {
 }
 
 function arch_setup() {
+    # Update Arch Linux keyring
+    __task "Updating Arch Linux keyring"
+    _cmd "sudo pacman -Sy archlinux-keyring --noconfirm"
 
     # Run a full system upgrade if there are pending updates
     __task "Checking for system updates"
