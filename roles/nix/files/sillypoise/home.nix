@@ -6,6 +6,7 @@
 
     # Define the username for the Home Manager configuration
     home.username = "sillypoise";
+    home.homeDirectory = "/home/sillypoise";
 
     # Package Management
     home.packages = with pkgs; [
