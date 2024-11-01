@@ -2,8 +2,9 @@
   ansible.builtin.command:
     cmd: "op read 'op://sp-dev/user/password'"
   register: new_password
-  no_log: true
+  # no_log: true
 
+# TODO: non-idempotent
 - name: "Set passwd for sillypoise"
   ansible.builtin.user:
     name: sillypoise
