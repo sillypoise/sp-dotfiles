@@ -22,9 +22,10 @@
   tags:
     - bootstrap
     - packages
-  ansible.builtin.pacman:
+  ansible.builtin.apt:
     name: zsh
     state: present
+    update_cache: yes
 
 - name: users | sillypoise | create user
   tags:
@@ -84,15 +85,3 @@
   with_file:
     - users/sillypoise/ssh/sp_work_ed25519.pub
   notify: restart_sshd
-
-# - name: users | sillypoise | import ansible password op tpl file
-#   tags:
-#     - secrets
-#     - op
-#     - template
-#   copy:
-#     src: users/vault_key_passwd
-#     dest: /home/sillypoise/.vault_key_passwd.tpl
-#     owner: sillypoise
-#     group: sillypoise
-#     mode: 0600
