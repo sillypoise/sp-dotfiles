@@ -21,7 +21,7 @@
   tags:
     - nix
     - environment
-# TODO: You need a shell restart after this
+# TODO: You need a shell restart after this no? I am souricng in zsh but you'd think this would've done the trick but it doesn't seem to be sourcing.
 
 - name: system setup | nix | add home-manager channel
   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
