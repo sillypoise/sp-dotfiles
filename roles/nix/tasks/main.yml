@@ -79,10 +79,10 @@
     - home-manager
     - update
 
-# - name: system setup | nix | update home-manager packages
-#   shell: "sudo -i -u {{ host_user }} home-manager switch -b backup"
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
-#     - update
+- name: system setup | nix | update home-manager packages
+  shell: "sudo -i -u {{ host_user }} home-manager switch -b backup"
+  tags:
+    - nix
+    - home-manager
+    - packages
+    - update
