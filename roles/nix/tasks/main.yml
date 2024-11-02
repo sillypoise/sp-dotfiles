@@ -1,81 +1,87 @@
-- name: system setup | nix | install nix package manager
-  shell: |
+- name: Check if Nix is installed
+  ansible.builtin.command: which nix
+  register: nix_check
+  ignore_errors: true
+
+- name: Install Nix package manager
+  ansible.builtin.shell: |
     sh <(curl -L https://nixos.org/nix/install) --daemon
   args:
     creates: /nix/var/nix/profiles/default
+  when: nix_check.rc != 0
   tags:
     - nix
     - system
     - setup
 
-- name: system setup | nix | source nix environment
-  shell: . /etc/profile.d/nix.sh
-# TODO: non-idempotent
-  # changed_when: false
-  tags:
-    - nix
-    - environment
-
-- name: system setup | nix | add home-manager channel
-  shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
-  tags:
-    - nix
-    - home-manager
-
-- name: system setup | nix | update nix channels
-  shell: nix-channel --update
-  tags:
-    - nix
-    - home-manager
-
-- name: system setup | nix | install home-manager into profile
-  shell: nix-env -iA nixpkgs.home-manager
-  tags:
-    - nix
-    - home-manager
-
-- name: system setup | nix | create .config/nixpkgs directory for home manager config
-  file:
-    path: "{{ ansible_user_dir }}/.config/nixpkgs"
-    state: directory
-    owner: "{{ host_user }}"
-    group: "{{ host_user }}"
-    # permissions so home-manager can write to it
-    mode: '0755'
-  tags:
-    - nix
-    - home-manager
-
-- name: system setup | nix | copy home-manager configuration file
-  copy:
-    src: "{{ host_user }}/home.nix"
-    dest: "{{ ansible_user_dir }}/.config/nixpkgs/home.nix"
-    owner: "{{ host_user }}"
-    group: "{{ host_user }}"
-    mode: '0644'
-  tags:
-    - nix
-    - home-manager
-    - packages
-
-- name: system setup | nix | install packages via home-manager
-  shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix"
-  tags:
-    - nix
-    - home-manager
-    - packages
-
-- name: system setup | nix | update nix channels
-  shell: nix-channel --update
-  tags:
-    - nix
-    - home-manager
-    - update
-
-- name: system setup | nix | update home-manager packages
-  shell: "sudo -i -u {{ host_user }} home-manager switch -b backup"
-  tags:
-    - nix
-    - home-manager
-    - packages
-    - update
+# - name: system setup | nix | source nix environment
+#   shell: . /etc/profile.d/nix.sh
+# # TODO: non-idempotent
+#   # changed_when: false
+#   tags:
+#     - nix
+#     - environment
+#
+# - name: system setup | nix | add home-manager channel
+#   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+#   tags:
+#     - nix
+#     - home-manager
+#
+# - name: system setup | nix | update nix channels
+#   shell: nix-channel --update
+#   tags:
+#     - nix
+#     - home-manager
+#
+# - name: system setup | nix | install home-manager into profile
+#   shell: nix-env -iA nixpkgs.home-manager
+#   tags:
+#     - nix
+#     - home-manager
+#
+# - name: system setup | nix | create .config/nixpkgs directory for home manager config
+#   file:
+#     path: "{{ ansible_user_dir }}/.config/nixpkgs"
+#     state: directory
+#     owner: "{{ host_user }}"
+#     group: "{{ host_user }}"
+#     # permissions so home-manager can write to it
+#     mode: '0755'
+#   tags:
+#     - nix
+#     - home-manager
+#
+# - name: system setup | nix | copy home-manager configuration file
+#   copy:
+#     src: "{{ host_user }}/home.nix"
+#     dest: "{{ ansible_user_dir }}/.config/nixpkgs/home.nix"
+#     owner: "{{ host_user }}"
+#     group: "{{ host_user }}"
+#     mode: '0644'
+#   tags:
+#     - nix
+#     - home-manager
+#     - packages
+#
+# - name: system setup | nix | install packages via home-manager
+#   shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix"
+#   tags:
+#     - nix
+#     - home-manager
+#     - packages
+#
+# - name: system setup | nix | update nix channels
+#   shell: nix-channel --update
+#   tags:
+#     - nix
+#     - home-manager
+#     - update
+#
+# - name: system setup | nix | update home-manager packages
+#   shell: "sudo -i -u {{ host_user }} home-manager switch -b backup"
+#   tags:
+#     - nix
+#     - home-manager
+#     - packages
+#     - update
