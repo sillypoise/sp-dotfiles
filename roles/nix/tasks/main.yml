@@ -33,13 +33,13 @@
   tags:
     - nix
     - home-manager
-#
-# - name: system setup | nix | install home-manager into profile
-#   shell: nix-env -iA nixpkgs.home-manager
-#   tags:
-#     - nix
-#     - home-manager
-#
+
+- name: system setup | nix | install home-manager into profile
+  shell: nix-env -iA nixpkgs.home-manager
+  tags:
+    - nix
+    - home-manager
+
 # - name: system setup | nix | create .config/nixpkgs directory for home manager config
 #   file:
 #     path: "{{ ansible_user_dir }}/.config/nixpkgs"
