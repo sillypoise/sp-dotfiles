@@ -129,22 +129,12 @@ fi
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 confirmVaultAccess
 
-# # Run Ansible playbook if 1Password authentication is successful
-# if [[ -n $OP_INSTALLED && -n $OP_AUTHENTICATED ]]; then
-#     printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
-#     ansible-playbook "$DOTFILES_DIR/main.yml" "$@"
-# else
-#     printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
-# fi
-#
-
-if [[ -n $OP_INSTALLED ]]; then
-    if [[ -n $OP_AUTHENTICATED ]]; then
-        printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}Checking for 1Password CLI: 1Password Authentication successful! ☕${NC}\n"
-        ansible-playbook "$DOTFILES_DIR/main.yml" "$@"
-    else
-        printf "${OVERWRITE}${LRED} [X]  ${LRED}Checking for 1Password CLI: Unable to Authenticate with 1Password.${NC}\n"
-    fi
+# Run Ansible playbook if 1Password authentication is successful
+if [[ -n $OP_INSTALLED && -n $OP_AUTHENTICATED ]]; then
+    printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
+    ansible-playbook "$DOTFILES_DIR/main.yml" "$@" "--ask-become"
+else
+    printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
 fi
 
 popd 2>&1 >/dev/null
