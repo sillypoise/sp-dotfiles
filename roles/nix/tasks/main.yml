@@ -28,11 +28,11 @@
     - nix
     - home-manager
 
-# - name: system setup | nix | update nix channels
-#   shell: nix-channel --update
-#   tags:
-#     - nix
-#     - home-manager
+- name: system setup | nix | update nix channels
+  shell: nix-channel --update
+  tags:
+    - nix
+    - home-manager
 #
 # - name: system setup | nix | install home-manager into profile
 #   shell: nix-env -iA nixpkgs.home-manager
