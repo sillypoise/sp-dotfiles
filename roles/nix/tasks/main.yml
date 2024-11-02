@@ -21,6 +21,7 @@
   tags:
     - nix
     - environment
+# TODO: You need a shell restart after this
 
 - name: system setup | nix | add home-manager channel
   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
@@ -64,13 +65,13 @@
     - home-manager
     - packages
 
-# - name: system setup | nix | install packages via home-manager
-#   shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix"
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
-#
+- name: system setup | nix | install packages via home-manager
+  shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/nixpkgs/home.nix"
+  tags:
+    - nix
+    - home-manager
+    - packages
+
 # - name: system setup | nix | update nix channels
 #   shell: nix-channel --update
 #   tags:
