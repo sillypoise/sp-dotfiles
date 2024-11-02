@@ -14,14 +14,14 @@
     - system
     - setup
 
-# - name: system setup | nix | source nix environment
-#   shell: . /etc/profile.d/nix.sh
-# # TODO: non-idempotent
-#   # changed_when: false
-#   tags:
-#     - nix
-#     - environment
-#
+- name: system setup | nix | source nix environment
+  shell: . /etc/profile.d/nix.sh
+# TODO: non-idempotent
+  # changed_when: false
+  tags:
+    - nix
+    - environment
+
 # - name: system setup | nix | add home-manager channel
 #   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
 #   tags:
