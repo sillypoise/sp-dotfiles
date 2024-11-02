@@ -72,13 +72,13 @@
     - home-manager
     - packages
 
-# - name: system setup | nix | update nix channels
-#   shell: nix-channel --update
-#   tags:
-#     - nix
-#     - home-manager
-#     - update
-#
+- name: system setup | nix | update nix channels
+  shell: nix-channel --update
+  tags:
+    - nix
+    - home-manager
+    - update
+
 # - name: system setup | nix | update home-manager packages
 #   shell: "sudo -i -u {{ host_user }} home-manager switch -b backup"
 #   tags:
