@@ -43,7 +43,7 @@
 
 - name: system setup | nix | create .config/nixpkgs directory for home manager config
   file:
-    path: "{{ ansible_user_dir }}/.config/nixpkgs"
+    path: "{{ ansible_user_dir }}/.config/home-manager"
     state: directory
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
