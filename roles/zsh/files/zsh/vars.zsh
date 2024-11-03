@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
+# settings
+export EDITOR="nvim"
+export TERM=xterm-256color
+
 # color codes
 export RESTORE='\033[0m'
 export NC='\033[0m'
