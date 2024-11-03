@@ -40,6 +40,8 @@
     - ssh
     - system
     - settings
+  become: true
+  no_log: true
   ansible.builtin.copy:
     src: system_setup/openssh_issue.net
     dest: /etc/issue.net
