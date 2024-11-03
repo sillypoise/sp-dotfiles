@@ -61,7 +61,6 @@ alias gco="git checkout"
 
 # GH & Copilot CLI 
 alias ghas="gh auth switch"
-eval "$(github-copilot-cli alias -- "$0")"
 
 # Remote Development Servers
 alias rds-sp="ssh sillypoise@sp-dev"
