@@ -26,6 +26,8 @@
     - ssh
     - system
     - settings
+  become: true
+  no_log: true
   ansible.builtin.template:
     src: sshd_config.j2
     dest: /etc/ssh/sshd_config
