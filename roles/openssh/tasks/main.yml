@@ -5,7 +5,7 @@
     - system
     - settings
   ansible.builtin.pacman:
-    name: openssh-server
+    name: openssh
     state: latest
   notify: restart_sshd
 
