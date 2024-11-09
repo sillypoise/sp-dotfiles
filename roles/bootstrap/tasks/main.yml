@@ -1,5 +1,5 @@
 - import_tasks: users/sillypoise.yml
 - import_tasks: users/root.yml
-# - import_tasks: users/flubber.yml
+- import_tasks: users/flubber.yml
 - import_tasks: software/onepassword.yml
 - import_tasks: cleanup.yml

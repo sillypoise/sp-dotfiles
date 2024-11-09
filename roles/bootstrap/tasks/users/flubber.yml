@@ -1,0 +1,51 @@
+- name: users | flubber | create group
+  tags:
+    - bootstrap
+    - groups
+    - flubber
+    - users
+  group:
+    name: flubber
+    state: present
+
+- name: users | flubber | create user
+  tags:
+    - bootstrap
+    - flubber
+    - users
+  user:
+    name: flubber
+    group: flubber
+    state: present
+    comment: "Automation user for Ansible"
+    shell: /bin/bash
+
+- name: users | flubber | add public key
+  tags:
+    - bootstrap
+    - dotfiles
+    - flubber
+    - ssh
+    - ssh-keys
+    - users
+  authorized_key:
+    user: flubber
+    key: "{{ item }}"
+  with_file:
+    - users/flubber/ssh/flubber_id_ed25519.pub
+
+- name: users | flubber | add sudoers file for passwordless sudo
+  tags:
+    - bootstrap
+    - settings
+    - flubber
+    - sudo
+    - system
+    - users
+  copy:
+    src: users/sudoers_flubber
+    dest: /etc/sudoers.d/flubber
+    owner: root
+    group: root
+    mode: 0440
+
