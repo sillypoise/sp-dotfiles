@@ -26,7 +26,7 @@
         starship
         btop
         gh
-        tailscale
+        # tailscale
         git
         zellij
         sqlite-utils
