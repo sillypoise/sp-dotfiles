@@ -1,6 +1,7 @@
 ---
 - name: DotFiles Config
   hosts: localhost
+  become: true
   connection: local
 
   pre_tasks:
@@ -28,7 +29,6 @@
         - always
 
     - name: Run roles
-      become: true
       ansible.builtin.include_role:
         apply:
           tags:
