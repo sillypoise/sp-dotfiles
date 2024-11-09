@@ -37,6 +37,7 @@
         aws-vault
         delta
         volta
+        # ufw
         zoxide
     ];
 }
