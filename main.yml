@@ -28,6 +28,7 @@
         - always
 
     - name: Run roles
+      become: true
       ansible.builtin.include_role:
         apply:
           tags:
