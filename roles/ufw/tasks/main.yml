@@ -28,13 +28,13 @@
   loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
   become: yes
 
-- name: Allow HTTP/HTTPS on Tailscale interface only
+- name: Allow HTTP/HTTPS and SSH on Tailscale interface only
   ansible.builtin.ufw:
     rule: allow
     port: "{{ item }}"
     proto: tcp
-    in_interface: "{{ ufw_tailscale_interface }}"
-  loop: "{{ ufw_allowed_ports }}" 
+    interface_in: "{{ ufw_tailscale_interface }}"
+  loop: "{{ ufw_allowed_ports }}"  # Including port 22 for SSH
   become: yes
 
 - name: Allow SSH on Tailscale interface only
