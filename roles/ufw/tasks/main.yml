@@ -1,0 +1,56 @@
+---
+- name: Install UFW on Arch Linux
+  ansible.builtin.pacman:
+    name: ufw
+    state: present
+  when: ansible_os_family == "Archlinux"
+
+- name: Enable and start UFW
+  ansible.builtin.systemd:
+    name: ufw
+    enabled: true
+    state: started
+
+- name: Set default UFW policies
+  ansible.builtin.ufw:
+    state: enabled
+    policy: allow
+    direction: outgoing
+
+- name: Block HTTP/HTTPS on all public interfaces
+  ansible.builtin.ufw:
+    rule: deny
+    port: "{{ item }}"
+    proto: tcp
+  loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
+
+- name: Allow HTTP/HTTPS on Tailscale interface only
+  ansible.builtin.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+    in_interface: "{{ ufw_tailscale_interface }}"
+  loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
+
+- name: Allow SSH on Tailscale interface only
+  ansible.builtin.ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+    in_interface: "{{ ufw_tailscale_interface }}"
+
+- name: Reload UFW to apply changes
+  ansible.builtin.command:
+    cmd: ufw reload
+  register: ufw_reload_result
+  changed_when: ufw_reload_result.rc == 0
+
+- name: Show UFW status for verification
+  ansible.builtin.command: ufw status verbose
+  register: ufw_status
+  changed_when: false
+
+- name: Display UFW status
+  ansible.builtin.debug:
+    msg: "{{ ufw_status.stdout_lines }}"
+
