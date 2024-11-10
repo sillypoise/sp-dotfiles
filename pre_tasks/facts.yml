@@ -60,7 +60,7 @@
   changed_when: false
   failed_when: false
   register: zsh_detection
-  when: not facts.zsh_installed
+  when: not facts_zsh_installed
   tags:
     - always
 
