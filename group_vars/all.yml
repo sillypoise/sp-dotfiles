@@ -28,3 +28,4 @@ automated_user_home: "/home/{{ automated_user }}"
 # Define configs
 
 facts_bash_config_installed: false
+facts_zsh_config_installed: false

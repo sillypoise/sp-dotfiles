@@ -1,10 +1,10 @@
 - name: Debug | Show important facts
   ansible.builtin.debug:
-    var: "{{ item }}"
-  with_items:
-    - facts_nix_installed
-    - facts_bash_config_installed
-    - facts_zsh_config_installed
+    msg: |
+      Nix Installed: {{ facts_nix_installed }}
+      Bash Config Installed: {{ facts_bash_config_installed }}
+      Zsh Config Installed: {{ facts_zsh_config_installed }}
+      1Password Installed: {{ facts_op_installed }}
   tags:
     - always
 
