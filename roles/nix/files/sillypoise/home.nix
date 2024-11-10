@@ -10,35 +10,35 @@
 
     # Package Management
     home.packages = with pkgs; [
-        # neovim
-        # ripgrep
-        # fzf
+        aws-vault
+        awscli2
         bat
-        # broot
-        # fd
-        # eza
-        # gnused
-        # sd
-        # lazygit
-        # lazydocker
-        # jq
-        # tree-sitter
-        # starship
-        # btop
-        # gh
+        btop
+        broot
+        datasette
+        delta
+        eza
+        fd
+        fzf
+        gh
+        git
+        gnused
+        jq
+        lazydocker
+        lazygit
+        neovim
+        ripgrep
+        rsync
+        rustup
+        sd
+        sqlite-utils
+        starship
         tailscale
-        # git
-        # zellij
-        # sqlite-utils
-        # datasette
-        # rustup
-        # rsync
-        # awscli2
-        # aws-vault
-        # delta
-        # volta
-        # ufw
-        # zoxide
+        tree-sitter
+        ufw
+        volta
+        zellij
+        zoxide
         zsh
     ];
 }
