@@ -8,6 +8,12 @@
   ansible.builtin.debug:
     msg: "The environment user is: {{ ansible_env['USER'] }}"
 
+- name: Set default user for become if not defined
+  ansible.builtin.set_fact:
+    become_target_user: "{{ become_user | default(ansible_user) }}"
+  tags:
+    - always
+
 # Register Current User if Undefined
 - name: Register Current User if Undefined
   ansible.builtin.set_fact:
@@ -33,7 +39,7 @@
 
 # Detect Nix installation
 - name: Detect Nix Installation
-  become_user: "{{ host_user }}"
+  become_user: "noexiste"
   ansible.builtin.command:
     cmd: which nix
   changed_when: false
@@ -56,6 +62,7 @@
 
 # Detect Zsh installation
 - name: Detect Zsh Installation
+  become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: which zsh
   changed_when: false

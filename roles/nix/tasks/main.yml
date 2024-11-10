@@ -15,23 +15,6 @@
   tags:
     - always
 
-- name: Verify if Nix is installed
-  ansible.builtin.command: which nix
-  register: nix_check
-  become_user: "{{ host_user }}"
-  ignore_errors: true
-  changed_when: false
-  tags:
-    - nix
-    - check
-
-- name: Set fact | Nix installation status
-  ansible.builtin.set_fact:
-    facts_nix_installed: "{{ nix_check.rc == 0 }}"
-  tags:
-    - nix
-    - setup
-
 - name: Install Nix package manager in multi-user mode
   ansible.builtin.shell: |
     sh <(curl -L https://nixos.org/nix/install) --daemon
