@@ -1,8 +1,26 @@
 ---
-# Register Current User
-- name: Register Current User if Undefined
+# Initialize facts dictionary if it doesn't exist
+- name: Initialize facts dictionary
   ansible.builtin.set_fact:
-    host_user: "{{ ansible_env['USER'] }}"
+    facts: {}
+  when: facts is not defined
+  tags:
+    - always
+
+# Initialize tools and users dictionaries if not present
+- name: Initialize facts.tools dictionary
+  ansible.builtin.set_fact:
+    facts:
+      tools: {}
+  when: facts.tools is not defined
+  tags:
+    - always
+
+- name: Initialize facts.users dictionary
+  ansible.builtin.set_fact:
+    facts:
+      users: {}
+  when: facts.users is not defined
   tags:
     - always
 
@@ -19,8 +37,7 @@
 - name: Set 1Password Installed Status
   ansible.builtin.set_fact:
     facts:
-      tools:
-        op_installed: "{{ op_detection.rc == 0 }}"
+      tools: "{{ facts.tools | combine({'op_installed': op_detection.rc == 0}) }}"
   tags:
     - always
 
@@ -37,8 +54,7 @@
 - name: Set Nix Installed Status
   ansible.builtin.set_fact:
     facts:
-      tools:
-        nix_installed: "{{ nix_detection.rc == 0 }}"
+      tools: "{{ facts.tools | combine({'nix_installed': nix_detection.rc == 0}) }}"
   tags:
     - always
 
@@ -55,8 +71,7 @@
 - name: Set Zsh Installed Status
   ansible.builtin.set_fact:
     facts:
-      tools:
-        zsh_installed: "{{ zsh_detection.rc == 0 }}"
+      tools: "{{ facts.tools | combine({'zsh_installed': zsh_detection.rc == 0}) }}"
   tags:
     - always
 
@@ -73,8 +88,7 @@
 - name: Set sillypoise User Existence Status
   ansible.builtin.set_fact:
     facts:
-      users:
-        sillypoise_exists: "{{ sillypoise_user_detection.rc == 0 }}"
+      users: "{{ facts.users | combine({'sillypoise_exists': sillypoise_user_detection.rc == 0}) }}"
   tags:
     - always
 
@@ -91,8 +105,7 @@
 - name: Set flubber User Existence Status
   ansible.builtin.set_fact:
     facts:
-      users:
-        flubber_exists: "{{ flubber_user_detection.rc == 0 }}"
+      users: "{{ facts.users | combine({'flubber_exists': flubber_user_detection.rc == 0}) }}"
   tags:
     - always
 
