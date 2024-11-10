@@ -12,5 +12,5 @@ exclude_roles:
 facts_op_installed: false
 facts_nix_installed: false
 facts_zsh_installed: false
-factssillypoise_exists: false
+facts_sillypoise_exists: false
 facts_flubber_exists: false
