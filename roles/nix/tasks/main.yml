@@ -1,6 +1,6 @@
 - name: Debug | Show nix facts
   ansible.builtin.debug:
-    var: facts
+    var: facts_nix_installed
   tags:
     - always
 
