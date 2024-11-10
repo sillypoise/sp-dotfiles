@@ -29,21 +29,22 @@
   tags:
     - always
 
-- name: Verify Nix is available
-  ansible.builtin.command: which nix
-  register: nix_check
-  failed_when: nix_check.rc != 0
-  tags:
-    - nix
-    - check
-  ignore_errors: false
-
-# - name: system setup | nix | add home-manager channel
-#   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+# - name: Verify Nix is available
+#   ansible.builtin.command: which nix
+#   register: nix_check
+#   failed_when: nix_check.rc != 0
 #   tags:
 #     - nix
-#     - home-manager
-#
+#     - check
+#   ignore_errors: false
+
+- name: system setup | nix | add home-manager channel
+  shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+  become: "{{ host_user }}"
+  tags:
+    - nix
+    - home-manager
+
 # - name: system setup | nix | update nix channels
 #   shell: nix-channel --update
 #   tags:
