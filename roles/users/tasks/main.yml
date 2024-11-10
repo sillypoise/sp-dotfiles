@@ -21,10 +21,3 @@
     password: "{{ new_password.stdout }}"
   become: true
   no_log: true
-
-# Set fact to mark that password setup is complete
-- name: "Set password setup complete fact for {{ host_user }}"
-  ansible.builtin.set_fact:
-    facts_password_setup_complete: true
-  tags:
-    - shell
