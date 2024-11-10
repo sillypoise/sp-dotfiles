@@ -1,6 +1,0 @@
-# defaults/main.yml
-op_installed: false
-nix_installed: false
-zsh_installed: false
-sillypoise_user_installed: false
-flubber_user_installed: false

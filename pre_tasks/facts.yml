@@ -14,13 +14,15 @@
   changed_when: false
   failed_when: false
   register: op_detection
-  when: not op_installed  # Only check if `op_installed` is false
+  when: not facts.tools.op_installed  # Only check if `op_installed` is false
   tags:
     - always
 
 - name: Set 1Password Installed Status
   ansible.builtin.set_fact:
-    op_installed: "{{ op_detection.rc == 0 }}"
+    facts:
+      tools:
+        op_installed: "{{ op_detection.rc == 0 }}"
   when: op_detection is defined
   tags:
     - always
@@ -32,13 +34,15 @@
   changed_when: false
   failed_when: false
   register: nix_detection
-  when: not nix_installed
+  when: not facts.tools.nix_installed
   tags:
     - always
 
 - name: Set Nix Installed Status
   ansible.builtin.set_fact:
-    nix_installed: "{{ nix_detection.rc == 0 }}"
+    facts:
+      tools:
+        nix_installed: "{{ nix_detection.rc == 0 }}"
   when: nix_detection is defined
   tags:
     - always
@@ -50,13 +54,15 @@
   changed_when: false
   failed_when: false
   register: zsh_detection
-  when: not zsh_installed
+  when: not facts.tools.zsh_installed
   tags:
     - always
 
 - name: Set Zsh Installed Status
   ansible.builtin.set_fact:
-    zsh_installed: "{{ zsh_detection.rc == 0 }}"
+    facts:
+      tools:
+        zsh_installed: "{{ zsh_detection.rc == 0 }}"
   when: zsh_detection is defined
   tags:
     - always
@@ -68,13 +74,15 @@
   changed_when: false
   failed_when: false
   register: sillypoise_user_detection
-  when: not sillypoise_user_installed
+  when: not facts.users.sillypoise_exists
   tags:
     - always
 
 - name: Set sillypoise User Existence Status
   ansible.builtin.set_fact:
-    sillypoise_user_installed: "{{ sillypoise_user_detection.rc == 0 }}"
+    facts:
+      users:
+        sillypoise_exists: "{{ sillypoise_user_detection.rc == 0 }}"
   when: sillypoise_user_detection is defined
   tags:
     - always
@@ -86,13 +94,15 @@
   changed_when: false
   failed_when: false
   register: flubber_user_detection
-  when: not flubber_user_installed
+  when: not facts.users.flubber_exists
   tags:
     - always
 
 - name: Set flubber User Existence Status
   ansible.builtin.set_fact:
-    flubber_user_installed: "{{ flubber_user_detection.rc == 0 }}"
+    facts:
+      users:
+        flubber_exists: "{{ flubber_user_detection.rc == 0 }}"
   when: flubber_user_detection is defined
   tags:
     - always

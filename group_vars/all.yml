@@ -5,5 +5,16 @@ default_roles:
   # - openssh
   # - users 
   # - test
+
 exclude_roles:
   - bootstrap
+
+facts:
+  tools:
+    op_installed: false
+    nix_installed: false
+    zsh_installed: false
+
+  users:
+    sillypoise_exists: false
+    flubber_exists: false
