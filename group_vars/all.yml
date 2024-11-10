@@ -9,9 +9,8 @@ default_roles:
 exclude_roles:
   - bootstrap
 
-facts:
-  op_installed: false
-  nix_installed: false
-  zsh_installed: false
-  sillypoise_exists: false
-  flubber_exists: false
+facts_op_installed: false
+facts_nix_installed: false
+facts_zsh_installed: false
+factssillypoise_exists: false
+facts_flubber_exists: false
