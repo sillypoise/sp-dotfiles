@@ -19,6 +19,7 @@ facts_zsh_installed: false
 # Users facts
 facts_sillypoise_exists: false
 facts_flubber_exists: false
+facts_password_setup_complete: false
 
 # Define usernames
 host_user: "sillypoise"
