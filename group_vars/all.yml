@@ -1,8 +1,8 @@
 default_roles:
   - bash
   - nix
-  # - openssh
   - users 
+  # - openssh
   # - test
   # - ufw
   # - zsh
