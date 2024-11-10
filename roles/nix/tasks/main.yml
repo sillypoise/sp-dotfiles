@@ -22,6 +22,13 @@
     - system
     - setup
 
+
+- name: Debug | Show bash config installation status
+  ansible.builtin.debug:
+    var: facts_bash_config_installed
+  tags:
+    - always
+
 # - name: Verify Nix is available
 #   ansible.builtin.command: which nix
 #   register: nix_check

@@ -24,3 +24,7 @@ automated_user: "flubber"
 # Define home directories based on usernames, with fallback for host_user
 host_user_home: "/home/{{ host_user  }}"
 automated_user_home: "/home/{{ automated_user }}"
+
+# Define configs
+
+facts_bash_config_installed: false

@@ -25,3 +25,10 @@
     - { path: "{{ automated_user_home }}", owner: "{{ automated_user }}", group: "{{ automated_user }}" }
   tags:
     - environment
+
+# Set fact to mark bash config as installed
+- name: Set fact for bash config installation
+  ansible.builtin.set_fact:
+    facts_bash_config_installed: true
+  tags:
+    - environment
