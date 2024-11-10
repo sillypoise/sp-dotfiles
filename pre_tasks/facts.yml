@@ -33,6 +33,7 @@
 
 # Detect Nix installation
 - name: Detect Nix Installation
+  become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: which nix
   changed_when: false
