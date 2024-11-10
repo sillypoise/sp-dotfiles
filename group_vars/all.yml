@@ -9,3 +9,17 @@ default_roles:
 exclude_roles:
   - bootstrap
 
+# Default values for system facts
+facts_op_installed: false
+facts_nix_installed: false
+facts_zsh_installed: false
+facts_sillypoise_exists: false
+facts_flubber_exists: false
+
+# Define usernames
+host_user: "sillypoise"
+automated_user: "flubber"
+
+# Define home directories based on usernames, with fallback for host_user
+sillypoise_home: "/home/{{ host_user | default(sillypoise_user) }}"
+flubber_home: "/home/{{ automated_user }}"
