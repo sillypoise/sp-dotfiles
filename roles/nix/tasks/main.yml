@@ -22,44 +22,6 @@
     - system
     - setup
 
-- name: Ensure Nix environment is sourced for all users
-  ansible.builtin.lineinfile:
-    path: /etc/profile.d/nix.sh
-    line: '. /etc/profile.d/nix.sh'
-    state: present
-  tags:
-    - nix
-    - bootstrap
-    - environment
-
-- name: Verify Nix command availability
-  ansible.builtin.command: which nix-env
-  register: nix_command_check
-  changed_when: false
-  failed_when: nix_command_check.rc != 0
-  tags:
-    - nix
-    - environment
-    - debug
-
-- name: Debug | Show Nix command check
-  ansible.builtin.debug:
-    var: nix_command_check.stdout
-  tags:
-    - nix
-    - environment
-    - debug
-
-# - name: Source Nix environment
-#   ansible.builtin.shell: |
-#     . /etc/profile.d/nix.sh
-#   args:
-#     executable: /bin/bash
-#   changed_when: false
-#   tags:
-#     - nix
-#     - environment
-#
 # - name: Verify Nix is available
 #   ansible.builtin.command: which nix
 #   register: nix_check
