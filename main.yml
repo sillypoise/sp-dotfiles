@@ -1,11 +1,8 @@
 ---
 - name: DotFiles Config
   hosts: localhost
-  connection: local
   become: true
-  become_user: root
-  vars:
-    ansible_user: flubber
+  connection: local
 
   pre_tasks:
     - name: Load Initial Facts
