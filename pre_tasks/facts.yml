@@ -38,6 +38,7 @@
     - always
 
 # Detect Nix installation
+    # TODO: Find a different way to check this without becoming sp
 - name: Detect Nix Installation
   become_user: "noexiste"
   ansible.builtin.command:
@@ -45,6 +46,7 @@
   changed_when: false
   failed_when: false
   register: nix_detection
+  ignore_errors: true # in bootstrap host_user doesn't exist yet. And nix installation check in root doesn't work
   tags:
     - always
 
