@@ -1,8 +1,11 @@
 ---
 - name: DotFiles Config
   hosts: localhost
-  become: true
   connection: local
+  become: true
+  become_user: flubber  # Ensures tasks run as flubber with sudo
+  vars:
+    ansible_user: flubber  # Ensures Ansible uses flubber as the main user
 
   pre_tasks:
     - name: Load Initial Facts
