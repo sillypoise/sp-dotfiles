@@ -4,7 +4,6 @@
     dest: "{{ ansible_user_dir }}/.zshrc"
     mode: "0644"
 
-# TODO: non-idempotent because we inject a new file each time
 - name: "zsh | copy custom zsh config"
   ansible.builtin.copy:
     dest: "{{ ansible_user_dir }}/.config/"
@@ -12,7 +11,6 @@
     mode: "0644"
     directory_mode: "0755"
     force: true
-  # changed_when: false
 
 - name: "zsh | inject secrets"
   ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/vars.secret.tpl -o {{ ansible_user_dir }}/.config/zsh/vars.secret -f"

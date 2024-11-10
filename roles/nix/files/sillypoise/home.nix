@@ -39,6 +39,7 @@
         # volta
         # ufw
         # zoxide
+        zsh
     ];
 }
 
