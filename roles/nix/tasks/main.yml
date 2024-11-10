@@ -79,6 +79,12 @@
     - nix
     - home-manager
 
+- name: Debug | Confirm Home Manager Installed Fact is Set
+  ansible.builtin.debug:
+    var: facts_home_manager_installed
+  tags:
+    - always
+
 - name: system setup | nix | create .config/nixpkgs directory for home manager config
   file:
     path: "{{ host_user_home }}/.config/home-manager"
