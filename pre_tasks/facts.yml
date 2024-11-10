@@ -20,7 +20,7 @@
   changed_when: false
   failed_when: false
   register: op_detection
-  when: not facts.tools.op_installed  # Only check if `op_installed` is false
+  when: not facts.op_installed  # Only check if `op_installed` is false
   tags:
     - always
 
@@ -40,7 +40,7 @@
   changed_when: false
   failed_when: false
   register: nix_detection
-  when: not facts.tools.nix_installed
+  when: not facts.nix_installed
   tags:
     - always
 
@@ -60,7 +60,7 @@
   changed_when: false
   failed_when: false
   register: zsh_detection
-  when: not facts.tools.zsh_installed
+  when: not facts.zsh_installed
   tags:
     - always
 
@@ -80,7 +80,7 @@
   changed_when: false
   failed_when: false
   register: sillypoise_user_detection
-  when: not facts.users.sillypoise_exists
+  when: not facts.sillypoise_exists
   tags:
     - always
 
@@ -100,7 +100,7 @@
   changed_when: false
   failed_when: false
   register: flubber_user_detection
-  when: not facts.users.flubber_exists
+  when: not facts.flubber_exists
   tags:
     - always
 
