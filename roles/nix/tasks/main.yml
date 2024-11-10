@@ -64,6 +64,13 @@
     - nix
     - home-manager
 
+- name: Debug | Show Home Manager verification result
+  ansible.builtin.debug:
+    var: home_manager_check
+  tags:
+    - nix
+    - home-manager
+
 - name: Set Home Manager Installed Fact
   ansible.builtin.set_fact:
     facts_home_manager_installed: true
