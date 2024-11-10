@@ -1,6 +1,10 @@
-- name: Debug | Show nix facts
+- name: Debug | Show important facts
   ansible.builtin.debug:
-    var: facts_nix_installed
+    var: "{{ item }}"
+  with_items:
+    - facts_nix_installed
+    - facts_bash_config_installed
+    - facts_zsh_config_installed
   tags:
     - always
 
@@ -29,34 +33,30 @@
   tags:
     - always
 
-# - name: Verify Nix is available
-#   ansible.builtin.command: which nix
-#   register: nix_check
-#   failed_when: nix_check.rc != 0
-#   tags:
-#     - nix
-#     - check
-#   ignore_errors: false
-
 - name: system setup | nix | add home-manager channel
   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
   become_user: "{{ host_user }}"
+  when: not facts_bash_config_installed or not facts_zsh_config_installed
   tags:
     - nix
     - home-manager
 
-# - name: system setup | nix | update nix channels
-#   shell: nix-channel --update
-#   tags:
-#     - nix
-#     - home-manager
-#
-# - name: system setup | nix | install home-manager into profile
-#   shell: nix-env -iA nixpkgs.home-manager
-#   tags:
-#     - nix
-#     - home-manager
-#
+- name: system setup | nix | update nix channels
+  shell: nix-channel --update
+  become_user: "{{ host_user }}"
+  when: not facts_bash_config_installed or not facts_zsh_config_installed
+  tags:
+    - nix
+    - home-manager
+
+- name: system setup | nix | install home-manager into profile
+  shell: nix-env -iA nixpkgs.home-manager
+  become_user: "{{ host_user }}"
+  when: not facts_bash_config_installed or not facts_zsh_config_installed
+  tags:
+    - nix
+    - home-manager
+
 # - name: system setup | nix | create .config/nixpkgs directory for home manager config
 #   file:
 #     path: "{{ ansible_user_dir }}/.config/home-manager"
