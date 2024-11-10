@@ -1,7 +1,7 @@
 ---
 - name: DotFiles Config
   hosts: localhost
-  # become: true
+  become: true
   connection: local
 
   pre_tasks:
