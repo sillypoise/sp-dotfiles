@@ -38,7 +38,7 @@
 - name: system setup | nix | update nix channels
   shell: nix-channel --update
   become_user: "{{ host_user }}"
-  when: not facts_bash_config_installed or not facts_zsh_config_installed
+  when: facts_bash_config_installed or facts_zsh_config_installed
   tags:
     - nix
     - home-manager
@@ -46,12 +46,14 @@
 - name: system setup | nix | install home-manager into profile
   shell: nix-env -iA nixpkgs.home-manager
   become_user: "{{ host_user }}"
-  when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
+  # I think this is naturally idempotent
+  # when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
   tags:
     - nix
     - home-manager
 
 # Verify and set fact for home-manager installation
+    # TODO: Could be moved to facts.yml
 - name: Verify Home Manager installation
   ansible.builtin.command: home-manager --version
   become_user: "{{ host_user }}"
