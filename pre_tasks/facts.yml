@@ -40,13 +40,19 @@
 # Detect Nix installation
     # TODO: Find a different way to check this without becoming sp
 - name: Detect Nix Installation
-  # become_user: "{{ host_user }}
-  ansible.builtin.command:
-    cmd: which nix
+  ansible.builtin.shell: |
+    . /etc/profile.d/nix.sh
+    which nix
   changed_when: false
   failed_when: false
   register: nix_detection
-  ignore_errors: true # in bootstrap host_user doesn't exist yet. And nix installation check in root doesn't work
+  # ignore_errors: true  # Allows for cases when user or nix is not yet set up
+  tags:
+    - always
+
+- name: Debug | Show Nix detection result
+  ansible.builtin.debug:
+    var: nix_detection
   tags:
     - always
 
