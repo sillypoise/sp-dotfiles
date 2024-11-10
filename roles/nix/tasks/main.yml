@@ -18,6 +18,7 @@
 - name: Verify if Nix is installed
   ansible.builtin.command: which nix
   register: nix_check
+  become_user: "{{ host_user }}"
   ignore_errors: true
   changed_when: false
   tags:
