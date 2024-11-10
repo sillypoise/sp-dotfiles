@@ -38,11 +38,23 @@ set -e
 # Paths
 OP_INSTALLED=false
 OP_AUTHENTICATED=false
-OP_VAULT_SECRET=""
-ID=""
 DOTFILES_LOG="$HOME/.dotfiles.log"
 DOTFILES_DIR="$HOME/.dotfiles"
 IS_FIRST_RUN="$HOME/.dotfiles_run"
+USER_TO_RUN="flubber"
+TAGS="" # Default to no specific tags
+
+# Process command-line options for user (-u) and tags (-t)
+while getopts "u:t:" opt; do
+    case $opt in
+    u) USER_TO_RUN=$OPTARG ;;
+    t) TAGS="--tags $OPTARG" ;;
+    *)
+        echo "Usage: $0 [-u user] [-t tags]"
+        exit 1
+        ;;
+    esac
+done
 
 # Function to display tasks
 function __task {
@@ -132,7 +144,7 @@ confirmVaultAccess
 # Run Ansible playbook if 1Password authentication is successful
 if [[ -n $OP_INSTALLED && -n $OP_AUTHENTICATED ]]; then
     printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
-    ansible-playbook "$DOTFILES_DIR/main.yml" "$@"
+    sudo -u "$USER_TO_RUN" ansible-playbook "$DOTFILES_DIR/main.yml" $TAGS "$@"
 else
     printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
 fi
