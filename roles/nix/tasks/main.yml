@@ -30,7 +30,7 @@
 - name: system setup | nix | add home-manager channel
   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
   become_user: "{{ host_user }}"
-  when: not facts_bash_config_installed or not facts_zsh_config_installed or facts_home_manager_installed
+  when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
   tags:
     - nix
     - home-manager
@@ -46,7 +46,7 @@
 - name: system setup | nix | install home-manager into profile
   shell: nix-env -iA nixpkgs.home-manager
   become_user: "{{ host_user }}"
-  when: not facts_bash_config_installed or not facts_zsh_config_installed or facts_home_manager_installed
+  when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
   tags:
     - nix
     - home-manager
@@ -97,7 +97,7 @@
 - name: system setup | nix | install packages via home-manager
   ansible.builtin.shell: "home-manager switch -f {{ host_user_home }}/.config/home-manager/home.nix"
   become_user: "{{ host_user }}"
-  when: not facts_zsh_config_installed or facts_home_manager_installed
+  when: (facts_bash_config_installed or facts_zsh_config_installed) and facts_home_manager_installed
   tags:
     - nix
     - home-manager
