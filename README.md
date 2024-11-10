@@ -17,7 +17,7 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/m
 
 If you want to run only a specific role, you can specify the following bash command:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles | sudo bash -s -- -u root -t bootstrap
+curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles | bash -s -- -u root --tags bootstrap
 ```
 
 ### Update
