@@ -1,30 +1,12 @@
 ---
-# Initialize facts dictionary if it doesn't exist
-- name: Initialize facts dictionary
+# Register Current User if Undefined
+- name: Register Current User if Undefined
   ansible.builtin.set_fact:
-    facts: {}
-  when: facts is not defined
+    host_user: "{{ ansible_env['USER'] }}"
   tags:
     - always
 
-# Initialize tools and users dictionaries if not present
-- name: Initialize facts.tools dictionary
-  ansible.builtin.set_fact:
-    facts:
-      tools: {}
-  when: facts.tools is not defined
-  tags:
-    - always
-
-- name: Initialize facts.users dictionary
-  ansible.builtin.set_fact:
-    facts:
-      users: {}
-  when: facts.users is not defined
-  tags:
-    - always
-
-# Detect 1Password CLI installation status
+# Detect 1Password CLI installation
 - name: Detect 1Password CLI
   ansible.builtin.command:
     cmd: which op
@@ -36,12 +18,11 @@
 
 - name: Set 1Password Installed Status
   ansible.builtin.set_fact:
-    facts:
-      tools: "{{ facts.tools | combine({'op_installed': op_detection.rc == 0}) }}"
+    facts_op_installed: "{{ op_detection.rc == 0 }}"
   tags:
     - always
 
-# Detect Nix installation status
+# Detect Nix installation
 - name: Detect Nix Installation
   ansible.builtin.command:
     cmd: which nix
@@ -53,12 +34,11 @@
 
 - name: Set Nix Installed Status
   ansible.builtin.set_fact:
-    facts:
-      tools: "{{ facts.tools | combine({'nix_installed': nix_detection.rc == 0}) }}"
+    facts_nix_installed: "{{ nix_detection.rc == 0 }}"
   tags:
     - always
 
-# Detect Zsh installation status
+# Detect Zsh installation
 - name: Detect Zsh Installation
   ansible.builtin.command:
     cmd: which zsh
@@ -70,12 +50,11 @@
 
 - name: Set Zsh Installed Status
   ansible.builtin.set_fact:
-    facts:
-      tools: "{{ facts.tools | combine({'zsh_installed': zsh_detection.rc == 0}) }}"
+    facts_zsh_installed: "{{ zsh_detection.rc == 0 }}"
   tags:
     - always
 
-# Check for the existence of the `sillypoise` user
+# Detect sillypoise User
 - name: Detect sillypoise User
   ansible.builtin.command:
     cmd: id -u sillypoise
@@ -87,12 +66,11 @@
 
 - name: Set sillypoise User Existence Status
   ansible.builtin.set_fact:
-    facts:
-      users: "{{ facts.users | combine({'sillypoise_exists': sillypoise_user_detection.rc == 0}) }}"
+    facts_sillypoise_exists: "{{ sillypoise_user_detection.rc == 0 }}"
   tags:
     - always
 
-# Check for the existence of the `flubber` user
+# Detect flubber User
 - name: Detect flubber User
   ansible.builtin.command:
     cmd: id -u flubber
@@ -104,14 +82,6 @@
 
 - name: Set flubber User Existence Status
   ansible.builtin.set_fact:
-    facts:
-      users: "{{ facts.users | combine({'flubber_exists': flubber_user_detection.rc == 0}) }}"
+    facts_flubber_exists: "{{ flubber_user_detection.rc == 0 }}"
   tags:
     - always
-
-- name: Debug | Show all facts
-  ansible.builtin.debug:
-    var: facts
-  tags:
-    - always
-
