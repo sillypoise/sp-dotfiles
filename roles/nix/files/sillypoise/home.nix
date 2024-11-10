@@ -35,7 +35,7 @@
         starship
         tailscale
         tree-sitter
-        ufw
+        # ufw
         volta
         zellij
         zoxide
