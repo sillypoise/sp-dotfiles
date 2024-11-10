@@ -144,7 +144,7 @@ confirmVaultAccess
 # Run Ansible playbook if 1Password authentication is successful
 if [[ -n $OP_INSTALLED && -n $OP_AUTHENTICATED ]]; then
     printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
-    sudo -u "$USER_TO_RUN" ansible-playbook "$DOTFILES_DIR/main.yml" $TAGS "$@"
+    ansible-playbook -u "$USER_TO_RUN" "$DOTFILES_DIR/main.yml" $TAGS "$@"
 else
     printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
 fi
