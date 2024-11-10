@@ -94,12 +94,14 @@
     - home-manager
     - packages
 
-# - name: system setup | nix | install packages via home-manager
-#   shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/home-manager/home.nix"
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
+- name: system setup | nix | install packages via home-manager
+  ansible.builtin.shell: "home-manager switch -f {{ host_user_home }}/.config/home-manager/home.nix"
+  become_user: "{{ host_user }}"
+  when: not facts_zsh_config_installed or facts_home_manager_installed
+  tags:
+    - nix
+    - home-manager
+    - packages
 #
 # - name: system setup | nix | update nix channels
 #   shell: nix-channel --update
