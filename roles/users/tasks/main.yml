@@ -20,4 +20,4 @@
     password: "{{ new_password.stdout }}"
   become: true
   no_log: true
-
+  when: facts_zsh_config_installed
