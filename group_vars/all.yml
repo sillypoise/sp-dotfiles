@@ -1,4 +1,5 @@
 default_roles:
+  - bash
   # - zsh
   - nix
   # - ufw
@@ -21,5 +22,5 @@ host_user: "sillypoise"
 automated_user: "flubber"
 
 # Define home directories based on usernames, with fallback for host_user
-sillypoise_home: "/home/{{ host_user | default(sillypoise_user) }}"
-flubber_home: "/home/{{ automated_user }}"
+host_user_home: "/home/{{ host_user  }}"
+automated_user_home: "/home/{{ automated_user }}"
