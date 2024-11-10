@@ -102,7 +102,7 @@ function _task_done {
 
 function arch_setup() {
     # Install essential packages if not present
-    packages=("ansible" "python3" "python-pip" "python-watchdog" "openssh" "git" "unzip")
+    packages=("ansible" "python3" "python-pip" "python-watchdog" "openssh" "git" "which" "unzip")
     for pkg in "${packages[@]}"; do
         if ! pacman -Q "$pkg" >/dev/null 2>&1; then
             __task "Installing $pkg"
