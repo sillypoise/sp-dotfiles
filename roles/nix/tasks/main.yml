@@ -52,39 +52,6 @@
     - nix
     - home-manager
 
-# Verify and set fact for home-manager installation
-    # TODO: Could be moved to facts.yml
-- name: Verify Home Manager installation
-  ansible.builtin.command: home-manager --version
-  become_user: "{{ host_user }}"
-  register: home_manager_check
-  changed_when: false
-  failed_when: home_manager_check.rc != 0
-  tags:
-    - nix
-    - home-manager
-
-- name: Debug | Show Home Manager verification result
-  ansible.builtin.debug:
-    var: home_manager_check
-  tags:
-    - nix
-    - home-manager
-
-- name: Set Home Manager Installed Fact
-  ansible.builtin.set_fact:
-    facts_home_manager_installed: true
-  when: home_manager_check.rc == 0
-  tags:
-    - nix
-    - home-manager
-
-- name: Debug | Confirm Home Manager Installed Fact is Set
-  ansible.builtin.debug:
-    var: facts_home_manager_installed
-  tags:
-    - always
-
 - name: system setup | nix | create .config/nixpkgs directory for home manager config
   file:
     path: "{{ host_user_home }}/.config/home-manager"
