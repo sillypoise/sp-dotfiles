@@ -40,7 +40,7 @@
 # Detect Nix installation
     # TODO: Find a different way to check this without becoming sp
 - name: Detect Nix Installation
-  become_user: "noexiste"
+  # become_user: "{{ host_user }}
   ansible.builtin.command:
     cmd: which nix
   changed_when: false
