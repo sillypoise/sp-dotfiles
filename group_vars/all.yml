@@ -2,10 +2,10 @@ default_roles:
   - bash
   - nix
   # - openssh
-  # - users 
+  - users 
   # - test
   # - ufw
-  - zsh
+  # - zsh
 
 exclude_roles:
   - bootstrap

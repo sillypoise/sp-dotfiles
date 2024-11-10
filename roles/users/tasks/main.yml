@@ -5,9 +5,15 @@
   no_log: true
 
 # TODO: non-idempotent
-- name: "Set passwd for sillypoise"
+- name: "Set passwd for {{ host_user }} "
   ansible.builtin.user:
-    name: sillypoise
+    name: "{{ host_user }}"
     password: "{{ new_password.stdout }}"
-  become: true
-  no_log: true
+
+ # Set Zsh as the default shell for sillypoise
+- name: "Set Zsh as default shell for {{ host_user }}"
+  ansible.builtin.user:
+    name: "{{ host_user }}"
+    shell: /bin/zsh
+  tags:
+    - shell no_log: true
