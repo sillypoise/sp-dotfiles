@@ -10,17 +10,17 @@
   tags:
     - always
 
-# - name: Install Nix package manager in multi-user mode
-#   ansible.builtin.shell: |
-#     sh <(curl -L https://nixos.org/nix/install) --daemon
-#   args:
-#     creates: /nix/var/nix/profiles/default
-#   when: not facts_nix_installed
-#   tags:
-#     - nix
-#     - bootstrap
-#     - system
-#     - setup
+- name: Install Nix package manager in multi-user mode
+  ansible.builtin.shell: |
+    sh <(curl -L https://nixos.org/nix/install) --daemon
+  args:
+    creates: /nix/var/nix/profiles/default
+  when: not facts_nix_installed
+  tags:
+    - nix
+    - bootstrap
+    - system
+    - setup
 
 # - name: Ensure Nix environment is sourced for all users
 #   ansible.builtin.lineinfile:
