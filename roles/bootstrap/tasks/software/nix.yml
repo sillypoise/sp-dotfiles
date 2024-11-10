@@ -1,6 +1,5 @@
 - name: Check if Nix is installed
-  ansible.builtin.shell: |
-    test -x /nix/var/nix/profiles/default/bin/nix
+  ansible.builtin.command: which nix
   register: nix_check
   ignore_errors: true
   tags:
@@ -25,6 +24,15 @@
     path: /etc/profile.d/nix.sh
     line: '. /etc/profile.d/nix.sh'
     state: present
+  tags:
+    - nix
+    - bootstrap
+    - environment
+
+- name: Source Nix environment for the current session
+  shell: . /etc/profile.d/nix.sh
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - bootstrap
