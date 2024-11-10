@@ -1,0 +1,98 @@
+---
+# Register Current User
+- name: Register Current User if Undefined
+  ansible.builtin.set_fact:
+    host_user: "{{ ansible_env['USER'] }}"
+  when: host_user is not defined
+  tags:
+    - always
+
+# Detect 1Password CLI installation if not already marked as installed
+- name: Detect 1Password CLI
+  ansible.builtin.command:
+    cmd: which op
+  changed_when: false
+  failed_when: false
+  register: op_detection
+  when: not op_installed  # Only check if `op_installed` is false
+  tags:
+    - always
+
+- name: Set 1Password Installed Status
+  ansible.builtin.set_fact:
+    op_installed: "{{ op_detection.rc == 0 }}"
+  when: op_detection is defined
+  tags:
+    - always
+
+# Detect Nix installation if not already marked as installed
+- name: Detect Nix Installation
+  ansible.builtin.command:
+    cmd: which nix
+  changed_when: false
+  failed_when: false
+  register: nix_detection
+  when: not nix_installed
+  tags:
+    - always
+
+- name: Set Nix Installed Status
+  ansible.builtin.set_fact:
+    nix_installed: "{{ nix_detection.rc == 0 }}"
+  when: nix_detection is defined
+  tags:
+    - always
+
+# Detect Zsh installation if not already marked as installed
+- name: Detect Zsh Installation
+  ansible.builtin.command:
+    cmd: which zsh
+  changed_when: false
+  failed_when: false
+  register: zsh_detection
+  when: not zsh_installed
+  tags:
+    - always
+
+- name: Set Zsh Installed Status
+  ansible.builtin.set_fact:
+    zsh_installed: "{{ zsh_detection.rc == 0 }}"
+  when: zsh_detection is defined
+  tags:
+    - always
+
+# Check for the existence of the `sillypoise` user if not already marked as installed
+- name: Detect sillypoise User
+  ansible.builtin.command:
+    cmd: id -u sillypoise
+  changed_when: false
+  failed_when: false
+  register: sillypoise_user_detection
+  when: not sillypoise_user_installed
+  tags:
+    - always
+
+- name: Set sillypoise User Existence Status
+  ansible.builtin.set_fact:
+    sillypoise_user_installed: "{{ sillypoise_user_detection.rc == 0 }}"
+  when: sillypoise_user_detection is defined
+  tags:
+    - always
+
+# Check for the existence of the `flubber` user if not already marked as installed
+- name: Detect flubber User
+  ansible.builtin.command:
+    cmd: id -u flubber
+  changed_when: false
+  failed_when: false
+  register: flubber_user_detection
+  when: not flubber_user_installed
+  tags:
+    - always
+
+- name: Set flubber User Existence Status
+  ansible.builtin.set_fact:
+    flubber_user_installed: "{{ flubber_user_detection.rc == 0 }}"
+  when: flubber_user_detection is defined
+  tags:
+    - always

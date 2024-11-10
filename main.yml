@@ -4,13 +4,8 @@
   connection: local
 
   pre_tasks:
-    - name: Detect Host User
-      ansible.builtin.import_tasks: pre_tasks/whoami.yml
-      tags:
-        - always
-
-    - name: Detect 1Password
-      ansible.builtin.import_tasks: pre_tasks/detect_1password.yml
+    - name: Load Initial Facts
+      ansible.builtin.import_tasks: pre_tasks/facts.yml
       tags:
         - always
 
