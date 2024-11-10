@@ -10,3 +10,18 @@
     - { path: "{{ automated_user_home }}", owner: "{{ automated_user }}", group: "{{ automated_user }}" }
   tags:
     - environment
+
+- name: Copy custom bash config directory
+  ansible.builtin.copy:
+    dest: "{{ item.path }}/.config/bash"
+    src: "bash"
+    mode: "0644"
+    directory_mode: "0755"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    force: true
+  loop:
+    - { path: "{{ host_user_home }}", owner: "{{ host_user }}", group: "{{ host_user }}" }
+    - { path: "{{ automated_user_home }}", owner: "{{ automated_user }}", group: "{{ automated_user }}" }
+  tags:
+    - environment
