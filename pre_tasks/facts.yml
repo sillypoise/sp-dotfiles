@@ -41,6 +41,12 @@
   tags:
     - always
 
+- name: Debug | Show Nix detection result
+  ansible.builtin.debug:
+    var: nix_detection
+  tags:
+    - always
+
 - name: Set Nix Installed Status
   ansible.builtin.set_fact:
     facts_nix_installed: "{{ nix_detection.rc == 0 }}"
