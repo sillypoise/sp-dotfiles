@@ -13,7 +13,7 @@
 
 - name: Copy custom bash config directory
   ansible.builtin.copy:
-    dest: "{{ item.path }}/.config/bash"
+    dest: "{{ item.path }}/.config/"
     src: "bash"
     mode: "0644"
     directory_mode: "0755"
