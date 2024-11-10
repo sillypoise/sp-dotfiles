@@ -12,6 +12,7 @@
 - name: Register Current User if Undefined
   ansible.builtin.set_fact:
     host_user: "{{ ansible_env['USER'] }}"
+  become: false
   tags:
     - always
 
