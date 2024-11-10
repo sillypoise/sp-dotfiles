@@ -7,27 +7,27 @@
     - bootstrap
     - system
 
-- name: Install Nix package manager in multi-user mode
-  ansible.builtin.shell: |
-    sh <(curl -L https://nixos.org/nix/install) --daemon
-  args:
-    creates: /nix/var/nix/profiles/default
-  when: nix_check.rc != 0
-  tags:
-    - nix
-    - bootstrap
-    - system
-    - setup
-
-- name: Ensure Nix environment is sourced for all users
-  ansible.builtin.lineinfile:
-    path: /etc/profile.d/nix.sh
-    line: '. /etc/profile.d/nix.sh'
-    state: present
-  tags:
-    - nix
-    - bootstrap
-    - environment
+# - name: Install Nix package manager in multi-user mode
+#   ansible.builtin.shell: |
+#     sh <(curl -L https://nixos.org/nix/install) --daemon
+#   args:
+#     creates: /nix/var/nix/profiles/default
+#   when: nix_check.rc != 0
+#   tags:
+#     - nix
+#     - bootstrap
+#     - system
+#     - setup
+#
+# - name: Ensure Nix environment is sourced for all users
+#   ansible.builtin.lineinfile:
+#     path: /etc/profile.d/nix.sh
+#     line: '. /etc/profile.d/nix.sh'
+#     state: present
+#   tags:
+#     - nix
+#     - bootstrap
+#     - environment
 
 # - name: Source Nix environment
 #   ansible.builtin.shell: |
