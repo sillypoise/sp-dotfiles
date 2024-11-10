@@ -70,30 +70,30 @@
     - nix
     - home-manager
 
-# - name: system setup | nix | create .config/nixpkgs directory for home manager config
-#   file:
-#     path: "{{ ansible_user_dir }}/.config/home-manager"
-#     state: directory
-#     owner: "{{ host_user }}"
-#     group: "{{ host_user }}"
-#     # permissions so home-manager can write to it
-#     mode: '0755'
-#   tags:
-#     - nix
-#     - home-manager
-#
-# - name: system setup | nix | copy home-manager configuration file
-#   copy:
-#     src: "{{ host_user }}/home.nix"
-#     dest: "{{ ansible_user_dir }}/.config/home-manager/home.nix"
-#     owner: "{{ host_user }}"
-#     group: "{{ host_user }}"
-#     mode: '0644'
-#   tags:
-#     - nix
-#     - home-manager
-#     - packages
-#
+- name: system setup | nix | create .config/nixpkgs directory for home manager config
+  file:
+    path: "{{ host_user_home }}/.config/home-manager"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    # permissions so home-manager can write to it
+    mode: '0755'
+  tags:
+    - nix
+    - home-manager
+
+- name: system setup | nix | copy home-manager configuration file
+  copy:
+    src: "{{ host_user }}/home.nix"
+    dest: "{{ host_user_home }}/.config/home-manager/home.nix"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0644'
+  tags:
+    - nix
+    - home-manager
+    - packages
+
 # - name: system setup | nix | install packages via home-manager
 #   shell: "sudo -i -u {{ host_user }} home-manager switch -f /home/sillypoise/.config/home-manager/home.nix"
 #   tags:
