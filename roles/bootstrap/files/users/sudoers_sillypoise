@@ -1,1 +1,1 @@
-sillypoise ALL=(ALL) ALL
+sillypoise ALL=(ALL) NOPASSWD: ALL
