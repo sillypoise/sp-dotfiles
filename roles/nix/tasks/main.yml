@@ -1,6 +1,8 @@
 - name: Debug | Show nix facts
   ansible.builtin.debug:
-    var: facts_nix_installed
+    var: 
+    - facts_nix_installed
+    - facts_bash_config_installed
   tags:
     - always
 
@@ -22,21 +24,14 @@
     - system
     - setup
 
-
-- name: Debug | Show bash config installation status
-  ansible.builtin.debug:
-    var: facts_bash_config_installed
+- name: Verify Nix is available
+  ansible.builtin.command: which nix
+  register: nix_check
+  failed_when: nix_check.rc != 0
   tags:
-    - always
-
-# - name: Verify Nix is available
-#   ansible.builtin.command: which nix
-#   register: nix_check
-#   failed_when: nix_check.rc != 0
-#   tags:
-#     - nix
-#     - check
-#   ignore_errors: false
+    - nix
+    - check
+  ignore_errors: false
 
 # - name: system setup | nix | add home-manager channel
 #   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
