@@ -1,3 +1,9 @@
+- name: Debug | Show nix facts
+  ansible.builtin.debug:
+    var: facts
+  tags:
+    - always
+
 - name: Check if Nix is installed
   ansible.builtin.command: which nix
   register: nix_check
