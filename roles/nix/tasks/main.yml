@@ -1,10 +1,11 @@
 - name: Debug | Show important facts
   ansible.builtin.debug:
-    msg: |
-      Nix Installed: {{ facts_nix_installed }}
-      Bash Config Installed: {{ facts_bash_config_installed }}
-      Zsh Config Installed: {{ facts_zsh_config_installed }}
-      1Password Installed: {{ facts_op_installed }}
+    msg:
+      - Nix Installed: {{ facts_nix_installed }}
+      - Home Manager Installed: {{ facts_home_manager_installed }}
+      - Bash Config Installed: {{ facts_bash_config_installed }}
+      - Zsh Config Installed: {{ facts_zsh_config_installed }}
+      - 1Password Installed: {{ facts_op_installed }}
   tags:
     - always
 
@@ -26,13 +27,6 @@
     - system
     - setup
 
-
-- name: Debug | Show bash config installation status
-  ansible.builtin.debug:
-    var: facts_bash_config_installed
-  tags:
-    - always
-
 - name: system setup | nix | add home-manager channel
   shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
   become_user: "{{ host_user }}"
@@ -53,6 +47,25 @@
   shell: nix-env -iA nixpkgs.home-manager
   become_user: "{{ host_user }}"
   when: not facts_bash_config_installed or not facts_zsh_config_installed
+  tags:
+    - nix
+    - home-manager
+
+# Verify and set fact for home-manager installation
+- name: Verify Home Manager installation
+  ansible.builtin.command: home-manager --version
+  become_user: "{{ host_user }}"
+  register: home_manager_check
+  changed_when: false
+  failed_when: home_manager_check.rc != 0
+  tags:
+    - nix
+    - home-manager
+
+- name: Set Home Manager Installed Fact
+  ansible.builtin.set_fact:
+    facts_home_manager_installed: true
+  when: home_manager_check.rc == 0
   tags:
     - nix
     - home-manager
