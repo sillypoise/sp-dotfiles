@@ -1,0 +1,4 @@
+# Source all .bash files in the $HOME/.config/bash directory
+for file in $HOME/.config/bash/*.bash; do
+    [ -r "$file" ] && source "$file"
+done
