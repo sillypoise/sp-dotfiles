@@ -32,25 +32,6 @@
     - bootstrap
     - environment
 
-- name: Source Nix environment for current session
-  ansible.builtin.shell: |
-    . /etc/profile.d/nix.sh && echo "Nix environment sourced successfully"
-  args:
-    executable: /bin/bash
-  register: nix_source_check
-  tags:
-    - nix
-    - environment
-    - debug
-
-- name: Debug | Show Nix source result
-  ansible.builtin.debug:
-    var: nix_source_check.stdout
-  tags:
-    - nix
-    - environment
-    - debug
-
 - name: Verify Nix command availability
   ansible.builtin.command: which nix-env
   register: nix_command_check
