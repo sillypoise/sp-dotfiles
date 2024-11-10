@@ -1,9 +1,9 @@
 default_roles:
-  - zsh
-  # - nix
+  # - zsh
+  - nix
   # - ufw
-  - openssh
-  - users 
-  - test
+  # - openssh
+  # - users 
+  # - test
 exclude_roles:
   - bootstrap
