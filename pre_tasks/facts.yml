@@ -1,4 +1,13 @@
 ---
+# Debug the current Ansible user and environment user
+- name: Debug | Show current Ansible user
+  ansible.builtin.debug:
+    msg: "Ansible is using the user: {{ ansible_user }}"
+
+- name: Debug | Show environment user from ansible_env
+  ansible.builtin.debug:
+    msg: "The environment user is: {{ ansible_env['USER'] }}"
+
 # Register Current User if Undefined
 - name: Register Current User if Undefined
   ansible.builtin.set_fact:
