@@ -40,7 +40,8 @@
   changed_when: false
   failed_when: false
   register: nix_detection
-  when: not facts.tools.nix_installed
+  when: not nix_installed_2
+  # when: not facts.tools.nix_installed
   tags:
     - always
 

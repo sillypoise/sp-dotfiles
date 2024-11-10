@@ -9,10 +9,12 @@ default_roles:
 exclude_roles:
   - bootstrap
 
+nix_installed_2: false
+
 facts:
   tools:
     op_installed: false
-    nix_installed: false
+    # nix_installed: false
     zsh_installed: false
 
   users:
