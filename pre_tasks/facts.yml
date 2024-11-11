@@ -171,15 +171,15 @@
   tags:
     - always
 
-# - name: Set Tailscale Authenticated Status
-#   ansible.builtin.set_fact:
-#     facts_tailscale_authed: "{{ 'logged in' in tailscale_auth_status.stdout }}"
-#   when: facts_tailscale_installed and tailscale_auth_status.rc == 0
-#   tags:
-#     - always
-#
-# - name: Debug | Show Tailscale Authenticated Status
-#   ansible.builtin.debug:
-#     msg: "Tailscale Authenticated: {{ facts_tailscale_authed }}"
-#   tags:
-#     - always
+- name: Set Tailscale Authenticated Status
+  ansible.builtin.set_fact:
+    facts_tailscale_authed: "{{ 'logged in' in tailscale_auth_status.stdout }}"
+  when: facts_tailscale_installed and tailscale_auth_status.rc == 0
+  tags:
+    - always
+
+- name: Debug | Show Tailscale Authenticated Status
+  ansible.builtin.debug:
+    msg: "Tailscale Authenticated: {{ facts_tailscale_authed }}"
+  tags:
+    - always
