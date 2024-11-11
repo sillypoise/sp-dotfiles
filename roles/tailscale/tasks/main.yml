@@ -4,32 +4,37 @@
     name: tailscale
     state: present
   register: tailscale_install
-  become: true
 
-- name: Copy token tpl
-  become: true
+- name: Ensure temporary directory for secrets exists
+  ansible.builtin.file:
+    path: "{{ host_user }}/.config/secrets"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0700'
+
+- name: Copy secrets.tpl to temporary location for user injection
   ansible.builtin.copy:
-    src: secrets.tpl
-    dest: /etc/secrets.tpl
-    owner: root
-    group: root
+    src: secrets.tpl  # Path to your .tpl file in Ansible
+    dest: "{{ host_user_home }}/.config/secrets/secrets.tpl"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
     mode: '0600'
-  tags:
-    - secrets
-    - setup
 
-- name: Inject Tailscale auth key and other secrets into /etc/environment
-  become: true
+- name: "Inject secrets into temporary environment file as {{ host_user }}"
+  become: false
+  become_user: "{{ host_user }}"
   ansible.builtin.shell: |
-    op inject -i /etc/secrets.tpl -o /etc/environment -f
+    op inject -i {{ host_user_home }}/.config/secrets/secrets.tpl -o {{ host_user_home }}/.config/secrets/environment.tmp -f
   register: inject_result
   no_log: true
-  tags:
-    - secrets
-    - op
-  changed_when: false
 
-- name: Ensure /etc/environment has secure permissions
+- name: Move environment file to /etc/environment
+  ansible.builtin.command: "mv {{ host_user_home }}/.config/secrets/environment.tmp /etc/environment"
+  tags:
+    - security
+
+- name: Set secure permissions on /etc/environment
   ansible.builtin.file:
     path: /etc/environment
     owner: root
