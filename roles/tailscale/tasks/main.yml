@@ -7,7 +7,7 @@
 
 - name: Ensure temporary directory for secrets exists
   ansible.builtin.file:
-    path: "{{ host_user }}/.config/secrets"
+    path: "{{ host_user_home }}/.config/secrets"
     state: directory
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
