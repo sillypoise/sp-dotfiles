@@ -1,37 +1,45 @@
-- name: "zsh | copy .zshrc"
+- name: Copy .zshrc for host user
   ansible.builtin.copy:
     src: "zshrc"
-    dest: "{{ ansible_user_dir }}/.zshrc"
+    dest: "{{ host_user_home }}/.zshrc"
     mode: "0644"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - environment
 
-- name: "zsh | copy custom zsh config"
+- name: Copy custom Zsh config directory
   ansible.builtin.copy:
-    dest: "{{ ansible_user_dir }}/.config/"
     src: "zsh"
+    dest: "{{ host_user_home }}/.config/"
     mode: "0644"
     directory_mode: "0755"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
     force: true
+  tags:
+    - environment
 
-- name: "zsh | inject secrets"
-  ansible.builtin.shell: "op inject -i {{ ansible_user_dir }}/.config/zsh/vars.secret.tpl -o {{ ansible_user_dir }}/.config/zsh/vars.secret -f"
+- name: Inject secrets into Zsh config
+  become_user: "{{ host_user }}"
+  ansible.builtin.shell: "op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/zsh/vars.secret -f"
   register: inject_result
   no_log: true
   tags:
     - secrets
     - op
-# TODO: non-idempotent
-  # changed_when: false
+  changed_when: false
 
 - name: Ensure op_token.zsh has secure permissions
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/vars.secret"
+    path: "{{ host_user_home }}/.config/zsh/vars.secret"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: '0600'
 
 - name: Ensure vars.secret has secure permissions
   ansible.builtin.file:
-    path: "{{ ansible_user_dir }}/.config/zsh/vars.secret"
+    path: "{{ host_user_home }}/.config/zsh/vars.secret"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: '0600'
