@@ -7,6 +7,16 @@
   tags:
     - shell
 
+- name: Ensure /bin/zsh symlink points to Nix Zsh binary
+  ansible.builtin.file:
+    src: "/home/sillypoise/.nix-profile/bin/zsh"  # Adjust if the Nix-installed Zsh is in a different location
+    dest: "/bin/zsh"
+    state: link
+  tags:
+    - shell
+    - environment
+    - zsh
+
 - name: "Fetch {{ host_user }} passwd"
   become_user: "{{ host_user }}"
   ansible.builtin.command:
