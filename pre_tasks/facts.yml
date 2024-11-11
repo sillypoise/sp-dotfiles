@@ -140,11 +140,13 @@
 
 # Detect Tailscale installation
 - name: Detect Tailscale Installation
+  become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: which tailscale
   changed_when: false
   failed_when: false
   register: tailscale_detection
+  when: facts_sillypoise_exists
   tags:
     - always
 
