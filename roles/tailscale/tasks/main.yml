@@ -1,5 +1,64 @@
-- name: Enable and start Tailscale service
-  ansible.builtin.systemd:
-    name: tailscaled
-    state: started
-    enabled: true
+---
+- name: Install Tailscale with pacman
+  ansible.builtin.pacman:
+    name: tailscale
+    state: present
+  register: tailscale_install
+  become: true
+
+- name: Copy token tpl
+  become: true
+  ansible.builtin.copy:
+    src: secrets.tpl
+    dest: /etc/secrets.tpl
+    owner: root
+    group: root
+    mode: '0600'
+  tags:
+    - secrets
+    - setup
+
+- name: Inject Tailscale auth key and other secrets into /etc/environment
+  become: true
+  ansible.builtin.shell: |
+    op inject -i /etc/secrets.tpl -o /etc/environment -f
+  register: inject_result
+  no_log: true
+  tags:
+    - secrets
+    - op
+  changed_when: false
+
+- name: Ensure /etc/environment has secure permissions
+  ansible.builtin.file:
+    path: /etc/environment
+    owner: root
+    group: root
+    mode: '0600'
+  tags:
+    - security
+
+# - name: Enable and start Tailscale service
+#   ansible.builtin.systemd:
+#     name: tailscaled
+#     state: started
+#     enabled: true
+#   become: true
+#
+# - name: Start Tailscale with auth key
+#   ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
+#   register: tailscale_up
+#   changed_when: tailscale_up.rc == 0
+#   become: true
+#   environment:
+#     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
+#   no_log: true  # keep the auth key secure
+#
+# - name: Check Tailscale status
+#   ansible.builtin.command: tailscale status
+#   register: tailscale_status
+#   changed_when: false
+
+- name: Show Tailscale status
+  ansible.builtin.debug:
+    msg: "Tailscale Status: {{ tailscale_status.stdout }}"
