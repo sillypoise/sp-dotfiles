@@ -59,10 +59,10 @@
 #     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
 #   no_log: true  # keep the auth key secure
 #
-# - name: Check Tailscale status
-#   ansible.builtin.command: tailscale status
-#   register: tailscale_status
-#   changed_when: false
+- name: Check Tailscale status
+  ansible.builtin.command: tailscale status
+  register: tailscale_status
+  changed_when: false
 
 - name: Show Tailscale status
   ansible.builtin.debug:
