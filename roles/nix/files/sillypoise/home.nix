@@ -33,7 +33,7 @@
         sd                   # Modern sed alternative
         sqlite-utils         # SQLite utility and CLI
         starship             # Customizable shell prompt
-        tailscale            # Mesh VPN service
+        # tailscale          # Mesh VPN service
         tree-sitter          # Syntax parsing tool for editors
         volta                # JavaScript tool manager
         zellij               # Terminal workspace manager
