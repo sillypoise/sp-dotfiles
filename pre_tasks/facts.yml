@@ -21,6 +21,12 @@
   tags:
     - always
 
+- name: Debug | Show Current User
+  ansible.builtin.debug:
+    msg: "Current Host User: {{ host_user }}"
+  tags:
+    - always
+
 # Detect 1Password CLI installation
 - name: Detect 1Password CLI
   ansible.builtin.command:
@@ -37,6 +43,12 @@
   tags:
     - always
 
+- name: Debug | Show 1Password Installed Status
+  ansible.builtin.debug:
+    msg: "1Password Installed: {{ facts_op_installed }}"
+  tags:
+    - always
+
 # Detect Nix installation
 - name: Detect Nix Installation
   ansible.builtin.shell: |
@@ -45,13 +57,18 @@
   changed_when: false
   failed_when: false
   register: nix_detection
-  # ignore_errors: true  # Allows for cases when user or nix is not yet set up
   tags:
     - always
 
 - name: Set Nix Installed Status
   ansible.builtin.set_fact:
     facts_nix_installed: "{{ nix_detection.rc == 0 }}"
+  tags:
+    - always
+
+- name: Debug | Show Nix Installed Status
+  ansible.builtin.debug:
+    msg: "Nix Installed: {{ facts_nix_installed }}"
   tags:
     - always
 
@@ -71,6 +88,12 @@
   tags:
     - always
 
+- name: Debug | Show Zsh Installed Status
+  ansible.builtin.debug:
+    msg: "Zsh Installed: {{ facts_zsh_installed }}"
+  tags:
+    - always
+
 # Detect sillypoise User
 - name: Detect sillypoise User
   ansible.builtin.command:
@@ -84,6 +107,12 @@
 - name: Set sillypoise User Existence Status
   ansible.builtin.set_fact:
     facts_sillypoise_exists: "{{ sillypoise_user_detection.rc == 0 }}"
+  tags:
+    - always
+
+- name: Debug | Show sillypoise User Existence Status
+  ansible.builtin.debug:
+    msg: "sillypoise User Exists: {{ facts_sillypoise_exists }}"
   tags:
     - always
 
@@ -103,25 +132,11 @@
   tags:
     - always
 
-# Detect Home Manager installation
-
-- name: Verify Home Manager installation
-  ansible.builtin.command: home-manager --version
-  become_user: "{{ host_user }}"
-  register: home_manager_check
-  changed_when: false
-  failed_when: home_manager_check.rc != 0
+- name: Debug | Show flubber User Existence Status
+  ansible.builtin.debug:
+    msg: "flubber User Exists: {{ facts_flubber_exists }}"
   tags:
-    - nix
-    - home-manager
-
-- name: Set Home Manager Installed Fact
-  ansible.builtin.set_fact:
-    facts_home_manager_installed: true
-  when: home_manager_check.rc == 0
-  tags:
-    - nix
-    - home-manager
+    - always
 
 # Detect Tailscale installation
 - name: Detect Tailscale Installation
@@ -138,3 +153,33 @@
     facts_tailscale_installed: "{{ tailscale_detection.rc == 0 }}"
   tags:
     - always
+
+- name: Debug | Show Tailscale Installed Status
+  ansible.builtin.debug:
+    msg: "Tailscale Installed: {{ facts_tailscale_installed }}"
+  tags:
+    - always
+
+# Verify Tailscale Authentication
+- name: Check if Tailscale is authenticated
+  ansible.builtin.command:
+    cmd: tailscale status
+  changed_when: false
+  failed_when: false
+  register: tailscale_auth_status
+  when: facts_tailscale_installed
+  tags:
+    - always
+
+# - name: Set Tailscale Authenticated Status
+#   ansible.builtin.set_fact:
+#     facts_tailscale_authed: "{{ 'logged in' in tailscale_auth_status.stdout }}"
+#   when: facts_tailscale_installed and tailscale_auth_status.rc == 0
+#   tags:
+#     - always
+#
+# - name: Debug | Show Tailscale Authenticated Status
+#   ansible.builtin.debug:
+#     msg: "Tailscale Authenticated: {{ facts_tailscale_authed }}"
+#   tags:
+#     - always

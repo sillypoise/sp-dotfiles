@@ -1,14 +1,4 @@
-- name: Debug | Show important facts
-  ansible.builtin.debug:
-    msg:
-      - "Nix Installed: {{ facts_nix_installed }}"
-      - "Home Manager Installed: {{ facts_home_manager_installed }}"
-      - "Bash Config Installed: {{ facts_bash_config_installed }}"
-      - "Zsh Config Installed: {{ facts_zsh_config_installed }}"
-      - "1Password Installed: {{ facts_op_installed }}"
-  tags:
-    - always
-
+---
 - name: Debug | Show current Ansible user
   ansible.builtin.debug:
     msg: "Ansible is using the user: {{ ansible_user }}"
