@@ -28,9 +28,11 @@
     op inject -i {{ host_user_home }}/.config/secrets/secrets.tpl -o {{ host_user_home }}/.config/secrets/environment.tmp -f
   register: inject_result
   no_log: true
+  when: facts_zsh_config_installed
 
 - name: Move environment file to /etc/environment
   ansible.builtin.command: "mv {{ host_user_home }}/.config/secrets/environment.tmp /etc/environment"
+  when: facts_zsh_config_installed
   tags:
     - security
 
@@ -49,6 +51,7 @@
     state: started
     enabled: true
   become: true
+  when: facts_tailscale_installed
 
 - name: Start Tailscale with auth key
   ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
@@ -58,7 +61,8 @@
   environment:
     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
   no_log: true  # keep the auth key secure
-#
+  when: facts_tailscale_authed and facts_zsh_config_installed
+
 - name: Check Tailscale status
   ansible.builtin.command: tailscale status
   register: tailscale_status
