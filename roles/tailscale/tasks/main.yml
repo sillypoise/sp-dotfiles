@@ -43,21 +43,21 @@
   tags:
     - security
 
-# - name: Enable and start Tailscale service
-#   ansible.builtin.systemd:
-#     name: tailscaled
-#     state: started
-#     enabled: true
-#   become: true
-#
-# - name: Start Tailscale with auth key
-#   ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
-#   register: tailscale_up
-#   changed_when: tailscale_up.rc == 0
-#   become: true
-#   environment:
-#     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
-#   no_log: true  # keep the auth key secure
+- name: Enable and start Tailscale service
+  ansible.builtin.systemd:
+    name: tailscaled
+    state: started
+    enabled: true
+  become: true
+
+- name: Start Tailscale with auth key
+  ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
+  register: tailscale_up
+  changed_when: tailscale_up.rc == 0
+  become: true
+  environment:
+    TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
+  no_log: true  # keep the auth key secure
 #
 - name: Check Tailscale status
   ansible.builtin.command: tailscale status
