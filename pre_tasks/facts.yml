@@ -200,6 +200,12 @@
   tags:
     - always
 
+- name: Debug | Show Tailscale Authenticated Status
+  ansible.builtin.debug:
+    msg: "{{ tailscale_auth_status }}"
+  tags:
+    - always
+
 - name: Set Tailscale Authenticated Status
   ansible.builtin.set_fact:
     facts_tailscale_authed: "{{ 'logged in' in tailscale_auth_status.stdout }}"
