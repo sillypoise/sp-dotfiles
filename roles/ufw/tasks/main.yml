@@ -30,13 +30,9 @@
 - name: Allow all traffic on Tailscale interface
   ansible.builtin.ufw:
     rule: allow
-    direction: in
     interface_in: "{{ ufw_tailscale_interface }}"
     from_ip: "any"
   notify: Restart UFW
-  tags:
-    - ufw
-    - tailscale
 
 # Allow SSH on the public interface (to ensure access even if Tailscale is unavailable)
 - name: Allow SSH on public interface
@@ -45,9 +41,6 @@
     port: 22
     proto: tcp
   notify: Restart UFW
-  tags:
-    - ufw
-    - ssh
 
 # - name: Allow SSH on Tailscale interface only
 #   ansible.builtin.ufw:
