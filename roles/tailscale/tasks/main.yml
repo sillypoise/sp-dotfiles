@@ -28,11 +28,11 @@
     op inject -i {{ host_user_home }}/.config/secrets/secrets.tpl -o {{ host_user_home }}/.config/secrets/environment.tmp -f
   register: inject_result
   no_log: true
-  when: facts_zsh_config_installed
+  when: facts_zsh_config_installed and not facts_tailscale_authed
 
 - name: Move environment file to /etc/environment
   ansible.builtin.command: "mv {{ host_user_home }}/.config/secrets/environment.tmp /etc/environment"
-  when: facts_zsh_config_installed
+  when: facts_zsh_config_installed and not facts_tailscale_authed
   tags:
     - security
 
@@ -42,6 +42,7 @@
     owner: root
     group: root
     mode: '0600'
+  when: facts_zsh_config_installed and not facts_tailscale_authed
   tags:
     - security
 
