@@ -4,21 +4,19 @@
     name: ufw
     state: present
   when: ansible_os_family == "Archlinux"
-  become: yes
 
 - name: Enable and start UFW
   ansible.builtin.systemd:
     name: ufw
     enabled: true
     state: started
-  become: yes
 
 - name: Set default UFW policies
   ansible.builtin.ufw:
     state: enabled
     policy: allow
     direction: outgoing
-  become: yes
+  notify: Restart UFW
 
 # - name: Block HTTP/HTTPS on all public interfaces
 #   ansible.builtin.ufw:
@@ -35,7 +33,7 @@
     direction: in
     interface_in: "{{ ufw_tailscale_interface }}"
     from_ip: "any"
-  become: yes
+  notify: Restart UFW
   tags:
     - ufw
     - tailscale
@@ -46,7 +44,7 @@
     rule: allow
     port: 22
     proto: tcp
-  become: yes
+  notify: Restart UFW
   tags:
     - ufw
     - ssh
