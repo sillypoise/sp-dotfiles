@@ -27,16 +27,30 @@
 #     proto: tcp
 #   loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
 #   become: yes
-#
-# - name: Allow HTTP/HTTPS and SSH on Tailscale interface only
-#   ansible.builtin.ufw:
-#     rule: allow
-#     port: "{{ item }}"
-#     proto: tcp
-#     interface_in: "{{ ufw_tailscale_interface }}"
-#   loop: "{{ ufw_allowed_ports }}"  # Including port 22 for SSH
-#   become: yes
-#
+
+# Allow all traffic on the Tailscale interface
+- name: Allow all traffic on Tailscale interface
+  ansible.builtin.ufw:
+    rule: allow
+    direction: in
+    interface_in: "{{ ufw_tailscale_interface }}"
+    from_ip: "any"
+  become: yes
+  tags:
+    - ufw
+    - tailscale
+
+# Allow SSH on the public interface (to ensure access even if Tailscale is unavailable)
+- name: Allow SSH on public interface
+  ansible.builtin.ufw:
+    rule: allow
+    port: 22
+    proto: tcp
+  become: yes
+  tags:
+    - ufw
+    - ssh
+
 # - name: Allow SSH on Tailscale interface only
 #   ansible.builtin.ufw:
 #     rule: allow
