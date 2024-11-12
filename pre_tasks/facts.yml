@@ -94,6 +94,27 @@
   tags:
     - always
 
+# Check if Zsh configuration directory and vars.secret file exist
+- name: Check if Zsh config directory exists
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.config/zsh"
+  register: zsh_config_dir
+  tags:
+    - always
+
+- name: Check if vars.secret file exists in Zsh config
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.config/zsh/vars.secret"
+  register: zsh_vars_secret_file
+  tags:
+    - always
+
+- name: Set Zsh Config Installed Status
+  ansible.builtin.set_fact:
+    facts_zsh_config_installed: "{{ zsh_config_dir.stat.exists and zsh_vars_secret_file.stat.exists }}"
+  tags:
+    - always
+
 # Detect sillypoise User
 - name: Detect sillypoise User
   ansible.builtin.command:
