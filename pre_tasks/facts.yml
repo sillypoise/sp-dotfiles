@@ -115,6 +115,12 @@
   tags:
     - always
 
+- name: Debug | Show zsh config installed status
+  ansible.builtin.debug:
+    msg: "zsh config installed: {{ facts_zsh_config_installed }}"
+  tags:
+    - always
+
 # Detect sillypoise User
 - name: Detect sillypoise User
   ansible.builtin.command:
