@@ -190,9 +190,9 @@
     - always
 
 # Verify Tailscale Authentication
-- name: Check if Tailscale is authenticated
+- name: Fetch Tailscale authentication status
   ansible.builtin.command:
-    cmd: tailscale status
+    cmd: tailscale status --json
   changed_when: false
   failed_when: false
   register: tailscale_auth_status
@@ -200,15 +200,9 @@
   tags:
     - always
 
-- name: Debug | Show Tailscale Authenticated Status
-  ansible.builtin.debug:
-    msg: "{{ tailscale_auth_status }}"
-  tags:
-    - always
-
 - name: Set Tailscale Authenticated Status
   ansible.builtin.set_fact:
-    facts_tailscale_authed: "{{ 'logged in' in tailscale_auth_status.stdout }}"
+    facts_tailscale_authed: "{{ (tailscale_auth_status.stdout | from_json).Self.Online | default(false) }}"
   when: facts_tailscale_installed and tailscale_auth_status.rc == 0
   tags:
     - always
