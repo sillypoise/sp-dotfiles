@@ -61,7 +61,7 @@
   environment:
     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
   no_log: true  # keep the auth key secure
-  when: facts_tailscale_authed and facts_zsh_config_installed
+  when: facts_zsh_config_installed
 
 - name: Check Tailscale status
   ansible.builtin.command: tailscale status
