@@ -20,45 +20,45 @@
     direction: outgoing
   become: yes
 
-- name: Block HTTP/HTTPS on all public interfaces
-  ansible.builtin.ufw:
-    rule: deny
-    port: "{{ item }}"
-    proto: tcp
-  loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
-  become: yes
-
-- name: Allow HTTP/HTTPS and SSH on Tailscale interface only
-  ansible.builtin.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: tcp
-    interface_in: "{{ ufw_tailscale_interface }}"
-  loop: "{{ ufw_allowed_ports }}"  # Including port 22 for SSH
-  become: yes
-
-- name: Allow SSH on Tailscale interface only
-  ansible.builtin.ufw:
-    rule: allow
-    port: 22
-    proto: tcp
-    in_interface: "{{ ufw_tailscale_interface }}"
-  become: yes
-
-- name: Reload UFW to apply changes
-  ansible.builtin.command:
-    cmd: ufw reload
-  register: ufw_reload_result
-  changed_when: ufw_reload_result.rc == 0
-  become: yes
-
-- name: Show UFW status for verification
-  ansible.builtin.command: ufw status verbose
-  register: ufw_status
-  changed_when: false
-  become: yes
-
-- name: Display UFW status
-  ansible.builtin.debug:
-    msg: "{{ ufw_status.stdout_lines }}"
-
+# - name: Block HTTP/HTTPS on all public interfaces
+#   ansible.builtin.ufw:
+#     rule: deny
+#     port: "{{ item }}"
+#     proto: tcp
+#   loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
+#   become: yes
+#
+# - name: Allow HTTP/HTTPS and SSH on Tailscale interface only
+#   ansible.builtin.ufw:
+#     rule: allow
+#     port: "{{ item }}"
+#     proto: tcp
+#     interface_in: "{{ ufw_tailscale_interface }}"
+#   loop: "{{ ufw_allowed_ports }}"  # Including port 22 for SSH
+#   become: yes
+#
+# - name: Allow SSH on Tailscale interface only
+#   ansible.builtin.ufw:
+#     rule: allow
+#     port: 22
+#     proto: tcp
+#     in_interface: "{{ ufw_tailscale_interface }}"
+#   become: yes
+#
+# - name: Reload UFW to apply changes
+#   ansible.builtin.command:
+#     cmd: ufw reload
+#   register: ufw_reload_result
+#   changed_when: ufw_reload_result.rc == 0
+#   become: yes
+#
+# - name: Show UFW status for verification
+#   ansible.builtin.command: ufw status verbose
+#   register: ufw_status
+#   changed_when: false
+#   become: yes
+#
+# - name: Display UFW status
+#   ansible.builtin.debug:
+#     msg: "{{ ufw_status.stdout_lines }}"
+#
