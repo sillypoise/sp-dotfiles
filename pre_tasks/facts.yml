@@ -215,6 +215,7 @@
 
 # Check if GitHub CLI (gh) is installed
 - name: Detect GitHub CLI (gh) Installation
+  become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: which gh
   changed_when: false
