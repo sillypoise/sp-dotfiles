@@ -239,12 +239,13 @@
 
 # Verify GitHub Authentication
 - name: Check GitHub Authentication Status
+  become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: gh auth status
   changed_when: false
   failed_when: false
   register: gh_auth_status
-  when: facts_gh_installed and facts_zsh_config_installed
+  when: facts_gh_installed and facts_zsh_config_installed 
   tags:
     - always
 
