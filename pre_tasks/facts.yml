@@ -212,3 +212,50 @@
     msg: "Tailscale Authenticated: {{ facts_tailscale_authed }}"
   tags:
     - always
+
+# Check if GitHub CLI (gh) is installed
+- name: Detect GitHub CLI (gh) Installation
+  ansible.builtin.command:
+    cmd: which gh
+  changed_when: false
+  failed_when: false
+  register: gh_detection
+  when: facts_sillypoise_exists and facts_nix_installed
+  tags:
+    - always
+
+- name: Set GitHub CLI Installed Status
+  ansible.builtin.set_fact:
+    facts_gh_installed: "{{ gh_detection.rc == 0 }}"
+  tags:
+    - always
+
+- name: Debug | Show GitHub CLI Installed Status
+  ansible.builtin.debug:
+    msg: "GitHub CLI Installed: {{ facts_gh_installed }}"
+  tags:
+    - always
+
+# Verify GitHub Authentication
+- name: Check GitHub Authentication Status
+  ansible.builtin.command:
+    cmd: gh auth status
+  changed_when: false
+  failed_when: false
+  register: gh_auth_status
+  when: facts_gh_installed and facts_zsh_config_installed
+  tags:
+    - always
+
+- name: Set GitHub Authenticated Status
+  ansible.builtin.set_fact:
+    facts_gh_authed: "{{ 'Logged in to github.com' in gh_auth_status.stdout }}"
+  when: facts_gh_installed and gh_auth_status.rc == 0
+  tags:
+    - always
+
+- name: Debug | Show GitHub Authenticated Status
+  ansible.builtin.debug:
+    msg: "GitHub Authenticated: {{ facts_gh_authed }}"
+  tags:
+    - always
