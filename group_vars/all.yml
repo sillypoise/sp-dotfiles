@@ -1,11 +1,12 @@
 default_roles:
   - bash
   - nix
-  - users 
+  - nvim
   - openssh
   - tailscale
   # - test
   - ufw
+  - users 
   - zsh
 
 exclude_roles:
@@ -27,6 +28,7 @@ facts_password_setup_complete: false
 # Define usernames
 host_user: "sillypoise"
 automated_user: "flubber"
+gh_user: "sillypoise"
 
 # Define home directories based on usernames, with fallback for host_user
 host_user_home: "/home/{{ host_user  }}"
