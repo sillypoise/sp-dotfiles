@@ -1,5 +1,6 @@
 default_roles:
   - bash
+  - c
   - nix
   - nvim
   - openssh

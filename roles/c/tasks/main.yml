@@ -1,0 +1,7 @@
+---
+- name: Install C compiler pacman
+  ansible.builtin.pacman:
+    name: base-devel
+    state: present
+  register: c_devtools_install
+
