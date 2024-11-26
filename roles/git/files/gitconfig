@@ -1,0 +1,10 @@
+[user]
+    name = sillypoise
+    email = somewhatjose@gmail.com
+
+[init]
+    defaultBranch = main
+
+[core]
+    editor = nvim
+    pager = delta

@@ -1,0 +1,11 @@
+---
+- name: Copy gitconfig file
+  ansible.builtin.copy:
+    src: gitconfig
+    dest: "{{ host_user_home }}/.gitconfig"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0644'
+  tags:
+    - git
+    - config
