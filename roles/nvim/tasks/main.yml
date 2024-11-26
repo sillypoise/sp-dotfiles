@@ -4,6 +4,9 @@
     cmd: "gh repo clone {{ gh_user }}/nvim-config {{ host_user_home }}/.config/nvim"
   become_user: "{{ host_user }}"
   when: facts_gh_authed
+  changed_when: not ansible_check_mode
+  args:
+    creates: "{{ host_user_home }}/.config/nvim/.git"
   tags:
     - neovim
     - config
