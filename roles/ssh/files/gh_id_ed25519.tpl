@@ -1,1 +1,1 @@
-"op://ssh/gh_id_ed25519/private key"
+op://ssh/gh_id_ed25519/private key
