@@ -45,3 +45,14 @@
   tags:
     - ssh
     - security
+
+- name: Remove template files
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.ssh/{{ item }}"
+    state: absent
+  with_items:
+    - gh_id_ed25519.tpl
+  tags:
+    - ssh
+    - security
+    - cleanup
