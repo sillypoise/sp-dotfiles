@@ -1,0 +1,27 @@
+---
+# roles/volta/tasks/main.yml
+- name: Check if Volta is installed
+  ansible.builtin.command: "which volta"
+  register: volta_check
+  ignore_errors: true
+  changed_when: false
+  become_user: "{{ host_user }}"
+  tags:
+    - volta
+    - check
+
+- name: Install Node.js LTS
+  ansible.builtin.shell: "volta install node@lts"
+  become_user: "{{ host_user }}"
+  when: volta_check.rc == 0
+  tags:
+    - volta
+    - node
+
+- name: Install pnpm
+  ansible.builtin.shell: "volta install pnpm@latest"
+  become_user: "{{ host_user }}"
+  when: volta_check.rc == 0
+  tags:
+    - volta
+    - node
