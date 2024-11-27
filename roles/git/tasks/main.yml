@@ -9,3 +9,25 @@
   tags:
     - git
     - config
+
+- name: Ensure gh config directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/gh"
+    state: directory
+    mode: '0755'
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - gh
+    - config
+
+- name: Copy gh config file
+  ansible.builtin.copy:
+    src: config.yml
+    dest: "{{ host_user_home }}/.config/gh/config.yml"
+    mode: '0644'
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - gh
+    - config
