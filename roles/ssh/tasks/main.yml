@@ -42,7 +42,6 @@
     group: "{{ host_user }}"
   with_items:
     - { file: 'gh_id_ed25519', mode: '0600' }
-    - { file: 'gh_id_ed25519.pub', mode: '0644' }
   tags:
     - ssh
     - security
