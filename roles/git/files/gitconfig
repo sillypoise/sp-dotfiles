@@ -1,6 +1,7 @@
 [user]
     name = sillypoise
     email = somewhatjose@gmail.com
+  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7zA/iy0C5VOt/TKDX2msds7r/kTBaJ/gWG9oTQLxR6
 
 [init]
     defaultBranch = main
@@ -10,13 +11,12 @@
     pager = delta
 
 [user]
-  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7zA/iy0C5VOt/TKDX2msds7r/kTBaJ/gWG9oTQLxR6
 
 [gpg]
   format = ssh
 
 [gpg "ssh"]
-  program = "/usr/bin/ssh-agent"
+  program = "/usr/bin/ssh-keygen"
 
 [commit]
   gpgsign = true
