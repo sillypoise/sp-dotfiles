@@ -1,7 +1,7 @@
 [user]
     name = sillypoise
     email = somewhatjose@gmail.com
-  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7zA/iy0C5VOt/TKDX2msds7r/kTBaJ/gWG9oTQLxR6
+    signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7zA/iy0C5VOt/TKDX2msds7r/kTBaJ/gWG9oTQLxR6
 
 [init]
     defaultBranch = main
@@ -9,8 +9,6 @@
 [core]
     editor = nvim
     pager = delta
-
-[user]
 
 [gpg]
   format = ssh
