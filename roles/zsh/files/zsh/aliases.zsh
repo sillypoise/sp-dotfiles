@@ -2,7 +2,8 @@
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
-alias brt= "broot --cmd :print_tree"
+alias br="broot"
+alias brt="broot --cmd :print_tree"
 alias c='clear'
 alias cp='cp -iv'
 alias cat="bat"
