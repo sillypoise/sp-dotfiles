@@ -2,13 +2,15 @@
 alias ..='cd ..'
 alias ...='cd ../../../'
 alias ....='cd ../../../../'
+alias br = "broot"
+alias brt = "br --cmd :print_tree"
 alias c='clear'
 alias cp='cp -iv'
-alias grep="rg"
 alias cat="bat"
 alias chmod="chmod -c"
 alias chown="chown -c"
 alias find="fd"
+alias grep="rg"
 alias lg="lazygit"
 alias ld="lazydocker"
 alias ls="exa"
