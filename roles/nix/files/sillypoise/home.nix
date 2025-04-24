@@ -20,12 +20,14 @@
         eza                  # Enhanced ls with better formatting
         fd                   # Simple and fast file search
         fzf                  # Command-line fuzzy finder
+        httpie               # Command-line HTTP client
         gh                   # GitHub CLI
         git                  # Version control system
         gnused               # GNU sed (stream editor)
         jq                   # JSON processor
         lazydocker           # Simplified Docker management
         lazygit              # Simplified Git UI
+        neofetch             # Modern fetch
         neovim               # Modern text editor
         ripgrep              # Fast, recursive file search
         rsync                # File synchronization utility
