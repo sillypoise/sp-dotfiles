@@ -9,14 +9,19 @@
     home.homeDirectory = "/home/sillypoise";
 
     # Package Management
-    home.packages = with pkgs; [
+        home.packages = with pkgs; [
+      (python312.withPackages (ps: [
+        ps.datasette
+        ps.setuptools
+      ]))
       aws-vault                  # AWS credential management
       awscli2                    # AWS CLI
       bat                        # Improved cat with syntax highlighting
+      biome                      # Linting and formatting toolchain
       btop                       # Resource monitor
       broot                      # Enhanced directory navigation
-      datasette                  # Publish and explore SQLite databases
-      python312Packages.setuptools  # Required for datasette (pkg_resources)
+      # datasette                  # Publish and explore SQLite databases
+      # python312Packages.setuptools  # Required for datasette (pkg_resources)
       delta                      # Git diff viewer with syntax highlighting
       dysk                       # df alternative
       eza                        # Enhanced ls with better formatting
@@ -44,4 +49,5 @@
       zoxide                     # Directory navigation tool
       zsh                        # Z shell (command-line interpreter)
   ];
+
 }
