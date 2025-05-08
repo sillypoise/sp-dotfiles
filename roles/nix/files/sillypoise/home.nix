@@ -17,6 +17,7 @@
         broot                # Enhanced directory navigation
         datasette            # Publish and explore SQLite databases
         delta                # Git diff viewer with syntax highlighting
+        dysk                 # df alternative
         eza                  # Enhanced ls with better formatting
         fd                   # Simple and fast file search
         fzf                  # Command-line fuzzy finder
