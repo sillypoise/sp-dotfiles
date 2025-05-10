@@ -33,6 +33,10 @@ if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh --cmd cd)"
 fi
 
+if command -v opencode &>/dev/null; then
+    addToPath "$HOME/.opencode/bin"
+fi
+
 # Optional tooling setup (e.g., Aactivator)
 if command -v aactivator &>/dev/null; then
     eval "$(aactivator init)"
