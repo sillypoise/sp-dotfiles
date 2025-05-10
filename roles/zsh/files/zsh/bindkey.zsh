@@ -1,5 +1,5 @@
 # Vim mode
-bindkey -v                     # Enable Vi key bindings
+# bindkey -v                     # Enable Vi key bindings
 # Restore history searching with ^r
 bindkey '^r' history-incremental-search-backward
 
