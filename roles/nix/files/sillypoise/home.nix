@@ -36,6 +36,7 @@
       lazygit                    # Simplified Git UI
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
+      podman                     # Docker alternative: manage pods, containers and container images
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
