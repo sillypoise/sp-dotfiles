@@ -32,11 +32,13 @@
       git                        # Version control system
       gnused                     # GNU sed (stream editor)
       jq                         # JSON processor
+      k9s                        # k8s tui
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
       podman                     # Docker alternative: manage pods, containers and container images
+      postgresql_17              # PostgreSQL 17
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
