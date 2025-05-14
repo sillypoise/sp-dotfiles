@@ -7,6 +7,9 @@ addToPath "$HOME/.local/bin"
 # Add Nix to PATH if available
 sourceIfExists "/etc/profile.d/nix.sh"
 
+# # Add op plugins NOT UNTIL WE FIGURE OUT RDS
+# sourceIfExists "$HOME/.config/op/plugins.sh"
+
 # Volta setup
 if [ -d "$HOME/.volta" ]; then
     export VOLTA_HOME="$HOME/.volta"
