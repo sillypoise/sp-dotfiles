@@ -12,7 +12,10 @@
         home.packages = with pkgs; [
       (python312.withPackages (ps: [
         ps.datasette
+        ps.llm
         ps.setuptools
+        ps.ruff
+        ps.uv
       ]))
       aws-vault                  # AWS credential management
       awscli2                    # AWS CLI
