@@ -10,15 +10,15 @@ sourceIfExists "/etc/profile.d/nix.sh"
 # # Add op plugins NOT UNTIL WE FIGURE OUT RDS
 # sourceIfExists "$HOME/.config/op/plugins.sh"
 
+# Add independently install binaries to PATH
+
+addToPath "$HOME/.opencode/bin"
+
+## Add nix-installed binaries to PATH
 # Volta setup
 if [ -d "$HOME/.volta" ]; then
     export VOLTA_HOME="$HOME/.volta"
     addToPathFront "$VOLTA_HOME/bin"
-fi
-
-# Github Copilot CLI Prompt setup
-if command -v github-copilot-cli &>/dev/null; then
-    eval "$(github-copilot-cli alias -- "$0")"
 fi
 
 # Rustup setup
@@ -34,10 +34,6 @@ fi
 # Zoxide setup
 if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh --cmd cd)"
-fi
-
-if command -v opencode &>/dev/null; then
-    addToPath "$HOME/.opencode/bin"
 fi
 
 # Optional tooling setup (e.g., Aactivator)
