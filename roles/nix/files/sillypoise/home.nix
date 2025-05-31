@@ -23,9 +23,11 @@
       biome                      # Linting and formatting toolchain
       btop                       # Resource monitor
       broot                      # Enhanced directory navigation
+      bun                        # JavaScript runtime and package manager
       # datasette                  # Publish and explore SQLite databases
       # python312Packages.setuptools  # Required for datasette (pkg_resources)
       delta                      # Git diff viewer with syntax highlighting
+      deno                       # JavaScript runtime
       dysk                       # df alternative
       eza                        # Enhanced ls with better formatting
       fd                         # Simple and fast file search
@@ -34,6 +36,7 @@
       gh                         # GitHub CLI
       git                        # Version control system
       gnused                     # GNU sed (stream editor)
+      go                         # Go programming language
       jq                         # JSON processor
       k9s                        # k8s tui
       lazydocker                 # Simplified Docker management
