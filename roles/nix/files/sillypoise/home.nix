@@ -14,6 +14,7 @@
         ps.datasette
         ps.llm
         ps.setuptools
+        ps.sqlite-utils
         ps.ruff
         ps.uv
       ]))
@@ -49,7 +50,7 @@
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
       sd                         # Modern sed alternative
-      sqlite-utils               # SQLite utility and CLI
+      # sqlite-utils               # SQLite utility and CLI
       starship                   # Customizable shell prompt
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
