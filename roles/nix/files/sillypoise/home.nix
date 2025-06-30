@@ -29,7 +29,7 @@
       # python312Packages.setuptools  # Required for datasette (pkg_resources)
       delta                      # Git diff viewer with syntax highlighting
       deno                       # JavaScript runtime
-      dysk                       # df alternative
+      duf                        # df alternative
       eza                        # Enhanced ls with better formatting
       fd                         # Simple and fast file search
       fzf                        # Command-line fuzzy finder
