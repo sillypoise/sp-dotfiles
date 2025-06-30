@@ -31,3 +31,7 @@ Subsystem sftp {{ openssh.sftp_path }}
 # Logging
 SyslogFacility AUTH
 LogLevel INFO
+
+# Keep SSH sessions alive
+ClientAliveInterval 60
+ClientAliveCountMax 3
