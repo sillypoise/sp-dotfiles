@@ -25,30 +25,34 @@
       awscli2                    # AWS CLI
       bat                        # Improved cat with syntax highlighting
       biome                      # Linting and formatting toolchain
-      btop                       # Resource monitor
       broot                      # Enhanced directory navigation
+      btop                       # Resource monitor
       bun                        # JavaScript runtime and package manager
+      claude-code                # Agentic coding tool from Anthropic
+      codex                      # Lightweight coding agent that runs in your terminal
       # datasette                  # Publish and explore SQLite databases
-      # python312Packages.setuptools  # Required for datasette (pkg_resources)
       delta                      # Git diff viewer with syntax highlighting
       deno                       # JavaScript runtime
       duf                        # df alternative
       eza                        # Enhanced ls with better formatting
       fd                         # Simple and fast file search
       fzf                        # Command-line fuzzy finder
-      httpie                     # Command-line HTTP client
       gh                         # GitHub CLI
       git                        # Version control system
       gnused                     # GNU sed (stream editor)
       go                         # Go programming language
+      httpie                     # Command-line HTTP client
       jq                         # JSON processor
       k9s                        # k8s tui
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
+      opencode                   # AI coding agent built for the terminal
+      pnpm                       # Fast, disk space efficient package manager
       podman                     # Docker alternative: manage pods, containers and container images
       postgresql_17              # PostgreSQL 17
+      # python312Packages.setuptools  # Required for datasette (pkg_resources)
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
@@ -58,8 +62,6 @@
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
       volta                      # JavaScript tool manager
-      pnpm                       # Fast, disk space efficient package manager
-      claude-code                # Agentic coding tool from Anthropic
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
       zsh                        # Z shell (command-line interpreter)
