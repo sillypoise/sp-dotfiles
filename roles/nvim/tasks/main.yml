@@ -1,12 +1,46 @@
 ---
-- name: Clone private Neovim config repo
+- name: Ensure .config directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  tags:
+    - neovim
+    - config
+
+- name: Clone Neovim config repo with GitHub CLI
   ansible.builtin.command:
-    cmd: "gh repo clone {{ gh_user }}/nvim-config {{ host_user_home }}/.config/nvim"
+    cmd: "gh repo clone {{ gh_user }}/sp-nvim {{ host_user_home }}/.config/nvim"
   become_user: "{{ host_user }}"
   when: facts_gh_authed
   changed_when: not ansible_check_mode
   args:
     creates: "{{ host_user_home }}/.config/nvim/.git"
+  tags:
+    - neovim
+    - config
+
+- name: Clone Neovim config repo with git (fallback)
+  ansible.builtin.git:
+    repo: "https://github.com/{{ gh_user }}/sp-nvim.git"
+    dest: "{{ host_user_home }}/.config/nvim"
+    version: main
+    force: no
+  become_user: "{{ host_user }}"
+  when: not facts_gh_authed
+  tags:
+    - neovim
+    - config
+
+- name: Ensure proper ownership of nvim directory
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/nvim"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    recurse: yes
   tags:
     - neovim
     - config
