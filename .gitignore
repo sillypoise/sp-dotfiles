@@ -1,1 +1,29 @@
 .DS_Store
+
+# Security - prevent accidental commits of sensitive files
+*.key
+*.pem
+*.p12
+*_rsa
+*_ed25519
+*.secret
+.env*
+*.private
+*.crt
+*.cer
+*.pfx
+
+# Exclude actual secret files (keep .tpl templates)
+vars.secret
+secrets.env
+/etc/environment
+
+# Password and auth files
+passwd
+shadow
+*.passwd
+*password*
+!*password*.tpl
+
+# 1Password session files
+.op/
