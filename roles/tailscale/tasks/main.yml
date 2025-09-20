@@ -51,8 +51,9 @@
     name: tailscaled
     state: started
     enabled: true
+    daemon_reload: true
   become: true
-  when: facts_tailscale_installed
+  when: tailscale_install is changed or facts_tailscale_installed | default(false)
 
 - name: Start Tailscale with auth key
   ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
