@@ -17,11 +17,3 @@
   tags:
     - volta
     - node
-
-- name: Install pnpm
-  ansible.builtin.shell: "volta install pnpm@latest"
-  become_user: "{{ host_user }}"
-  when: volta_check.rc == 0
-  tags:
-    - volta
-    - node

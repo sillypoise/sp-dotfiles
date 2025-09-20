@@ -55,6 +55,8 @@
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
       volta                      # JavaScript tool manager
+      pnpm                       # Fast, disk space efficient package manager
+      claude-code                # Agentic coding tool from Anthropic
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
       zsh                        # Z shell (command-line interpreter)
