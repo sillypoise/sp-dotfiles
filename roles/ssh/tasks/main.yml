@@ -46,6 +46,17 @@
     - ssh
     - security
 
+- name: Copy SSH config file
+  ansible.builtin.copy:
+    src: config
+    dest: "{{ host_user_home }}/.ssh/config"
+    mode: '0600'
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - ssh
+    - security
+
 - name: Add GitHub SSH host keys to known_hosts
   ansible.builtin.known_hosts:
     name: github.com
