@@ -18,26 +18,38 @@
     - setup
 
 - name: system setup | nix | add home-manager channel
-  shell: nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
+  shell: |
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix-channel --add https://github.com/nix-community/home-manager/archive/release-24.05.tar.gz home-manager
   become_user: "{{ host_user }}"
   when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - home-manager
 
 - name: system setup | nix | update nix channels
-  shell: nix-channel --update
+  shell: |
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix-channel --update
   become_user: "{{ host_user }}"
   when: facts_bash_config_installed or facts_zsh_config_installed
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - home-manager
 
 - name: system setup | nix | install home-manager into profile
-  shell: nix-env -iA nixpkgs.home-manager
+  shell: |
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix-env -iA nixpkgs.home-manager
   become_user: "{{ host_user }}"
   # I think this is naturally idempotent
   # when: not facts_home_manager_installed and (facts_bash_config_installed or facts_zsh_config_installed)
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - home-manager
@@ -67,9 +79,13 @@
     - packages
 
 - name: system setup | nix | install packages via home-manager
-  ansible.builtin.shell: "home-manager switch -f {{ host_user_home }}/.config/home-manager/home.nix"
+  ansible.builtin.shell: |
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    home-manager switch -f {{ host_user_home }}/.config/home-manager/home.nix
   become_user: "{{ host_user }}"
   when: (facts_bash_config_installed or facts_zsh_config_installed) and facts_home_manager_installed
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - home-manager
@@ -77,7 +93,11 @@
 
 - name: system setup | nix | update home-manager packages
   become_user: "{{ host_user }}"
-  shell: "home-manager switch -b backup"
+  shell: |
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    home-manager switch -b backup
+  args:
+    executable: /bin/bash
   tags:
     - nix
     - home-manager
