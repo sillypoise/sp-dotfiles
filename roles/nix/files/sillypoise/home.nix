@@ -8,6 +8,9 @@
     home.username = "sillypoise";
     home.homeDirectory = "/home/sillypoise";
 
+    # Allow unfree packages (needed for claude-code)
+    nixpkgs.config.allowUnfree = true;
+
     # Package Management
         home.packages = with pkgs; [
       (python312.withPackages (ps: [
