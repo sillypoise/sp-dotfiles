@@ -179,7 +179,15 @@
 
 - name: Set Tailscale Installed Status
   ansible.builtin.set_fact:
-    facts_tailscale_installed: "{{ tailscale_detection.rc == 0 }}"
+    facts_tailscale_installed: "{{ tailscale_detection.rc | default(1) == 0 }}"
+  when: tailscale_detection is defined and not tailscale_detection.skipped | default(false)
+  tags:
+    - always
+
+- name: Set Tailscale Not Installed (when detection skipped)
+  ansible.builtin.set_fact:
+    facts_tailscale_installed: false
+  when: tailscale_detection is not defined or tailscale_detection.skipped | default(false)
   tags:
     - always
 
@@ -245,7 +253,7 @@
   changed_when: false
   failed_when: false
   register: gh_auth_status
-  when: facts_gh_installed and facts_zsh_config_installed 
+  when: facts_gh_installed and facts_zsh_config_installed
   tags:
     - always
 
