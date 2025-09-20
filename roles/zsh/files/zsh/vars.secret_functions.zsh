@@ -55,3 +55,24 @@ fi
   export SECRETS_ALREADY_LOADED=true
   _task_done
 }
+
+function secret-refresh() {
+  __task "${ARROW} ${YELLOW}Refreshing secrets from 1Password..."
+  
+  # Check if op is authenticated
+  if ! op whoami &>/dev/null; then
+    echo -e " ${RED}[${CROSS_MARK}${RED}] Error: Not authenticated with 1Password CLI"
+    echo -e " ${YELLOW}Please run: ${WHITE}eval \$(op signin)"
+    return 1
+  fi
+  
+  # Run op inject to update vars.secret from template
+  if op inject -i "$HOME/.config/zsh/vars.secret.tpl" -o "$HOME/.config/zsh/vars.secret" -f; then
+    _task_done
+    # Now reload the secrets
+    secret --reload
+  else
+    echo -e " ${RED}[${CROSS_MARK}${RED}] Failed to inject secrets from 1Password"
+    return 1
+  fi
+}
