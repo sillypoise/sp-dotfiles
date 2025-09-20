@@ -211,7 +211,22 @@
 - name: Set Tailscale Authenticated Status
   ansible.builtin.set_fact:
     facts_tailscale_authed: "{{ (tailscale_auth_status.stdout | from_json).Self.Online | default(false) }}"
-  when: facts_tailscale_installed and tailscale_auth_status.rc == 0
+  when: 
+    - facts_tailscale_installed
+    - tailscale_auth_status is defined
+    - not tailscale_auth_status.skipped | default(false)
+    - tailscale_auth_status.rc == 0
+  tags:
+    - always
+
+- name: Set Tailscale Not Authenticated (when detection skipped or failed)
+  ansible.builtin.set_fact:
+    facts_tailscale_authed: false
+  when: >
+    not facts_tailscale_installed or
+    tailscale_auth_status is not defined or
+    tailscale_auth_status.skipped | default(false) or
+    tailscale_auth_status.rc | default(1) != 0
   tags:
     - always
 
@@ -235,7 +250,15 @@
 
 - name: Set GitHub CLI Installed Status
   ansible.builtin.set_fact:
-    facts_gh_installed: "{{ gh_detection.rc == 0 }}"
+    facts_gh_installed: "{{ gh_detection.rc | default(1) == 0 }}"
+  when: gh_detection is defined and not gh_detection.skipped | default(false)
+  tags:
+    - always
+
+- name: Set GitHub CLI Not Installed (when detection skipped)
+  ansible.builtin.set_fact:
+    facts_gh_installed: false
+  when: gh_detection is not defined or gh_detection.skipped | default(false)
   tags:
     - always
 
@@ -260,7 +283,20 @@
 - name: Set GitHub Authenticated Status
   ansible.builtin.set_fact:
     facts_gh_authed: "{{ 'Logged in to github.com' in gh_auth_status.stdout }}"
-  when: facts_gh_installed
+  when: 
+    - facts_gh_installed
+    - gh_auth_status is defined
+    - not gh_auth_status.skipped | default(false)
+  tags:
+    - always
+
+- name: Set GitHub Not Authenticated (when detection skipped)
+  ansible.builtin.set_fact:
+    facts_gh_authed: false
+  when: >
+    not facts_gh_installed or
+    gh_auth_status is not defined or
+    gh_auth_status.skipped | default(false)
   tags:
     - always
 
