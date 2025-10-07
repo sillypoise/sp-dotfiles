@@ -38,7 +38,7 @@ fi
 
 # Mise setup
 if command -v mise &>/dev/null; then
-    eval "$(~/.local/bin/mise activate zsh)"
+    eval "$($HOME/.nix-profile/bin/mise activate zsh)"
 fi
 
 
