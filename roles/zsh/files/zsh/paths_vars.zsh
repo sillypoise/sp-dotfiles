@@ -36,6 +36,12 @@ if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh --cmd cd)"
 fi
 
+# Mise setup
+if command -v mise &>/dev/null; then
+    eval "$(~/.local/bin/mise activate zsh)"
+fi
+
+
 # Optional tooling setup (e.g., Aactivator)
 if command -v aactivator &>/dev/null; then
     eval "$(aactivator init)"
