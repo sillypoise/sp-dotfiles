@@ -46,6 +46,7 @@
       k9s                        # k8s tui
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
+      mise
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
       opencode                   # AI coding agent built for the terminal
