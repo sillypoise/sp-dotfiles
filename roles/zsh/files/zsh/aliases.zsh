@@ -15,6 +15,7 @@ alias lg="lazygit"
 alias ld="lazydocker"
 alias ls="exa"
 alias ll="exa -l"
+alias oc="opencode -s"
 alias sed="sd"
 alias extip='curl https://myip.wtf/text'
 alias extipjson='curl https://myip.wtf/json'
