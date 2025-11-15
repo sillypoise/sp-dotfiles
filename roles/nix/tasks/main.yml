@@ -61,7 +61,7 @@
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     # permissions so home-manager can write to it
-    mode: '0755'
+    mode: "0755"
   tags:
     - nix
     - home-manager
@@ -72,34 +72,23 @@
     dest: "{{ host_user_home }}/.config/home-manager/home.nix"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
-    mode: '0644'
+    mode: "0644"
   tags:
     - nix
     - home-manager
     - packages
 
-- name: system setup | nix | install packages via home-manager
-  ansible.builtin.shell: |
-    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-    home-manager switch -f {{ host_user_home }}/.config/home-manager/home.nix
-  become_user: "{{ host_user }}"
-  when: (facts_bash_config_installed or facts_zsh_config_installed) and facts_home_manager_installed
-  args:
-    executable: /bin/bash
-  tags:
-    - nix
-    - home-manager
-    - packages
-
-- name: system setup | nix | update home-manager packages
+- name: system setup | nix | apply home-manager config
   become_user: "{{ host_user }}"
   shell: |
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-    home-manager switch -b backup
+    home-manager switch -b backup -f {{ host_user_home }}/.config/home-manager/home.nix
   args:
     executable: /bin/bash
+  when: facts_bash_config_installed or facts_zsh_config_installed
+  register: hm_result
+  changed_when: "'Activating installPackages' in hm_result.stdout"
   tags:
     - nix
     - home-manager
     - packages
-    - update
