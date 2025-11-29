@@ -50,7 +50,7 @@
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
       ngrok                      # local revers proxy
-      opencode                   # AI coding agent built for the terminal
+      # opencode                   # AI coding agent built for the terminal
       pnpm                       # Fast, disk space efficient package manager
       podman                     # Docker alternative: manage pods, containers and container images
       postgresql_17              # PostgreSQL 17
