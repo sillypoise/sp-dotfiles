@@ -1,0 +1,10 @@
+---
+# roles/opencode/tasks/main.yml
+- name: Install or update OpenCode
+  ansible.builtin.shell: |
+    curl -fsSL https://opencode.ai/install | bash
+  become_user: "{{ host_user }}"
+  args:
+    executable: /bin/bash
+  tags:
+    - opencode
