@@ -162,6 +162,8 @@ function confirmVaultAccess() {
 }
 
 # Initial distro setup
+# Note: base packages are also installed in the bootstrap role.
+# This duplication is intentional to keep first-run setup resilient.
 if is_arch; then
     arch_setup
 elif is_ubuntu; then

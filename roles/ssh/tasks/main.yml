@@ -29,6 +29,7 @@
   ansible.builtin.shell: "op inject -i {{ host_user_home }}/.ssh/gh_id_ed25519.tpl -o {{ host_user_home }}/.ssh/gh_id_ed25519 -f"
   register: inject_gh_private_key
   no_log: true
+  when: facts_op_installed
   tags:
     - ssh
     - security

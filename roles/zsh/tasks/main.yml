@@ -1,3 +1,24 @@
+- name: Install Zsh (Arch)
+  ansible.builtin.pacman:
+    name: zsh
+    state: present
+  when: facts_is_arch and not facts_zsh_installed
+  tags:
+    - system
+    - packages
+    - zsh
+
+- name: Install Zsh (Ubuntu)
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+    update_cache: true
+  when: facts_is_ubuntu and not facts_zsh_installed
+  tags:
+    - system
+    - packages
+    - zsh
+
 - name: Copy .zshrc for host user
   ansible.builtin.copy:
     src: "zshrc"
@@ -25,6 +46,7 @@
   ansible.builtin.shell: "op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/zsh/vars.secret -f"
   register: inject_result
   no_log: true
+  when: facts_op_installed
   tags:
     - secrets
     - op

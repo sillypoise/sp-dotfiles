@@ -1,4 +1,14 @@
 ---
+- name: bootstrap | packages | install base packages (Arch)
+  ansible.builtin.pacman:
+    name: "{{ packages_common + packages_arch }}"
+    state: present
+    update_cache: true
+  tags:
+    - bootstrap
+    - packages
+    - system
+
 - name: bootstrap | openssh | set defaults (Arch)
   ansible.builtin.set_fact:
     openssh:

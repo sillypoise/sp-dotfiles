@@ -1,4 +1,14 @@
 ---
+- name: bootstrap | packages | install base packages (Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ packages_common + packages_ubuntu }}"
+    state: present
+    update_cache: true
+  tags:
+    - bootstrap
+    - packages
+    - system
+
 - name: bootstrap | openssh | set defaults (Ubuntu)
   ansible.builtin.set_fact:
     openssh:

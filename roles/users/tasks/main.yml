@@ -4,6 +4,7 @@
     name: "{{ host_user }}"
     shell: /bin/zsh
   become: true
+  when: facts_zsh_installed
   tags:
     - shell
 
@@ -12,6 +13,7 @@
     src: "/home/{{ host_user }}/.nix-profile/bin/zsh"  # Adjust if the Nix-installed Zsh is in a different location
     dest: "/bin/zsh"
     state: link
+  when: facts_nix_installed
   tags:
     - shell
     - environment
@@ -23,6 +25,7 @@
     cmd: "op read 'op://sp-dev/user/hashed'"
   register: new_password
   no_log: true
+  when: facts_op_installed
 
 # TODO: non-idempotent
 - name: "Set passwd for {{ host_user }}"
@@ -31,3 +34,4 @@
     password: "{{ new_password.stdout }}"
   become: true
   no_log: true
+  when: facts_op_installed and new_password is defined and new_password.stdout | length > 0
