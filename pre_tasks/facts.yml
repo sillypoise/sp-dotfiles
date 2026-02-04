@@ -15,6 +15,12 @@
   tags:
     - always
 
+- name: Set sudo group name
+  ansible.builtin.set_fact:
+    sudo_group: "{{ 'sudo' if facts_is_ubuntu else 'wheel' }}"
+  tags:
+    - always
+
 - name: Set default user for become if not defined
   ansible.builtin.set_fact:
     become_target_user: "{{ become_user | default(ansible_user) }}"

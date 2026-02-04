@@ -1,4 +1,4 @@
 - name: restart_sshd
-  service:
+  ansible.builtin.service:
     name: "{{ openssh.service }}"
     state: restarted

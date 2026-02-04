@@ -1,10 +1,16 @@
 # sillypoise dotfiles
 
+Supported OS:
+- Arch Linux
+- Ubuntu LTS (starter-level support)
+
 ## Usage
 
 ### Install
 
 This playbook includes a custom shell script located at `bin/dotfiles`. This script is added to your $PATH after installation and can be run multiple times while making sure any Ansible dependencies are installed and updated.
+
+`bin/dotfiles` detects the distro and installs the required dependencies for Arch or Ubuntu.
 
 This shell script is also used to initialize your environment after bootstrapping your `supported-OS` and performing a full system upgrade as mentioned above.
 
@@ -52,4 +58,3 @@ dotfiles -t <tab><tab>
 dotfiles -t t<tab>
 dotfiles -t ne<tab>
 ```
-

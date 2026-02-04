@@ -1,5 +1,23 @@
-- import_tasks: users/sillypoise.yml
-- import_tasks: users/root.yml
-- import_tasks: users/flubber.yml
-- import_tasks: software/onepassword.yml
-- import_tasks: cleanup.yml
+---
+- name: bootstrap | load distro tasks (Arch)
+  ansible.builtin.import_tasks: arch.yml
+  when: facts_is_arch
+
+- name: bootstrap | load distro tasks (Ubuntu)
+  ansible.builtin.import_tasks: ubuntu.yml
+  when: facts_is_ubuntu
+
+- name: bootstrap | users | sillypoise
+  ansible.builtin.import_tasks: users/sillypoise.yml
+
+- name: bootstrap | users | root
+  ansible.builtin.import_tasks: users/root.yml
+
+- name: bootstrap | users | flubber
+  ansible.builtin.import_tasks: users/flubber.yml
+
+- name: bootstrap | software | onepassword
+  ansible.builtin.import_tasks: software/onepassword.yml
+
+- name: bootstrap | cleanup
+  ansible.builtin.import_tasks: cleanup.yml

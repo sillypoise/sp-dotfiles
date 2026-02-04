@@ -114,6 +114,12 @@ op whoami
 - `group_vars/all.yml`: default roles and global variables.
 - `pre_tasks/facts.yml`: fact gathering and detection.
 
+### Distro Support
+- Supported: Arch Linux and Ubuntu LTS (starter-level support).
+- `bin/dotfiles` detects the distro and installs base dependencies.
+- Use `facts_is_arch` and `facts_is_ubuntu` for OS-specific branches.
+- Use `sudo_group` for sudo membership (`wheel` on Arch, `sudo` on Ubuntu).
+
 ### Role Structure
 ```
 roles/<role>/

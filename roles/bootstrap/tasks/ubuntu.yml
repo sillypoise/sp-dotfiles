@@ -1,0 +1,10 @@
+---
+- name: bootstrap | openssh | set defaults (Ubuntu)
+  ansible.builtin.set_fact:
+    openssh:
+      service: ssh
+      sftp_path: /usr/lib/openssh/sftp-server
+  tags:
+    - bootstrap
+    - openssh
+    - system
