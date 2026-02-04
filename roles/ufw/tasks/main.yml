@@ -3,7 +3,14 @@
   ansible.builtin.pacman:
     name: ufw
     state: present
-  when: ansible_os_family == "Archlinux"
+  when: facts_is_arch
+
+- name: Install UFW on Ubuntu
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: true
+  when: facts_is_ubuntu
 
 - name: Enable and start UFW
   ansible.builtin.systemd:

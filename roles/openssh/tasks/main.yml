@@ -1,4 +1,4 @@
-- name: system setup | openssh | install or update daemon package
+- name: system setup | openssh | install daemon package (Arch)
   tags:
     - openssh
     - ssh
@@ -7,6 +7,20 @@
   ansible.builtin.pacman:
     name: openssh
     state: latest
+  when: facts_is_arch
+  notify: restart_sshd
+
+- name: system setup | openssh | install daemon package (Ubuntu)
+  tags:
+    - openssh
+    - ssh
+    - system
+    - settings
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+    update_cache: true
+  when: facts_is_ubuntu
   notify: restart_sshd
 
 - name: system setup | openssh | enable daemon
@@ -16,7 +30,7 @@
     - system
     - settings
   ansible.builtin.service:
-    name: sshd
+    name: "{{ openssh.service }}"
     enabled: yes
     state: started
 

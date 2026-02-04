@@ -1,4 +1,3 @@
 openssh:
-  sftp_path: /usr/lib/ssh/sftp-server
-  service: sshd
-
+  sftp_path: "{{ '/usr/lib/openssh/sftp-server' if facts_is_ubuntu else '/usr/lib/ssh/sftp-server' }}"
+  service: "{{ 'ssh' if facts_is_ubuntu else 'sshd' }}"
