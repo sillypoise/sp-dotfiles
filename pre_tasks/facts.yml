@@ -8,6 +8,13 @@
   ansible.builtin.debug:
     msg: "The environment user is: {{ ansible_env['USER'] }}"
 
+- name: Detect OS family
+  ansible.builtin.set_fact:
+    facts_is_arch: "{{ ansible_facts['distribution'] == 'Archlinux' }}"
+    facts_is_ubuntu: "{{ ansible_facts['distribution'] == 'Ubuntu' }}"
+  tags:
+    - always
+
 - name: Set default user for become if not defined
   ansible.builtin.set_fact:
     become_target_user: "{{ become_user | default(ansible_user) }}"
