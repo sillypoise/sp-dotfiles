@@ -44,6 +44,23 @@ IS_FIRST_RUN="$HOME/.dotfiles_run"
 USER_TO_RUN="flubber"
 TAGS="" # Default to no specific tags
 
+# Detect distro
+OS_ID=""
+OS_LIKE=""
+if [[ -f /etc/os-release ]]; then
+    . /etc/os-release
+    OS_ID="${ID}"
+    OS_LIKE="${ID_LIKE}"
+fi
+
+function is_ubuntu() {
+    [[ "$OS_ID" == "ubuntu" || "$OS_LIKE" == *"ubuntu"* ]]
+}
+
+function is_arch() {
+    [[ "$OS_ID" == "arch" || "$OS_LIKE" == *"arch"* ]]
+}
+
 # Process command-line options for user (-u) and tags (-t)
 while getopts "u:t:" opt; do
     case $opt in
@@ -116,6 +133,24 @@ function arch_setup() {
         _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
     fi
 }
+
+function ubuntu_setup() {
+    __task "Updating apt cache"
+    _cmd "sudo apt-get update -y"
+
+    packages=("ansible" "python3" "python3-pip" "openssh-client" "openssh-server" "git" "curl" "unzip" "sudo")
+    for pkg in "${packages[@]}"; do
+        if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+            __task "Installing $pkg"
+            _cmd "sudo apt-get install -y $pkg"
+        fi
+    done
+
+    if ! locale | grep -q "LANG=en_US.UTF-8"; then
+        __task "Setting Locale"
+        _cmd "sudo update-locale LANG=en_US.UTF-8"
+    fi
+}
 # 1Password CLI access confirmation
 function confirmVaultAccess() {
     __task "Checking for 1Password CLI"
@@ -126,8 +161,15 @@ function confirmVaultAccess() {
     fi
 }
 
-# Initial Arch Linux setup
-arch_setup
+# Initial distro setup
+if is_arch; then
+    arch_setup
+elif is_ubuntu; then
+    ubuntu_setup
+else
+    printf "${OVERWRITE}${LRED} [X]  ${LRED}Unsupported distro.${NC}\n"
+    exit 1
+fi
 
 # Clone or update the dotfiles repo
 if ! [[ -d "$DOTFILES_DIR" ]]; then
