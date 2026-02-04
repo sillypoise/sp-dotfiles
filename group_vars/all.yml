@@ -25,6 +25,23 @@ facts_zsh_installed: false
 facts_tailscale_installed: false
 facts_tailscale_authed: false
 
+# Base package lists by distro
+packages_common:
+  - git
+  - curl
+  - unzip
+
+packages_arch:
+  - python
+  - python-pip
+  - openssh
+
+packages_ubuntu:
+  - python3
+  - python3-pip
+  - openssh-client
+  - openssh-server
+
 # Users facts
 facts_sillypoise_exists: false
 facts_flubber_exists: false
