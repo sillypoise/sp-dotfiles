@@ -1,7 +1,15 @@
 ---
-- name: Install C compiler pacman
+- name: Install C compiler tools (Arch)
   ansible.builtin.pacman:
     name: base-devel
     state: present
   register: c_devtools_install
+  when: facts_is_arch
 
+- name: Install C compiler tools (Ubuntu)
+  ansible.builtin.apt:
+    name: build-essential
+    state: present
+    update_cache: true
+  register: c_devtools_install
+  when: facts_is_ubuntu

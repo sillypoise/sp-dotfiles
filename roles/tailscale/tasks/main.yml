@@ -1,9 +1,32 @@
 ---
-- name: Install Tailscale with pacman
+- name: Install Tailscale with pacman (Arch)
   ansible.builtin.pacman:
     name: tailscale
     state: present
   register: tailscale_install
+  when: facts_is_arch
+
+- name: Download Tailscale apt key (Ubuntu)
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/ubuntu/{{ ansible_facts['distribution_release'] }}.noarmor.gpg"
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: '0644'
+  when: facts_is_ubuntu
+
+- name: Add Tailscale apt repository (Ubuntu)
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_facts['distribution_release'] }} main"
+    filename: tailscale
+    state: present
+  when: facts_is_ubuntu
+
+- name: Install Tailscale with apt (Ubuntu)
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+    update_cache: true
+  register: tailscale_install
+  when: facts_is_ubuntu
 
 - name: Ensure temporary directory for secrets exists
   ansible.builtin.file:
@@ -53,7 +76,7 @@
     enabled: true
     daemon_reload: true
   become: true
-  when: tailscale_install is changed or facts_tailscale_installed | default(false)
+  when: (tailscale_install is defined and tailscale_install is changed) or facts_tailscale_installed | default(false)
 
 - name: Start Tailscale with auth key
   ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
