@@ -5,9 +5,21 @@
   tags:
     - always
 
+- name: Download Nix installer script
+  ansible.builtin.get_url:
+    url: https://nixos.org/nix/install
+    dest: /tmp/nix-install.sh
+    mode: "0755"
+  when: not facts_nix_installed
+  tags:
+    - nix
+    - bootstrap
+    - system
+    - setup
+
 - name: Install Nix package manager in multi-user mode
-  ansible.builtin.shell: |
-    sh <(curl -L https://nixos.org/nix/install) --daemon
+  ansible.builtin.command:
+    cmd: sh /tmp/nix-install.sh --daemon
   args:
     creates: /nix/var/nix/profiles/default
   when: not facts_nix_installed

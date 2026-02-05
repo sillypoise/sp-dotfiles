@@ -153,6 +153,11 @@ roles/<role>/
 - Use `changed_when: false` for read-only commands.
 - Guard tasks with `when:` facts to ensure safe execution.
 
+### Root-Run Considerations
+- First-run executes as root; avoid root-owned files in user homes.
+- Any task writing into a user home must set `owner`/`group` or run with `become_user`.
+- Shell/command tasks that depend on user env or write under user home should use `become_user`.
+
 ## Cursor/Copilot Rules
 - No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md`
   were found in this repository.
