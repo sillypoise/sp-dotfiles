@@ -105,7 +105,7 @@
   become_user: "{{ host_user }}"
   ansible.builtin.shell: |
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-    nix run home-manager/release-24.05 -- switch --flake {{ host_user_home }}/.config/home-manager
+    nix run home-manager/{{ home_manager_release }} -- switch --flake {{ host_user_home }}/.config/home-manager
   args:
     executable: /bin/bash
   register: hm_result

@@ -25,6 +25,10 @@ facts_zsh_installed: false
 facts_tailscale_installed: false
 facts_tailscale_authed: false
 
+# Nix/Home Manager releases
+nixpkgs_release: "nixos-25.11"
+home_manager_release: "release-25.11"
+
 # Base package lists by distro
 packages_common:
   - git
