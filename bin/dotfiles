@@ -117,6 +117,10 @@ function _task_done {
     _clear_task
 }
 
+if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+    printf "${WARNING} ${RED}Missing curl or wget. On Ubuntu run: apt update && apt install -y curl${NC}\n"
+fi
+
 function arch_setup() {
     # Install essential packages if not present
     packages=("ansible" "python3" "python-pip" "python-watchdog" "openssh" "git" "which" "unzip")
@@ -138,13 +142,18 @@ function ubuntu_setup() {
     __task "Updating apt cache"
     _cmd "sudo apt-get update -y"
 
-    packages=("ansible" "python3" "python3-pip" "openssh-client" "openssh-server" "git" "curl" "unzip" "sudo")
+    packages=("ansible" "python3" "python3-pip" "openssh-client" "openssh-server" "git" "curl" "unzip" "sudo" "locales")
     for pkg in "${packages[@]}"; do
         if ! dpkg -s "$pkg" >/dev/null 2>&1; then
             __task "Installing $pkg"
             _cmd "sudo apt-get install -y $pkg"
         fi
     done
+
+    if ! locale -a 2>/dev/null | grep -qi "^en_US\.utf8$"; then
+        __task "Generating Locale"
+        _cmd "sudo locale-gen en_US.UTF-8"
+    fi
 
     if ! locale | grep -q "LANG=en_US.UTF-8"; then
         __task "Setting Locale"
