@@ -150,14 +150,20 @@ function ubuntu_setup() {
         fi
     done
 
+    if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen 2>/dev/null; then
+        __task "Enabling Locale"
+        _cmd "sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen"
+        _cmd "grep -q '^en_US.UTF-8 UTF-8' /etc/locale.gen || echo 'en_US.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen >/dev/null"
+    fi
+
     if ! locale -a 2>/dev/null | grep -qi "^en_US\.utf8$"; then
         __task "Generating Locale"
-        _cmd "sudo locale-gen en_US.UTF-8"
+        _cmd "sudo locale-gen"
     fi
 
     if ! locale | grep -q "LANG=en_US.UTF-8"; then
         __task "Setting Locale"
-        _cmd "sudo update-locale LANG=en_US.UTF-8"
+        _cmd "sudo bash -c 'update-locale LANG=en_US.UTF-8 || update-locale LANG=C.UTF-8'"
     fi
 }
 # 1Password CLI access confirmation
