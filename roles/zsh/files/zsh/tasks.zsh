@@ -44,21 +44,21 @@ function _task_done {
 # Returns: 0 on success, 1 on failure
 # Note: This function will hide stdout and print stderr on failure
 function _cmd {
+    local LOG
     LOG=$(generate_log)
     # hide stdout, on error we print and exit
-    if eval "$1" 1> /dev/null 2> $LOG; then
-        rm $LOG
+    if eval "$1" 1> /dev/null 2> "$LOG"; then
+        command rm -f "$LOG"
         return 0 # success
     fi
     # read error from log and add spacing
     printf "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}\n"
     while read line; do
         printf "      ${line}\n"
-    done < $LOG
+    done < "$LOG"
     printf "\n"
-    cat $LOG >> /tmp/halp.log
-    rm $LOG
+    cat "$LOG" >> /tmp/halp.log
+    command rm -f "$LOG"
     return 1
 }
-
 
