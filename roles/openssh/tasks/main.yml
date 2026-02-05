@@ -102,26 +102,13 @@
     group: root
     mode: '0644'
 
-- name: system setup | openssh | add neofetch to login
+- name: system setup | openssh | remove neofetch login script
   tags:
     - openssh
     - ssh
     - system
     - settings
   become: true
-  ansible.builtin.copy:
-    content: |
-      #!/bin/sh
-      [ -t 1 ] || return 0
-      # Ensure Nix PATH is available (profile.d ordering is not guaranteed)
-      if [ -e /etc/profile.d/nix.sh ]; then
-        . /etc/profile.d/nix.sh
-      elif [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
-        . "$HOME/.nix-profile/etc/profile.d/nix.sh"
-      fi
-      command -v neofetch >/dev/null 2>&1 || return 0
-      neofetch
-    dest: /etc/profile.d/neofetch.sh
-    owner: root
-    group: root
-    mode: '0755'
+  ansible.builtin.file:
+    path: /etc/profile.d/neofetch.sh
+    state: absent
