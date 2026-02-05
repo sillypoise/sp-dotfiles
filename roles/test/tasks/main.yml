@@ -2,6 +2,14 @@
 - name: Confirm 1Password CLI Authentication
   ansible.builtin.command: "op vault list"
   register: op_auth_check
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
   changed_when: false
   failed_when: op_auth_check.rc != 0
   ignore_errors: false
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+
+- name: Warn when OP service account token is missing
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping 1Password CLI validation."
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)

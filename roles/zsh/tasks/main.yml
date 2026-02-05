@@ -51,12 +51,22 @@
   tags:
     - environment
 
+- name: Warn when OP service account token is missing
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping 1Password secret injection for Zsh."
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
+  tags:
+    - secrets
+    - op
+
 - name: Inject secrets into Zsh config
   become_user: "{{ host_user }}"
   ansible.builtin.shell: "op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/zsh/vars.secret -f"
   register: inject_result
   no_log: true
-  when: facts_op_installed
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
   tags:
     - secrets
     - op

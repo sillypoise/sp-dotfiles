@@ -24,12 +24,23 @@
     - ssh
     - security
 
+- name: Warn when OP service account token is missing
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping 1Password SSH secret injection."
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
+  tags:
+    - ssh
+    - security
+    - secrets
+
 - name: Inject GitHub SSH private key
   become_user: "{{ host_user }}"
   ansible.builtin.shell: "op inject -i {{ host_user_home }}/.ssh/gh_id_ed25519.tpl -o {{ host_user_home }}/.ssh/gh_id_ed25519 -f"
   register: inject_gh_private_key
   no_log: true
-  when: facts_op_installed
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
   tags:
     - ssh
     - security

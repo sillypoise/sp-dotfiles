@@ -51,7 +51,14 @@
     op inject -i {{ host_user_home }}/.config/secrets/secrets.tpl -o {{ host_user_home }}/.config/secrets/environment.tmp -f
   register: inject_result
   no_log: true
-  when: facts_op_installed and facts_zsh_config_installed and not facts_tailscale_authed
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and facts_zsh_config_installed and not facts_tailscale_authed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+
+- name: Warn when OP service account token is missing
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping Tailscale secret injection."
+  when: facts_op_installed and facts_zsh_config_installed and not facts_tailscale_authed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
 
 - name: Move environment file to /etc/environment
   ansible.builtin.command: "mv {{ host_user_home }}/.config/secrets/environment.tmp /etc/environment"

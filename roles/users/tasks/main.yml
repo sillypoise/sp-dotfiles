@@ -4,7 +4,14 @@
     cmd: "op read 'op://sp-dev/user/hashed'"
   register: new_password
   no_log: true
-  when: facts_op_installed
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+
+- name: Warn when OP service account token is missing
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping password update from 1Password."
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
 
 # TODO: non-idempotent
 - name: "Set passwd for {{ host_user }}"
