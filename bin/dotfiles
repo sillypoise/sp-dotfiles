@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -euo pipefail
+
+TASK=""
+
 # Color codes and emoji codes
 RESTORE='\033[0m'
 NC='\033[0m'
@@ -7,6 +11,7 @@ BLACK='\033[00;30m'
 RED='\033[00;31m'
 GREEN='\033[00;32m'
 YELLOW='\033[00;33m'
+ORANGE='\033[38;5;208m'
 BLUE='\033[00;34m'
 PURPLE='\033[00;35m'
 CYAN='\033[00;36m'
@@ -33,16 +38,46 @@ HOT="${ORANGE}\xF0\x9F\x94\xA5${NC}"
 WARNING="${RED}\xF0\x9F\x9A\xA8${NC}"
 RIGHT_ANGLE="${GREEN}\xE2\x88\x9F${NC}"
 
-set -e
+if [[ ! -t 1 ]]; then
+    RESTORE=""
+    NC=""
+    BLACK=""
+    RED=""
+    GREEN=""
+    YELLOW=""
+    ORANGE=""
+    BLUE=""
+    PURPLE=""
+    CYAN=""
+    SEA=""
+    LIGHTGRAY=""
+    LBLACK=""
+    LRED=""
+    LGREEN=""
+    LYELLOW=""
+    LBLUE=""
+    LPURPLE=""
+    LCYAN=""
+    WHITE=""
+    OVERWRITE=""
+    CHECK_MARK=""
+    X_MARK=""
+    PIN=""
+    CLOCK=""
+    ARROW=""
+    BOOK=""
+    HOT=""
+    WARNING=""
+    RIGHT_ANGLE=""
+fi
 
 # Paths
 OP_INSTALLED=false
 OP_AUTHENTICATED=false
-DOTFILES_LOG="$HOME/.dotfiles.log"
+DOTFILES_LOG=""
 DOTFILES_DIR="/opt/dotfiles"
 DOTFILES_RUN_MARKER="/var/lib/dotfiles/.dotfiles_run"
 USER_TO_RUN="flubber"
-TAGS="" # Default to no specific tags
 
 # Detect distro
 OS_ID=""
@@ -61,22 +96,25 @@ function is_arch() {
     [[ "$OS_ID" == "arch" || "$OS_LIKE" == *"arch"* ]]
 }
 
+tags_args=()
+
 # Process command-line options for user (-u) and tags (-t)
 while getopts "u:t:" opt; do
     case $opt in
-    u) USER_TO_RUN=$OPTARG ;;
-    t) TAGS="--tags $OPTARG" ;;
+    u) USER_TO_RUN="$OPTARG" ;;
+    t) tags_args+=("--tags" "$OPTARG") ;;
     *)
         echo "Usage: $0 [-u user] [-t tags]"
         exit 1
         ;;
     esac
 done
+shift $((OPTIND - 1))
 
 # Function to display tasks
 function __task {
     # if _task is called while a task was set, complete the previous
-    if [[ $TASK != "" ]]; then
+    if [[ -n "$TASK" ]]; then
         printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}${TASK}\n"
     fi
     # set new task title and print
@@ -86,25 +124,23 @@ function __task {
 
 # Function to run commands with error handling
 function _cmd {
-    #create log if it doesn't exist
-    if ! [[ -f $DOTFILES_LOG ]]; then
-        touch $DOTFILES_LOG
+    local -a cmd=("$@")
+    local cmd_log
+
+    cmd_log="$(mktemp)"
+    if "${cmd[@]}" 1>/dev/null 2>"$cmd_log"; then
+        cat "$cmd_log" >>"$DOTFILES_LOG"
+        rm -f "$cmd_log"
+        return 0
     fi
-    # empty conduro.log
-    >$DOTFILES_LOG
-    # hide stdout, on error we print and exit
-    if eval "$1" 1>/dev/null 2>$DOTFILES_LOG; then
-        return 0 # success
-    fi
-    # read error from log and add spacing
+
+    cat "$cmd_log" >>"$DOTFILES_LOG"
     printf "${OVERWRITE}${LRED} [X]  ${TASK}${LRED}\n"
-    while read line; do
-        printf "      ${line}\n"
-    done <$DOTFILES_LOG
+    while IFS= read -r line; do
+        printf "      %s\n" "$line"
+    done <"$cmd_log"
     printf "\n"
-    # remove log file
-    rm $DOTFILES_LOG
-    # exit installation
+    rm -f "$cmd_log"
     exit 1
 }
 
@@ -117,6 +153,58 @@ function _task_done {
     _clear_task
 }
 
+function init_log {
+    local log_dir
+
+    log_dir="/var/lib/dotfiles"
+    if [[ ! -d "$log_dir" || ! -w "$log_dir" ]]; then
+        log_dir="/tmp"
+    fi
+
+    DOTFILES_LOG="${log_dir}/dotfiles-$(date +%Y%m%d-%H%M%S)-$$.log"
+    : >"$DOTFILES_LOG"
+}
+
+function setup_sudo {
+    if [[ "$(id -u)" -eq 0 ]]; then
+        sudo_cmd=()
+        return
+    fi
+
+    if ! command -v sudo >/dev/null 2>&1; then
+        printf "${OVERWRITE}${LRED} [X]  ${LRED}sudo is required but not installed.${NC}\n"
+        exit 1
+    fi
+
+    sudo_cmd=(sudo)
+}
+
+function require_cmd {
+    local cmd="$1"
+    local hint="$2"
+
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        printf "${OVERWRITE}${LRED} [X]  ${LRED}Missing required command: %s.${NC}\n" "$cmd"
+        if [[ -n "$hint" ]]; then
+            printf "${WARNING} ${RED}%s${NC}\n" "$hint"
+        fi
+        exit 1
+    fi
+}
+
+function cleanup {
+    local exit_code=$?
+
+    if [[ $exit_code -ne 0 && -n "$TASK" ]]; then
+        printf "${OVERWRITE}${LRED} [X]  ${LRED}Failed: %s${NC}\n" "$TASK"
+        if [[ -n "$DOTFILES_LOG" ]]; then
+            printf "${WARNING} ${RED}See log: %s${NC}\n" "$DOTFILES_LOG"
+        fi
+    fi
+}
+
+trap cleanup EXIT
+
 if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
     printf "${WARNING} ${RED}Missing curl or wget. On Ubuntu run: apt update && apt install -y curl${NC}\n"
 fi
@@ -127,43 +215,43 @@ function arch_setup() {
     for pkg in "${packages[@]}"; do
         if ! pacman -Q "$pkg" >/dev/null 2>&1; then
             __task "Installing $pkg"
-            _cmd "sudo pacman -S --noconfirm $pkg"
+            _cmd "${sudo_cmd[@]}" pacman -S --noconfirm "$pkg"
         fi
     done
 
     # Set locale if it hasn’t been configured
     if [ "$(localectl status | grep 'LANG=en_US.UTF-8')" == "" ]; then
         __task "Setting Locale"
-        _cmd "sudo localectl set-locale LANG=en_US.UTF-8"
+        _cmd "${sudo_cmd[@]}" localectl set-locale LANG=en_US.UTF-8
     fi
 }
 
 function ubuntu_setup() {
     __task "Updating apt cache"
-    _cmd "sudo apt-get update -y"
+    _cmd "${sudo_cmd[@]}" apt-get update -y
 
     packages=("ansible" "python3" "python3-pip" "openssh-client" "openssh-server" "git" "curl" "unzip" "sudo" "locales")
     for pkg in "${packages[@]}"; do
         if ! dpkg -s "$pkg" >/dev/null 2>&1; then
             __task "Installing $pkg"
-            _cmd "sudo apt-get install -y $pkg"
+            _cmd "${sudo_cmd[@]}" apt-get install -y "$pkg"
         fi
     done
 
     if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen 2>/dev/null; then
         __task "Enabling Locale"
-        _cmd "sudo sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen"
-        _cmd "grep -q '^en_US.UTF-8 UTF-8' /etc/locale.gen || echo 'en_US.UTF-8 UTF-8' | sudo tee -a /etc/locale.gen >/dev/null"
+        _cmd "${sudo_cmd[@]}" sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+        _cmd "${sudo_cmd[@]}" bash -c "grep -q '^en_US.UTF-8 UTF-8' /etc/locale.gen || echo 'en_US.UTF-8 UTF-8' | tee -a /etc/locale.gen >/dev/null"
     fi
 
     if ! locale -a 2>/dev/null | grep -qi "^en_US\.utf8$"; then
         __task "Generating Locale"
-        _cmd "sudo locale-gen"
+        _cmd "${sudo_cmd[@]}" locale-gen
     fi
 
     if ! locale | grep -q "LANG=en_US.UTF-8"; then
         __task "Setting Locale"
-        _cmd "sudo bash -c 'update-locale LANG=en_US.UTF-8 || update-locale LANG=C.UTF-8'"
+        _cmd "${sudo_cmd[@]}" bash -c 'update-locale LANG=en_US.UTF-8 || update-locale LANG=C.UTF-8'
     fi
 }
 # 1Password CLI access confirmation
@@ -179,6 +267,9 @@ function confirmVaultAccess() {
 # Initial distro setup
 # Note: base packages are also installed in the bootstrap role.
 # This duplication is intentional to keep first-run setup resilient.
+setup_sudo
+init_log
+
 if is_arch; then
     arch_setup
 elif is_ubuntu; then
@@ -189,34 +280,51 @@ else
 fi
 
 __task "Preparing dotfiles directories"
-_cmd "sudo mkdir -p /opt /var/lib/dotfiles"
+_cmd "${sudo_cmd[@]}" mkdir -p /opt /var/lib/dotfiles
+
+git_hint=""
+ansible_hint=""
+if is_arch; then
+    git_hint="On Arch run: pacman -S git"
+    ansible_hint="On Arch run: pacman -S ansible"
+elif is_ubuntu; then
+    git_hint="On Ubuntu run: apt-get install -y git"
+    ansible_hint="On Ubuntu run: apt-get install -y ansible"
+fi
+
+require_cmd git "$git_hint"
+require_cmd ansible-playbook "$ansible_hint"
 
 # Clone or update the dotfiles repo
 if ! [[ -d "$DOTFILES_DIR" ]]; then
     __task "Cloning repository"
-    _cmd "sudo git clone --quiet https://github.com/sillypoise/sp-dotfiles.git $DOTFILES_DIR"
+    _cmd "${sudo_cmd[@]}" git clone --quiet https://github.com/sillypoise/sp-dotfiles.git "$DOTFILES_DIR"
 else
+    if ! [[ -d "$DOTFILES_DIR/.git" ]]; then
+        printf "${OVERWRITE}${LRED} [X]  ${LRED}Existing path is not a git repo: %s${NC}\n" "$DOTFILES_DIR"
+        exit 1
+    fi
     __task "Updating repository"
-    _cmd "sudo git -C $DOTFILES_DIR pull --quiet"
+    _cmd "${sudo_cmd[@]}" git -C "$DOTFILES_DIR" pull --ff-only --quiet
 fi
 
 __task "Linking dotfiles command"
-_cmd "sudo ln -sf $DOTFILES_DIR/bin/dotfiles /usr/local/bin/dotfiles"
+_cmd "${sudo_cmd[@]}" ln -sf "$DOTFILES_DIR/bin/dotfiles" /usr/local/bin/dotfiles
 
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 
 # First run bootstrap (only when no tags are provided)
-if [[ ! -f "$DOTFILES_RUN_MARKER" && -z "$TAGS" ]]; then
+if [[ ! -f "$DOTFILES_RUN_MARKER" && ${#tags_args[@]} -eq 0 ]]; then
     __task "Running bootstrap (first run)"
-    _cmd "ansible-playbook -u root $DOTFILES_DIR/main.yml --tags bootstrap"
+    _cmd ansible-playbook -u root "$DOTFILES_DIR/main.yml" --tags bootstrap
 fi
 
 confirmVaultAccess
 
 # Run Ansible playbook if 1Password authentication is successful
-if [[ -n $OP_INSTALLED && -n $OP_AUTHENTICATED ]]; then
+if [[ "$OP_INSTALLED" == "true" && "$OP_AUTHENTICATED" == "true" ]]; then
     printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
-    ansible-playbook -u "$USER_TO_RUN" "$DOTFILES_DIR/main.yml" $TAGS "$@"
+    ansible-playbook -u "$USER_TO_RUN" "$DOTFILES_DIR/main.yml" "${tags_args[@]}" "$@"
 else
     printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
 fi
@@ -225,7 +333,7 @@ popd 2>&1 >/dev/null
 
 # First run prompt
 if ! [[ -f "$DOTFILES_RUN_MARKER" ]]; then
+    _cmd "${sudo_cmd[@]}" touch "$DOTFILES_RUN_MARKER"
     echo -e "${CHECK_MARK} ${GREEN}First run complete!${NC}"
     echo -e "${ARROW} ${CYAN}Please reboot your computer to complete the setup.${NC}"
-    _cmd "sudo touch $DOTFILES_RUN_MARKER"
 fi
