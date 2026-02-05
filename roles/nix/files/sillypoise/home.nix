@@ -12,7 +12,7 @@
     nixpkgs.config.allowUnfree = true;
 
     # Package Management
-        home.packages = with pkgs; [
+    home.packages = with pkgs; [
       (python312.withPackages (ps: [
         ps.datasette
         ps.llm
@@ -28,7 +28,7 @@
       broot                      # Enhanced directory navigation
       btop                       # Resource monitor
       bun                        # JavaScript runtime and package manager
-      claude-code                # Agentic coding tool from Anthropic
+      # claude-code                # Agentic coding tool from Anthropic
       codex                      # Lightweight coding agent that runs in your terminal
       # datasette                  # Publish and explore SQLite databases
       delta                      # Git diff viewer with syntax highlighting
@@ -50,7 +50,7 @@
       neofetch                   # Modern fetch
       neovim                     # Modern text editor
       ngrok                      # local revers proxy
-      # opencode                   # AI coding agent built for the terminal
+      opencode                   # AI coding agent built for the terminal
       pnpm                       # Fast, disk space efficient package manager
       podman                     # Docker alternative: manage pods, containers and container images
       postgresql_17              # PostgreSQL 17
@@ -66,5 +66,5 @@
       volta                      # JavaScript tool manager
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
-    ];
+    ] ++ (if builtins.hasAttr "claude-code" pkgs then [ pkgs."claude-code" ] else [ ]);
 }
