@@ -66,6 +66,5 @@
       volta                      # JavaScript tool manager
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
-      zsh                        # Z shell (command-line interpreter)
     ];
 }

@@ -19,6 +19,16 @@
     - packages
     - zsh
 
+- name: Set Zsh as default shell for host user
+  ansible.builtin.user:
+    name: "{{ host_user }}"
+    shell: /bin/zsh
+  become: true
+  when: facts_zsh_installed
+  tags:
+    - shell
+    - zsh
+
 - name: Copy .zshrc for host user
   ansible.builtin.copy:
     src: "zshrc"

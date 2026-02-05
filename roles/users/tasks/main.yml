@@ -1,24 +1,3 @@
-# Set Zsh as the default shell for sillypoise
-- name: "Set Zsh as default shell for {{ host_user }}"
-  ansible.builtin.user:
-    name: "{{ host_user }}"
-    shell: /bin/zsh
-  become: true
-  when: facts_zsh_installed
-  tags:
-    - shell
-
-- name: Ensure /bin/zsh symlink points to Nix Zsh binary
-  ansible.builtin.file:
-    src: "/home/{{ host_user }}/.nix-profile/bin/zsh"  # Adjust if the Nix-installed Zsh is in a different location
-    dest: "/bin/zsh"
-    state: link
-  when: facts_nix_installed
-  tags:
-    - shell
-    - environment
-    - zsh
-
 - name: "Fetch {{ host_user }} passwd"
   become_user: "{{ host_user }}"
   ansible.builtin.command:
