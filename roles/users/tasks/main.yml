@@ -19,6 +19,7 @@
     - hostname
 
 - name: "Fetch {{ host_user }} passwd"
+  become: true
   become_user: "{{ host_user }}"
   ansible.builtin.command:
     cmd: "op read 'op://sp-dev/user/hashed'"

@@ -1,10 +1,46 @@
 ---
 # roles/opencode/tasks/main.yml
+- name: Ensure opencode config directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/opencode"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - opencode
+    - config
+
 - name: Install or update OpenCode
   ansible.builtin.shell: |
-    curl -fsSL https://opencode.ai/install | bash
+    set -euo pipefail
+    if command -v curl >/dev/null 2>&1; then
+      curl -fsSL https://opencode.ai/install | bash
+    elif command -v wget >/dev/null 2>&1; then
+      wget -qO- https://opencode.ai/install | bash
+    else
+      echo "Missing curl or wget" >&2
+      exit 1
+    fi
+  become: true
   become_user: "{{ host_user }}"
   args:
     executable: /bin/bash
   tags:
     - opencode
+    - install
+
+- name: Install default opencode agents file
+  ansible.builtin.copy:
+    src: AGENTS.md
+    dest: "{{ host_user_home }}/.config/opencode/AGENTS.md"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0644"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - opencode
+    - config

@@ -13,6 +13,7 @@
 - name: Clone Neovim config repo with GitHub CLI
   ansible.builtin.command:
     cmd: "gh repo clone {{ gh_user }}/sp-nvim {{ host_user_home }}/.config/nvim"
+  become: true
   become_user: "{{ host_user }}"
   when: facts_gh_authed
   changed_when: not ansible_check_mode
@@ -28,6 +29,7 @@
     dest: "{{ host_user_home }}/.config/nvim"
     version: main
     force: no
+  become: true
   become_user: "{{ host_user }}"
   when: not facts_gh_authed
   tags:

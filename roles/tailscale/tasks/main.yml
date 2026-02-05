@@ -45,7 +45,7 @@
     mode: '0600'
 
 - name: "Inject secrets into temporary environment file as {{ host_user }}"
-  become: false
+  become: true
   become_user: "{{ host_user }}"
   ansible.builtin.shell: |
     op inject -i {{ host_user_home }}/.config/secrets/secrets.tpl -o {{ host_user_home }}/.config/secrets/environment.tmp -f
@@ -61,14 +61,10 @@
   when: facts_op_installed and facts_zsh_config_installed and not facts_tailscale_authed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
 
 - name: Move environment file to /etc/environment
-  ansible.builtin.command: "mv {{ host_user_home }}/.config/secrets/environment.tmp /etc/environment"
-  when: facts_zsh_config_installed and not facts_tailscale_authed
-  tags:
-    - security
-
-- name: Set secure permissions on /etc/environment
-  ansible.builtin.file:
-    path: /etc/environment
+  ansible.builtin.copy:
+    src: "{{ host_user_home }}/.config/secrets/environment.tmp"
+    dest: /etc/environment
+    remote_src: true
     owner: root
     group: root
     mode: '0600'
@@ -86,11 +82,16 @@
   when: (tailscale_install is defined and tailscale_install is changed) or facts_tailscale_installed | default(false)
 
 - name: Start Tailscale with auth key
-  ansible.builtin.command: "tailscale up --authkey=${TAILSCALE_AUTHKEY} --accept-dns=false"
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - up
+      - "--authkey={{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
+      - "--accept-dns=false"
   register: tailscale_up
   changed_when: tailscale_up.rc == 0
   become: true
   environment:
     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
   no_log: true  # keep the auth key secure
-  when: facts_zsh_config_installed and not facts_tailscale_authed
+  when: facts_zsh_config_installed and not facts_tailscale_authed and (lookup('env', 'TAILSCALE_AUTHKEY') | length > 0)

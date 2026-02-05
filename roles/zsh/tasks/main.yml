@@ -60,6 +60,7 @@
     - op
 
 - name: Inject secrets into Zsh config
+  become: true
   become_user: "{{ host_user }}"
   ansible.builtin.shell: "op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/zsh/vars.secret -f"
   register: inject_result
