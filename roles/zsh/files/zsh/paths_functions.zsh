@@ -16,9 +16,9 @@ sourceIfExists() {
     local path="$1"
     if [ -e "$path" ]; then
         . "$path"
-        echo "Sourced $path"
+        [[ -n "$ZSH_DEBUG" ]] && echo "Sourced $path"
     else
-        echo "Warning: $path not found, skipping."
+        [[ -n "$ZSH_DEBUG" ]] && echo "Warning: $path not found, skipping."
     fi
 }
 
