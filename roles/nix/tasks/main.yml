@@ -97,7 +97,6 @@
   args:
     executable: /bin/bash
     creates: "{{ host_user_home }}/.config/home-manager/flake.lock"
-  when: facts_bash_config_installed or facts_zsh_config_installed
   tags:
     - nix
     - home-manager
@@ -109,7 +108,6 @@
     nix run home-manager/release-24.05 -- switch --flake {{ host_user_home }}/.config/home-manager
   args:
     executable: /bin/bash
-  when: facts_bash_config_installed or facts_zsh_config_installed
   register: hm_result
   changed_when: "'Activating installPackages' in hm_result.stdout"
   tags:

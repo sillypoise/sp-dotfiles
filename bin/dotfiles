@@ -39,8 +39,8 @@ set -e
 OP_INSTALLED=false
 OP_AUTHENTICATED=false
 DOTFILES_LOG="$HOME/.dotfiles.log"
-DOTFILES_DIR="$HOME/.dotfiles"
-IS_FIRST_RUN="$HOME/.dotfiles_run"
+DOTFILES_DIR="/opt/dotfiles"
+DOTFILES_RUN_MARKER="/var/lib/dotfiles/.dotfiles_run"
 USER_TO_RUN="flubber"
 TAGS="" # Default to no specific tags
 
@@ -188,19 +188,25 @@ else
     exit 1
 fi
 
+__task "Preparing dotfiles directories"
+_cmd "sudo mkdir -p /opt /var/lib/dotfiles"
+
 # Clone or update the dotfiles repo
 if ! [[ -d "$DOTFILES_DIR" ]]; then
     __task "Cloning repository"
-    _cmd "git clone --quiet https://github.com/sillypoise/sp-dotfiles.git $DOTFILES_DIR"
+    _cmd "sudo git clone --quiet https://github.com/sillypoise/sp-dotfiles.git $DOTFILES_DIR"
 else
     __task "Updating repository"
-    _cmd "git -C $DOTFILES_DIR pull --quiet"
+    _cmd "sudo git -C $DOTFILES_DIR pull --quiet"
 fi
+
+__task "Linking dotfiles command"
+_cmd "sudo ln -sf $DOTFILES_DIR/bin/dotfiles /usr/local/bin/dotfiles"
 
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
 
 # First run bootstrap (only when no tags are provided)
-if [[ ! -f "$IS_FIRST_RUN" && -z "$TAGS" ]]; then
+if [[ ! -f "$DOTFILES_RUN_MARKER" && -z "$TAGS" ]]; then
     __task "Running bootstrap (first run)"
     _cmd "ansible-playbook -u root $DOTFILES_DIR/main.yml --tags bootstrap"
 fi
@@ -218,8 +224,8 @@ fi
 popd 2>&1 >/dev/null
 
 # First run prompt
-if ! [[ -f "$IS_FIRST_RUN" ]]; then
+if ! [[ -f "$DOTFILES_RUN_MARKER" ]]; then
     echo -e "${CHECK_MARK} ${GREEN}First run complete!${NC}"
     echo -e "${ARROW} ${CYAN}Please reboot your computer to complete the setup.${NC}"
-    touch "$IS_FIRST_RUN"
+    _cmd "sudo touch $DOTFILES_RUN_MARKER"
 fi

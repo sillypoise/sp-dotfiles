@@ -8,7 +8,7 @@ Supported OS:
 
 ### Install
 
-This playbook includes a custom shell script located at `bin/dotfiles`. This script is added to your $PATH after installation and can be run multiple times while making sure any Ansible dependencies are installed and updated.
+This playbook includes a custom shell script located at `bin/dotfiles`. After the first run, it is available as `dotfiles` via `/usr/local/bin` and can be run multiple times while making sure any Ansible dependencies are installed and updated.
 
 `bin/dotfiles` detects the distro and installs the required dependencies for Arch or Ubuntu.
 
@@ -48,11 +48,11 @@ dotfiles
 This will handle the following tasks:
 
 - Verify Ansible is up-to-date
-- Clone this repository locally to `~/.dotfiles`
+- Clone this repository locally to `/opt/dotfiles`
 - Verify any `ansible-galaxy` plugins are updated
-- Run this playbook with the values in `~/.config/dotfiles/group_vars/all.yaml`
+- Run this playbook with the values in `group_vars/all.yml`
 
-This `dotfiles` command is available to you after the first use of this repo, as it adds this repo's `bin` directory to your path, allowing you to call `dotfiles` from anywhere.
+This `dotfiles` command is available after the first run via `/usr/local/bin/dotfiles`, allowing you to call `dotfiles` from anywhere.
 
 Any flags or arguments you pass to the `dotfiles` command are passed as-is to the `ansible-playbook` command.
 

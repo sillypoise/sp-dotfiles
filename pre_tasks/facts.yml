@@ -115,6 +115,13 @@
   tags:
     - always
 
+- name: Check if .zshrc exists
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.zshrc"
+  register: zshrc_file
+  tags:
+    - always
+
 - name: Check if vars.secret file exists in Zsh config
   ansible.builtin.stat:
     path: "{{ host_user_home }}/.config/zsh/vars.secret"
@@ -124,7 +131,7 @@
 
 - name: Set Zsh Config Installed Status
   ansible.builtin.set_fact:
-    facts_zsh_config_installed: "{{ zsh_config_dir.stat.exists and zsh_vars_secret_file.stat.exists }}"
+    facts_zsh_config_installed: "{{ zsh_config_dir.stat.exists or zshrc_file.stat.exists }}"
   tags:
     - always
 
