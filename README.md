@@ -23,6 +23,13 @@ This shell script is also used to initialize your environment after bootstrappin
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles || wget -qO- https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles)"
 ```
 
+For headless installs using a 1Password service account token:
+```bash
+OP_SERVICE_ACCOUNT_TOKEN=... bash -c "$(curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles || wget -qO- https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles)"
+```
+
+On first run, use a short-lived service account token. The long-term token is injected via `vars.secret` and takes effect on the next run.
+
 If you want to run only a specific role, you can specify the following bash command:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sillypoise/sp-dotfiles/main/bin/dotfiles | bash -s -- -u root -t bootstrap

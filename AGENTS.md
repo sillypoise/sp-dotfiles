@@ -99,6 +99,7 @@ op whoami
 - Inject secrets with `op inject`.
 - Never commit real secrets; only commit templates.
 - Use `no_log: true` for secret operations.
+- Service account flow: set `OP_SERVICE_ACCOUNT_TOKEN` for first run, then re-run after `vars.secret` injects the long-term token.
 
 ### File Permissions
 - Secrets: `0600`.
