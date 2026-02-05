@@ -10,12 +10,14 @@
   outputs = { nixpkgs, home-manager, ... }:
   let
     system = "{{ nix_system }}";
+    pkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
   in {
     homeConfigurations."{{ host_user }}" = home-manager.lib.homeManagerConfiguration {
-      inherit system;
-      homeDirectory = "/home/{{ host_user }}";
-      username = "{{ host_user }}";
-      configuration = import ./home.nix;
+      inherit pkgs;
+      modules = [ ./home.nix ];
     };
   };
 }
