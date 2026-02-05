@@ -13,7 +13,7 @@
   tasks:
     - name: Set roles
       ansible.builtin.set_fact:
-        run_roles: "{{ (ansible_run_tags | select('ne', 'all') | list) or (default_roles | difference(exclude_roles | default([])) | sort) }}"
+        run_roles: "{{ (ansible_run_tags | select('ne', 'all') | list) or (default_roles | difference(exclude_roles | default([]))) }}"
       tags:
         - always
 
@@ -34,4 +34,3 @@
       with_items: "{{ run_roles }}"
       tags:
         - always
-

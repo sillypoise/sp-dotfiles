@@ -12,6 +12,8 @@ This playbook includes a custom shell script located at `bin/dotfiles`. This scr
 
 `bin/dotfiles` detects the distro and installs the required dependencies for Arch or Ubuntu.
 
+On the first run, `bin/dotfiles` automatically runs the `bootstrap` role (as root) when no tags are provided.
+
 This shell script is also used to initialize your environment after bootstrapping your `supported-OS` and performing a full system upgrade as mentioned above.
 
 > [!NOTE]

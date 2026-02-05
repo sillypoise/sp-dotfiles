@@ -1,18 +1,18 @@
 default_roles:
+  - users
   - bash
-  - c
-  - git
+  - zsh
   - nix
+  - git
+  - ssh
+  - openssh
+  - ufw
+  - tailscale
+  - c
   - nvim
   - opencode
-  - openssh
-  - ssh
-  - tailscale
-  # - test
-  - ufw
-  - users
   - zellij
-  - zsh
+  # - test
 
 exclude_roles:
   - bootstrap

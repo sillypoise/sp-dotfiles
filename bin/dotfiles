@@ -183,6 +183,13 @@ else
 fi
 
 pushd "$DOTFILES_DIR" 2>&1 >/dev/null
+
+# First run bootstrap (only when no tags are provided)
+if [[ ! -f "$IS_FIRST_RUN" && -z "$TAGS" ]]; then
+    __task "Running bootstrap (first run)"
+    _cmd "ansible-playbook -u root $DOTFILES_DIR/main.yml --tags bootstrap"
+fi
+
 confirmVaultAccess
 
 # Run Ansible playbook if 1Password authentication is successful

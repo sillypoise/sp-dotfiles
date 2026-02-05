@@ -117,6 +117,7 @@ op whoami
 ### Distro Support
 - Supported: Arch Linux and Ubuntu LTS (starter-level support).
 - `bin/dotfiles` detects the distro and installs base dependencies.
+- On first run (with no tags), `bin/dotfiles` runs the `bootstrap` role as root.
 - Use `facts_is_arch` and `facts_is_ubuntu` for OS-specific branches.
 - Use `sudo_group` for sudo membership (`wheel` on Arch, `sudo` on Ubuntu).
 
@@ -131,6 +132,10 @@ roles/<role>/
 ### Templates
 - Jinja2 templates use `.j2`.
 - Secret templates use `.tpl` and are injected via 1Password CLI.
+
+### Role Order
+- Role execution follows the order listed in `group_vars/all.yml`.
+- Keep dependency order in mind when reordering roles.
 
 ## Development Workflow
 
