@@ -257,11 +257,27 @@ function ubuntu_setup() {
 # 1Password CLI access confirmation
 function confirmVaultAccess() {
     __task "Checking for 1Password CLI"
-    if op --version >/dev/null 2>&1; then
-        OP_INSTALLED=true
-        _cmd "op whoami"
-        OP_AUTHENTICATED=true
+    local op_bin=""
+
+    if command -v op >/dev/null 2>&1; then
+        op_bin="$(command -v op)"
+    else
+        for candidate in /usr/local/bin/op /opt/homebrew/bin/op "$HOME/.local/bin/op" "$HOME/bin/op"; do
+            if [[ -x "$candidate" ]]; then
+                op_bin="$candidate"
+                break
+            fi
+        done
     fi
+
+    if [[ -z "$op_bin" ]]; then
+        printf "${WARNING} ${RED}1Password CLI not found in PATH. Expected 'op' in PATH or common locations.${NC}\n"
+        return
+    fi
+
+    OP_INSTALLED=true
+    _cmd "$op_bin" whoami
+    OP_AUTHENTICATED=true
 }
 
 # Initial distro setup
