@@ -56,6 +56,9 @@ host_user: "sillypoise"
 automated_user: "flubber"
 gh_user: "sillypoise"
 
+# System identity
+system_hostname: "sp-dev"
+
 # Define home directories based on usernames, with fallback for host_user
 host_user_home: "/home/{{ host_user  }}"
 automated_user_home: "/home/{{ automated_user }}"

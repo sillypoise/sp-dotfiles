@@ -1,3 +1,23 @@
+- name: system setup | hostname | set hostname
+  ansible.builtin.hostname:
+    name: "{{ system_hostname }}"
+  become: true
+  tags:
+    - system
+    - hostname
+
+- name: system setup | hostname | ensure /etc/hosts entry
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+'
+    line: "127.0.1.1 {{ system_hostname }}"
+    create: true
+    mode: "0644"
+  become: true
+  tags:
+    - system
+    - hostname
+
 - name: "Fetch {{ host_user }} passwd"
   become_user: "{{ host_user }}"
   ansible.builtin.command:
