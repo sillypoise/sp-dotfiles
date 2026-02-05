@@ -34,6 +34,16 @@
     enabled: yes
     state: started
 
+- name: system setup | openssh | ensure host keys exist
+  tags:
+    - openssh
+    - ssh
+    - system
+    - settings
+  become: true
+  ansible.builtin.command: ssh-keygen -A
+  changed_when: false
+
 - name: system setup | openssh | generate sshd_config file from template
   tags:
     - openssh
