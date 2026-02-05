@@ -33,15 +33,62 @@
     - security
     - secrets
 
-- name: Inject GitHub SSH private key
+- name: Inject GitHub SSH private key to temporary file
   become: true
   become_user: "{{ host_user }}"
-  ansible.builtin.shell: "op inject -i {{ host_user_home }}/.ssh/gh_id_ed25519.tpl -o {{ host_user_home }}/.ssh/gh_id_ed25519 -f"
+  ansible.builtin.shell: "op inject -i {{ host_user_home }}/.ssh/gh_id_ed25519.tpl -o {{ host_user_home }}/.ssh/gh_id_ed25519.tmp -f"
   register: inject_gh_private_key
   no_log: true
   environment:
     OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
   when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+  tags:
+    - ssh
+    - security
+    - secrets
+
+- name: Stat injected SSH key
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.ssh/gh_id_ed25519.tmp"
+    checksum_algorithm: sha256
+  register: injected_key_stat
+  when: inject_gh_private_key is defined and inject_gh_private_key is succeeded
+  tags:
+    - ssh
+    - security
+    - secrets
+
+- name: Stat existing SSH key
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.ssh/gh_id_ed25519"
+    checksum_algorithm: sha256
+  register: existing_key_stat
+  when: inject_gh_private_key is defined and inject_gh_private_key is succeeded
+  tags:
+    - ssh
+    - security
+    - secrets
+
+- name: Determine if SSH key update is needed
+  ansible.builtin.set_fact:
+    update_gh_key: >-
+      {{ injected_key_stat.stat.exists and
+         (not existing_key_stat.stat.exists or injected_key_stat.stat.checksum != existing_key_stat.stat.checksum) }}
+  when: inject_gh_private_key is defined and inject_gh_private_key is succeeded
+  tags:
+    - ssh
+    - security
+    - secrets
+
+- name: Update GitHub SSH private key when changed
+  ansible.builtin.copy:
+    src: "{{ host_user_home }}/.ssh/gh_id_ed25519.tmp"
+    dest: "{{ host_user_home }}/.ssh/gh_id_ed25519"
+    remote_src: true
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0600'
+  when: update_gh_key | default(false)
   tags:
     - ssh
     - security
@@ -55,9 +102,20 @@
     group: "{{ host_user }}"
   with_items:
     - { file: 'gh_id_ed25519', mode: '0600' }
+  when: existing_key_stat is defined and existing_key_stat.stat.exists
   tags:
     - ssh
     - security
+
+- name: Remove temporary SSH key
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.ssh/gh_id_ed25519.tmp"
+    state: absent
+  when: injected_key_stat is defined and injected_key_stat.stat.exists
+  tags:
+    - ssh
+    - security
+    - cleanup
 
 - name: Copy SSH config file
   ansible.builtin.copy:
@@ -92,6 +150,7 @@
     state: absent
   with_items:
     - gh_id_ed25519.tpl
+  when: inject_gh_private_key is defined and inject_gh_private_key is succeeded
   tags:
     - ssh
     - security

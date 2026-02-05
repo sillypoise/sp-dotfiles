@@ -24,6 +24,7 @@
   ansible.builtin.command:
     cmd: "op read 'op://sp-dev/user/hashed'"
   register: new_password
+  changed_when: false
   no_log: true
   environment:
     OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
@@ -34,11 +35,30 @@
     msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping password update from 1Password."
   when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
 
-# TODO: non-idempotent
+- name: "Read current password hash for {{ host_user }}"
+  ansible.builtin.command: "getent shadow {{ host_user }}"
+  register: current_shadow
+  changed_when: false
+  failed_when: false
+  become: true
+  no_log: true
+  when: facts_op_installed and new_password is defined and new_password.stdout | length > 0
+
+- name: "Extract current password hash for {{ host_user }}"
+  ansible.builtin.set_fact:
+    current_password_hash: "{{ (current_shadow.stdout.split(':')[1]) if (current_shadow.stdout is defined and current_shadow.stdout | length > 0) else '' }}"
+  no_log: true
+  when: facts_op_installed and new_password is defined and new_password.stdout | length > 0
+
 - name: "Set passwd for {{ host_user }}"
   ansible.builtin.user:
     name: "{{ host_user }}"
     password: "{{ new_password.stdout }}"
   become: true
   no_log: true
-  when: facts_op_installed and new_password is defined and new_password.stdout | length > 0
+  when: >-
+    facts_op_installed and
+    new_password is defined and
+    new_password.stdout | length > 0 and
+    current_password_hash is defined and
+    current_password_hash != new_password.stdout
