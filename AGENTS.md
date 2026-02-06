@@ -3,6 +3,15 @@
 This file provides guidance for AI coding agents working in this Ansible
 dotfiles repository.
 
+## OpenCode Guide Bundle
+
+This repository ships an OpenCode guide bundle under `roles/opencode/files/`.
+The bundle includes `AGENTS.md`, `VARIANTS.md`, TigerStyle variants, and
+framework/library best-practice guides.
+
+To initialize a repo with the bundle, run `opencode-init-repo` (alias: `oci`),
+then edit `.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.
+
 ## Build, Test, and Lint Commands
 
 ### Main Commands
@@ -99,7 +108,8 @@ op whoami
 - Inject secrets with `op inject`.
 - Never commit real secrets; only commit templates.
 - Use `no_log: true` for secret operations.
-- Service account flow: set `OP_SERVICE_ACCOUNT_TOKEN` for first run, then re-run after `vars.secret` injects the long-term token.
+- Service account flow: set `OP_SERVICE_ACCOUNT_TOKEN` for first run, then re-run after
+  `vars.secret` injects the long-term token.
 
 ### File Permissions
 - Secrets: `0600`.

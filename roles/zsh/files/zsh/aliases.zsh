@@ -16,6 +16,7 @@ alias ld="lazydocker"
 alias ls="exa"
 alias ll="exa -l"
 alias oc="opencode -c"
+alias oci="opencode-init-repo"
 alias sed="sd"
 alias extip='curl https://myip.wtf/text'
 alias extipjson='curl https://myip.wtf/json'

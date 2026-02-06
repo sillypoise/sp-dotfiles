@@ -32,13 +32,14 @@
     - opencode
     - install
 
-- name: Install default opencode agents file
+- name: Install opencode guide bundle
   ansible.builtin.copy:
-    src: AGENTS.md
-    dest: "{{ host_user_home }}/.config/opencode/AGENTS.md"
+    src: "."
+    dest: "{{ host_user_home }}/.config/opencode/"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: "0644"
+    directory_mode: "0755"
   become: true
   become_user: "{{ host_user }}"
   tags:

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "git is required for opencode-init-repo" >&2
+  exit 1
+fi
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [ -z "${repo_root}" ]; then
+  echo "Run opencode-init-repo inside a git repository" >&2
+  exit 1
+fi
+
+bundle_root="${HOME}/.config/opencode"
+if [ ! -d "${bundle_root}" ]; then
+  echo "Missing bundle at ${bundle_root}" >&2
+  exit 1
+fi
+
+target_dir="${repo_root}/.opencode"
+if [ -d "${target_dir}" ] && [ "$(ls -A "${target_dir}")" ]; then
+  echo "${target_dir} already exists and is not empty" >&2
+  exit 1
+fi
+
+mkdir -p "${target_dir}"
+
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --exclude "opencode.json" "${bundle_root}/" "${target_dir}/"
+else
+  cp -R "${bundle_root}/". "${target_dir}/"
+  rm -f "${target_dir}/opencode.json"
+fi
+
+config_path="${repo_root}/opencode.json"
+cat >"${config_path}" <<'EOF'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["{file:.opencode/AGENTS.md}"]
+}
+EOF
+
+echo "Initialized ${target_dir} and ${config_path}"
