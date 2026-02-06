@@ -1,21 +1,19 @@
-# TigerStyle Rulebook — TypeScript / Strict / Compact
+# TigerStyle Rulebook — C++ / Strict / Compact
 
 ## Preamble
 
-This is the compact TypeScript variant of the TigerStyle Strict rulebook. Each rule is an
-imperative with a one-line rationale. For full rationale and TS examples, see
-`tigerstyle-ts-strict-full.md`.
+This is the compact C++ variant of the TigerStyle Strict rulebook. Each rule is an imperative with
+a one-line rationale. For full rationale and C++ examples, see `tigerstyle-cpp-strict-full.md`.
 
 **Design goal priority:** Safety > Performance > Developer Experience.
 
 **Keywords:** MUST, SHALL, MUST NOT — absolute requirements. Violations are defects.
 
-**TypeScript context:** ESM assumed (Node and browser). Use `import assert from "node:assert/strict"`
-in Node; use a lightweight `asserts` helper in browser. `tsconfig.json` MUST enable `strict: true`.
-
+**C++ baseline:** C++20. `clang-format` required. `clang`/`gcc` warnings as errors. Sanitizers in
+CI.
 
 Rule IDs are stable across all TigerStyle variants for cross-referencing.
-Rules marked **(TS)** have been adapted from the language-agnostic version.
+Rules marked **(C++)** have been adapted from the language-agnostic version.
 
 ---
 
@@ -27,16 +25,18 @@ Rationale: Ensures bounded, analyzable execution.
 **SAF-02** — All loops, queues, retries, and buffers MUST have a fixed upper bound.
 Rationale: Prevents infinite loops, tail-latency spikes, and resource exhaustion.
 
-**SAF-03** **(TS)** — All values MUST have the most precise type. `any` MUST NOT be used. Use `unknown` at boundaries, branded types for distinct units, `bigint` for large integers.
-Rationale: Precise types prevent unit confusion and type-level ambiguity.
+**SAF-03** **(C++)** — Integer types MUST be explicitly sized (`std::int32_t`, `std::int64_t`).
+`size_t` MUST NOT be used except for indexing/API needs.
+Rationale: Eliminates architecture-specific behavior and overflow ambiguity.
 
 **SAF-04** — Every function MUST assert its preconditions, postconditions, and invariants.
 Rationale: Assertions catch programmer errors early; crashing is correct on corruption.
 
 **SAF-05** — Assertion density MUST average at least 2 per function.
-Rationale: High density is a force multiplier for correctness and testing yield.
+Rationale: High density is a force multiplier for correctness and fuzzing yield.
 
-**SAF-06** — Every enforced property MUST have paired assertions on at least two different code paths.
+**SAF-06** — Every enforced property MUST have paired assertions on at least two different code
+paths.
 Rationale: Bugs hide at the boundary between valid and invalid data.
 
 **SAF-07** — Compound assertions MUST be split: `assert(a); assert(b);` not `assert(a && b)`.
@@ -45,7 +45,8 @@ Rationale: Split assertions isolate failure causes and improve readability.
 **SAF-08** — Implications MUST be expressed as single-line asserts: `if (a) assert(b)`.
 Rationale: Preserves logical intent without complex boolean expressions.
 
-**SAF-09** — Constants and type relationships MUST be asserted at build time (via `satisfies`, conditional types) or startup.
+**SAF-09** **(C++)** — Compile-time constants and type sizes MUST be asserted at compile time
+(`static_assert`) or startup.
 Rationale: Catches design integrity violations before runtime.
 
 **SAF-10** — Assertions MUST cover both positive space (expected) and negative space (not expected).
@@ -54,11 +55,11 @@ Rationale: Boundary-crossing bugs are the most common class of correctness error
 **SAF-11** — Tests MUST exercise valid inputs, invalid inputs, and boundary transitions.
 Rationale: 92% of catastrophic failures stem from incorrect handling of non-fatal errors.
 
-**SAF-12** **(TS)** — Allocations in hot paths MUST be minimized. Arrays/buffers MUST be pre-sized. Per-event allocations MUST be avoided when reuse is feasible.
-Rationale: Excessive allocation causes GC pressure and tail-latency spikes.
+**SAF-12** — All memory MUST be statically allocated at initialization. No runtime reallocation.
+Rationale: Avoids unpredictable latency, fragmentation, and use-after-free.
 
-**SAF-13** — Variables MUST be declared at the smallest scope. `const` by default. `var` MUST NOT be used.
-Rationale: Reduces misuse probability; `const` prevents accidental reassignment.
+**SAF-13** — Variables MUST be declared at the smallest possible scope; minimize variables in scope.
+Rationale: Reduces misuse probability and limits blast radius of errors.
 
 **SAF-14** — No function SHALL exceed 70 lines.
 Rationale: Forces clean decomposition; eliminates scrolling discontinuity.
@@ -69,8 +70,8 @@ Rationale: Centralizes case analysis in one place.
 **SAF-16** — State mutation MUST be centralized in parent functions. Leaf functions MUST be pure.
 Rationale: Localizes bugs to one mutation site; enables testable helpers.
 
-**SAF-17** **(TS)** — `tsconfig.json` MUST enable `strict: true`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`, `exactOptionalPropertyTypes`. All linter warnings MUST be resolved.
-Rationale: Strict mode catches the largest class of TS bugs at compile time.
+**SAF-17** **(C++)** — Warnings MUST be treated as errors; sanitizers MUST run in CI.
+Rationale: Warnings and UB hide correctness issues that are cheaper to catch early.
 
 **SAF-18** — External events MUST be queued and batch-processed, not handled inline.
 Rationale: Keeps control flow bounded and internal.
@@ -81,13 +82,14 @@ Rationale: Makes case coverage explicit and verifiable.
 **SAF-20** — Invariants MUST be stated positively. Negated conditions MUST NOT be used.
 Rationale: Positive form aligns with natural reasoning about bounds and validity.
 
-**SAF-21** — Every error MUST be handled explicitly. All Promises MUST have error handling. No silent swallowing.
+**SAF-21** — Every error MUST be handled explicitly. No error SHALL be silently ignored.
 Rationale: Error-handling bugs are the dominant cause of catastrophic production failures.
 
 **SAF-22** — Every non-obvious decision MUST have a comment or commit message explaining why.
 Rationale: Rationale enables safe future changes; code without "why" is incomplete.
 
-**SAF-23** — All options MUST be passed explicitly to library/API calls. Defaults MUST NOT be relied upon.
+**SAF-23** — All options MUST be passed explicitly to library calls. Defaults MUST NOT be relied
+upon.
 Rationale: Defaults can change across versions, introducing latent bugs.
 
 ---
@@ -97,26 +99,29 @@ Rationale: Defaults can change across versions, introducing latent bugs.
 **PERF-01** — Performance MUST be considered during design, not deferred to profiling.
 Rationale: Architecture-level wins (1000x) cannot be retrofitted.
 
-**PERF-02** — Back-of-the-envelope calculations MUST be performed for network, disk, memory, and CPU.
+**PERF-02** — Back-of-the-envelope calculations MUST be performed for network, disk, memory, and
+CPU.
 Rationale: Rough math guides design into the right 90% of solution space.
 
 **PERF-03** — Optimization MUST target the slowest resource first, weighted by access frequency.
 Rationale: Bottleneck-focused optimization yields the largest gains.
 
-**PERF-04** — Control plane (scheduling, metadata) MUST be separated from data plane (bulk processing).
+**PERF-04** — Control plane (scheduling, metadata) MUST be separated from data plane (bulk
+processing).
 Rationale: Enables batching without sacrificing assertion safety.
 
 **PERF-05** — Network, disk, memory, and CPU costs MUST be amortized via batching.
 Rationale: Per-item overhead dominates at high throughput.
 
-**PERF-06** — Hot paths MUST have predictable, linear control flow. Polymorphic call sites MUST be avoided.
-Rationale: V8 optimizes for monomorphic calls and predictable access patterns.
+**PERF-06** — Hot paths MUST have predictable, linear control flow.
+Rationale: Predictability enables cache utilization and branch prediction.
 
-**PERF-07** — Performance-critical code MUST be explicit. V8 optimizations MUST NOT be assumed.
-Rationale: Engine heuristics are fragile and non-portable across versions.
+**PERF-07** — Performance-critical code MUST be explicit. Compiler optimizations MUST NOT be
+assumed.
+Rationale: Compiler heuristics are fragile and non-portable.
 
-**PERF-08** **(TS)** — Hot loop functions MUST take primitive arguments. `this` MUST NOT be accessed in tight loops.
-Rationale: Enables register allocation without hidden class chain overhead.
+**PERF-08** — Hot loop functions MUST take primitive arguments. Avoid large receiver access.
+Rationale: Enables register allocation without alias analysis overhead.
 
 ---
 
@@ -125,19 +130,20 @@ Rationale: Enables register allocation without hidden class chain overhead.
 **DX-01** — Names MUST capture what a thing is or does with precision.
 Rationale: Great names are the essence of great code.
 
-**DX-02** **(TS)** — Variables/functions: `camelCase`. Types/interfaces/classes: `PascalCase`. Files: `kebab-case`.
-Rationale: Established TypeScript conventions reduce ecosystem friction.
+**DX-02** **(C++)** — Files/functions/variables MUST use snake_case. Types MUST follow project
+convention.
+Rationale: Consistency with C++ style reduces friction.
 
 **DX-03** — Names MUST NOT be abbreviated (except trivial loop counters i, j, k).
 Rationale: Abbreviations are ambiguous; full names are unambiguous.
 
-**DX-04** — Acronyms: PascalCase preserves them (`HTTPClient`); camelCase lowercases them (`httpClient`).
-Rationale: Consistent within each casing context.
+**DX-04** — Acronyms MUST use standard capitalization (HTTPClient, SQLQuery).
+Rationale: Standard form is unambiguous.
 
 **DX-05** — Units and qualifiers MUST be appended to names, sorted by descending significance.
 Rationale: Groups related variables visually and semantically.
 
-**DX-06** — Resource names MUST convey lifecycle and ownership (e.g., `connectionPool`, `requestAbortController`).
+**DX-06** — Resource names MUST convey lifecycle and ownership.
 Rationale: Cleanup expectations must be obvious from the name.
 
 **DX-07** — Related variable names MUST be aligned by character length when feasible.
@@ -149,10 +155,10 @@ Rationale: Makes call hierarchy visible in the name.
 **DX-09** — Callbacks MUST be the last parameter in function signatures.
 Rationale: Mirrors control flow (callbacks are invoked last).
 
-**DX-10** — Exports and public API MUST appear first in a file.
+**DX-10** — Important declarations (public API) MUST appear first in a file.
 Rationale: Files are read top-down; important context comes first.
 
-**DX-11** **(TS)** — Class/interface layout MUST follow: fields → types → methods.
+**DX-11** — Struct layout MUST follow: fields → types → methods.
 Rationale: Predictable layout enables navigation by position.
 
 **DX-12** — Names MUST NOT be overloaded with multiple domain-specific meanings.
@@ -161,11 +167,11 @@ Rationale: Overloaded terms cause confusion across contexts.
 **DX-13** — Externally-referenced names MUST be nouns that work as prose and section headers.
 Rationale: Noun names compose cleanly in documentation and conversation.
 
-**DX-14** — Functions with confusable arguments (same type, swappable) MUST use named option objects.
+**DX-14** — Functions with confusable arguments MUST use named option structs.
 Rationale: Prevents silent transposition bugs at the call site.
 
-**DX-15** — Nullable parameters MUST be named so `undefined`/`null` meaning is clear at the call site.
-Rationale: `foo(null)` is meaningless; `foo({ timeoutMs: undefined })` is not.
+**DX-15** — Nullable parameters MUST be named so null's meaning is clear at the call site.
+Rationale: `foo(nullptr)` is meaningless; `foo(timeout_ms: nullptr)` is not.
 
 **DX-16** — Singleton constructor params MUST be ordered from most general to most specific.
 Rationale: Consistent ordering reduces cognitive load.
@@ -179,7 +185,7 @@ Rationale: "Why" enables safe future changes; "what" restates the code.
 **DX-19** — Tests and complex logic MUST include a description of goal and methodology.
 Rationale: Tests are documentation; readers need context to understand or skip them.
 
-**DX-20** — Comments MUST be well-formed sentences (space after `//`, capital, full stop).
+**DX-20** — Comments MUST be well-formed sentences (space, capital, full stop).
 Rationale: Sloppy comments signal sloppy thinking.
 
 ---
@@ -189,49 +195,52 @@ Rationale: Sloppy comments signal sloppy thinking.
 **CIS-01** — Every piece of state MUST have exactly one source of truth. No duplication or aliasing.
 Rationale: Duplicated state will desynchronize.
 
-**CIS-02** **(TS)** — Large objects MUST NOT be shallow-copied via spread (`...`) in hot paths. Use `Readonly<T>` to signal immutability.
-Rationale: Spreading creates GC pressure and can mask mutation bugs.
+**CIS-02** **(C++)** — Function arguments larger than 16 bytes MUST be passed by `const &`.
+Rationale: Avoids implicit copies and stack waste.
 
-**CIS-03** **(TS)** — Large objects MUST be constructed in-place. Intermediate copies via spread MUST be avoided.
-Rationale: Intermediate copies waste memory and GC cycles.
+**CIS-03** **(C++)** — Large structs MUST be initialized in-place via out pointers.
+Rationale: Avoids copies and ensures pointer stability.
 
-**CIS-04** **(TS)** — If any field requires builder-pattern init, the entire object MUST use the same strategy.
-Rationale: Mixing init strategies makes construction hard to reason about.
+**CIS-04** **(C++)** — If any field requires in-place init, the entire struct MUST be initialized
+in-place.
+Rationale: In-place init is viral; mixing strategies breaks pointer stability.
 
 **CIS-05** — Variables MUST be declared and computed as close as possible to their point of use.
-Rationale: Minimizes check-to-use gaps (TOCTOU risk).
+Rationale: Minimizes check-to-use gaps (POCPOU/TOCTOU risk).
 
-**CIS-06** — Return types MUST be as simple as possible: void > boolean > number > T | null > Result<T, Error>.
+**CIS-06** — Return types MUST be as simple as possible: void > bool > integer > optional > error
+type.
 Rationale: Each dimension in the return type creates viral call-site branching.
 
-**CIS-07** **(TS)** — `await` MUST NOT appear between an assertion and the code that depends on it. Re-assert after resumption.
-Rationale: `await` yields control; preconditions may no longer hold on resume.
+**CIS-07** — Functions with precondition assertions MUST run to completion without re-entrancy.
+Rationale: Re-entrancy can invalidate preconditions, making assertions misleading.
 
-**CIS-08** — Unused buffer space (ArrayBuffer, Uint8Array) MUST be explicitly zeroed before use or transmission.
+**CIS-08** — Unused buffer space MUST be explicitly zeroed before use or transmission.
 Rationale: Buffer underflow leaks sensitive data (Heartbleed class).
 
-**CIS-09** — Allocation and cleanup (try/finally, AbortController) MUST be visually grouped with blank lines.
+**CIS-09** — Allocation and deallocation MUST be visually grouped with surrounding blank lines.
 Rationale: Makes resource leaks easy to spot during code review.
 
 ---
 
 ## Off-by-One & Arithmetic (OBO)
 
-**OBO-01** — Index, count, and size MUST be treated as distinct concepts with explicit conversions. CONSIDER branded types.
+**OBO-01** — Index, count, and size MUST be treated as distinct types with explicit conversions.
 Rationale: Casual interchange is the primary source of off-by-one errors.
 
-**OBO-02** — All integer division MUST use explicit helpers (divExact, divFloor, divCeil). JS `/` is floating-point.
-Rationale: Using `/` without explicit rounding is a latent bug in integer contexts.
+**OBO-02** **(C++)** — All integer division MUST use explicit semantics via helper functions:
+div_exact, div_floor, div_ceil.
+Rationale: Default division may be ambiguous; explicit shows intent.
 
 ---
 
 ## Formatting & Code Style (FMT)
 
-**FMT-01** — All code MUST be formatted by Prettier or Biome.
+**FMT-01** **(C++)** — All code MUST be formatted by `clang-format`.
 Rationale: Eliminates style debates and ensures consistency.
 
-**FMT-02** **(TS)** — Indentation MUST be 2 spaces. No tabs.
-Rationale: 2 spaces is the established TS/JS convention.
+**FMT-02** — Indentation MUST be 4 spaces.
+Rationale: 4 spaces is C++'s common indentation depth.
 
 **FMT-03** — No line SHALL exceed 100 columns.
 Rationale: Ensures side-by-side review with no horizontal scroll.
@@ -243,42 +252,42 @@ Rationale: Prevents "goto fail" class bugs.
 
 ## Dependencies & Tooling (DEP)
 
-**DEP-01** — npm dependencies MUST be minimized and justified.
-Rationale: Supply chain risk, bundle size, maintenance burden.
+**DEP-01** — External dependencies MUST be minimized and justified.
+Rationale: Supply chain risk, safety risk, performance risk, installation complexity.
 
 **DEP-02** — New tools MUST NOT be introduced when an existing tool suffices.
 Rationale: Tool sprawl increases complexity and maintenance burden.
 
-**DEP-03** **(TS)** — Scripts MUST be written in TypeScript (tsx/ts-node/Deno). Shell scripts only for trivial glue (<20 lines).
-Rationale: TypeScript scripts are type-safe, portable, and testable.
+**DEP-03** — Scripts MUST prefer typed, portable languages over shell scripts.
+Rationale: Shell scripts are not portable, not type-safe, and fail silently.
 
 ---
 
 ## Appendix: Rule Index
 
-| ID | Rule (short form) | TS? |
-|----|-------------------|-----|
+| ID | Rule (short form) | C++? |
+|----|-------------------|------|
 | SAF-01 | Simple explicit control flow; no recursion | |
 | SAF-02 | Bound everything | |
-| SAF-03 | Precise types; no `any`; branded types | Yes |
+| SAF-03 | Explicitly-sized types; avoid size_t | Yes |
 | SAF-04 | Assert pre/post/invariants | |
 | SAF-05 | Assertion density ≥ 2/function | |
 | SAF-06 | Pair assertions across paths | |
 | SAF-07 | Split compound assertions | |
 | SAF-08 | Single-line implication asserts | |
-| SAF-09 | Assert constants and type relationships | |
+| SAF-09 | Assert compile-time constants | Yes |
 | SAF-10 | Assert positive and negative space | |
 | SAF-11 | Test valid, invalid, and boundary | |
-| SAF-12 | Avoid unbounded allocations; pre-size; reuse | Yes |
-| SAF-13 | Smallest scope; const by default; no var | |
+| SAF-12 | Static allocation only | |
+| SAF-13 | Smallest possible variable scope | |
 | SAF-14 | 70-line function limit | |
 | SAF-15 | Centralize control flow in parent | |
 | SAF-16 | Centralize state mutation; pure leaves | |
-| SAF-17 | tsconfig strict; all warnings as errors | Yes |
+| SAF-17 | Warnings as errors; sanitizers | Yes |
 | SAF-18 | Batch external events | |
 | SAF-19 | Split compound conditions | |
 | SAF-20 | Positive invariants; no negations | |
-| SAF-21 | Handle all errors; no unhandled rejections | |
+| SAF-21 | Handle all errors explicitly | |
 | SAF-22 | Always state the why | |
 | SAF-23 | Explicit options; no defaults | |
 | PERF-01 | Design for performance from start | |
@@ -286,11 +295,11 @@ Rationale: TypeScript scripts are type-safe, portable, and testable.
 | PERF-03 | Optimize slowest resource first | |
 | PERF-04 | Separate control and data planes | |
 | PERF-05 | Amortize via batching | |
-| PERF-06 | Predictable CPU; monomorphic calls | |
-| PERF-07 | Explicit; no engine reliance | |
-| PERF-08 | Primitive args in hot loops; no this | Yes |
+| PERF-06 | Predictable CPU work | |
+| PERF-07 | Explicit; no compiler reliance | |
+| PERF-08 | Primitive args in hot loops | |
 | DX-01 | Precise nouns and verbs | |
-| DX-02 | camelCase vars/fns, PascalCase types, kebab files | Yes |
+| DX-02 | snake_case files/functions/vars | Yes |
 | DX-03 | No abbreviations | |
 | DX-04 | Consistent acronym capitalization | |
 | DX-05 | Units/qualifiers appended last | |
@@ -298,11 +307,11 @@ Rationale: TypeScript scripts are type-safe, portable, and testable.
 | DX-07 | Align related names by length | |
 | DX-08 | Prefix helpers with caller name | |
 | DX-09 | Callbacks last in params | |
-| DX-10 | Exports/public API first in file | |
-| DX-11 | Class: fields → types → methods | Yes |
+| DX-10 | Public API first in file | |
+| DX-11 | Struct: fields → types → methods | |
 | DX-12 | No overloaded domain terms | |
 | DX-13 | Noun names for external reference | |
-| DX-14 | Named option objects for confusable args | |
+| DX-14 | Named options for confusable args | |
 | DX-15 | Name nullable params clearly | |
 | DX-16 | Singletons: general → specific | |
 | DX-17 | Descriptive commit messages | |
@@ -310,20 +319,20 @@ Rationale: TypeScript scripts are type-safe, portable, and testable.
 | DX-19 | Explain "how" in tests | |
 | DX-20 | Comments are sentences | |
 | CIS-01 | No state duplication or aliasing | |
-| CIS-02 | No spread/copy of large objects in hot paths | Yes |
-| CIS-03 | In-place construction; no intermediate copies | Yes |
-| CIS-04 | Consistent init strategy per object | Yes |
+| CIS-02 | Large args by const reference | Yes |
+| CIS-03 | In-place init via out pointers | Yes |
+| CIS-04 | In-place init is viral | Yes |
 | CIS-05 | Declare close to use | |
 | CIS-06 | Simpler return types | |
-| CIS-07 | No await between assert and use | Yes |
+| CIS-07 | No suspension with active assertions | |
 | CIS-08 | Guard against buffer bleeds | |
-| CIS-09 | Group alloc/cleanup visually | |
-| OBO-01 | Index ≠ count ≠ size; branded types | |
-| OBO-02 | Explicit division: divExact/divFloor/divCeil | |
-| FMT-01 | Run Prettier or Biome | |
-| FMT-02 | 2-space indent | Yes |
+| CIS-09 | Group alloc/dealloc visually | |
+| OBO-01 | Index ≠ count ≠ size | |
+| OBO-02 | Explicit division semantics | Yes |
+| FMT-01 | Run clang-format | Yes |
+| FMT-02 | 4-space indent | |
 | FMT-03 | 100-column hard limit | |
 | FMT-04 | Braces on if (unless single-line) | |
-| DEP-01 | Minimize npm dependencies | |
+| DEP-01 | Minimize dependencies | |
 | DEP-02 | Prefer existing tools | |
-| DEP-03 | TypeScript for scripts | Yes |
+| DEP-03 | Typed portable scripts | |

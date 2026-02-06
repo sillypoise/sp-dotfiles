@@ -67,6 +67,7 @@ function assert(condition: unknown, message?: string): asserts condition {
 - Use explicit file extensions where the runtime or bundler requires them.
 - The assertion helper pattern above is portable across both environments.
 
+
 ### How to Use This Document
 
 - Reference rules by ID (e.g., SAF-01, DX-05) in code reviews and commit messages.
