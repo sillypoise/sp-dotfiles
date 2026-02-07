@@ -60,49 +60,39 @@
     - config
     - secrets
 
+
 - name: Warn when OP service account token is missing for opencode
   ansible.builtin.debug:
     msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping OpenCode server password injection."
-  when: facts_op_installed and facts_zsh_config_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
   tags:
     - opencode
     - secrets
     - op
 
-- name: Inject OpenCode server password credential
-  become: true
-  become_user: "{{ host_user }}"
-  ansible.builtin.shell: |
-    set -euo pipefail
-    op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/opencode/credentials/opencode.env -f
-    . {{ host_user_home }}/.config/opencode/credentials/opencode.env
-    if [ -z "${OPENCODE_SERVER_PASSWORD:-}" ]; then
-      echo "OPENCODE_SERVER_PASSWORD is empty after injection." >&2
-      exit 1
-    fi
-    umask 077
-    printf "%s" "${OPENCODE_SERVER_PASSWORD}" > {{ host_user_home }}/.config/opencode/credentials/server_password
-    rm -f {{ host_user_home }}/.config/opencode/credentials/opencode.env
-  args:
-    executable: /bin/bash
-  register: opencode_secret_injected
+- name: Read OpenCode server password from 1Password
+  ansible.builtin.command:
+    cmd: "/usr/bin/op read op://sp-dev/opencode_server/password"
+  register: opencode_secret_read
   no_log: true
   environment:
     OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
-  when: facts_op_installed and facts_zsh_config_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
   tags:
     - opencode
     - secrets
     - op
   changed_when: false
 
-- name: Ensure OpenCode server password file has secure permissions
-  ansible.builtin.file:
-    path: "{{ host_user_home }}/.config/opencode/credentials/server_password"
+- name: Write OpenCode server password credential
+  ansible.builtin.copy:
+    content: "{{ opencode_secret_read.stdout }}"
+    dest: "{{ host_user_home }}/.config/opencode/credentials/server_password"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: "0600"
-  when: opencode_secret_injected is defined
+  no_log: true
+  when: opencode_secret_read is defined
   tags:
     - opencode
     - secrets
