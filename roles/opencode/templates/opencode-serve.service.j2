@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenCode Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ host_user }}
+WorkingDirectory={{ host_user_home }}
+LoadCredential=opencode_password:{{ host_user_home }}/.config/opencode/credentials/server_password
+ExecStart=/usr/local/bin/opencode-serve
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

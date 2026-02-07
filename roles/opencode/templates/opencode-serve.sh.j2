@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -z "${CREDENTIALS_DIRECTORY:-}" ]; then
+  echo "CREDENTIALS_DIRECTORY is not set." >&2
+  exit 1
+fi
+
+password_file="${CREDENTIALS_DIRECTORY}/opencode_password"
+if [ ! -f "${password_file}" ]; then
+  echo "OpenCode server password credential is missing." >&2
+  exit 1
+fi
+
+opencode_server_password="$(<"${password_file}")"
+if [ -z "${opencode_server_password}" ]; then
+  echo "OpenCode server password is empty." >&2
+  exit 1
+fi
+
+export OPENCODE_SERVER_PASSWORD="${opencode_server_password}"
+exec {{ host_user_home }}/.opencode/bin/opencode serve --hostname 0.0.0.0 --port 4096

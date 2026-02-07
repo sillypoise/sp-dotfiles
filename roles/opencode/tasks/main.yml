@@ -45,3 +45,106 @@
   tags:
     - opencode
     - config
+
+- name: Ensure opencode credentials directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/opencode/credentials"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0700"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - opencode
+    - config
+    - secrets
+
+- name: Warn when OP service account token is missing for opencode
+  ansible.builtin.debug:
+    msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping OpenCode server password injection."
+  when: facts_op_installed and facts_zsh_config_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length == 0)
+  tags:
+    - opencode
+    - secrets
+    - op
+
+- name: Inject OpenCode server password credential
+  become: true
+  become_user: "{{ host_user }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    op inject -i {{ host_user_home }}/.config/zsh/vars.secret.tpl -o {{ host_user_home }}/.config/opencode/credentials/opencode.env -f
+    . {{ host_user_home }}/.config/opencode/credentials/opencode.env
+    if [ -z "${OPENCODE_SERVER_PASSWORD:-}" ]; then
+      echo "OPENCODE_SERVER_PASSWORD is empty after injection." >&2
+      exit 1
+    fi
+    umask 077
+    printf "%s" "${OPENCODE_SERVER_PASSWORD}" > {{ host_user_home }}/.config/opencode/credentials/server_password
+    rm -f {{ host_user_home }}/.config/opencode/credentials/opencode.env
+  args:
+    executable: /bin/bash
+  register: opencode_secret_injected
+  no_log: true
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and facts_zsh_config_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+  tags:
+    - opencode
+    - secrets
+    - op
+  changed_when: false
+
+- name: Ensure OpenCode server password file has secure permissions
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/opencode/credentials/server_password"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0600"
+  when: opencode_secret_injected is defined
+  tags:
+    - opencode
+    - secrets
+
+- name: Install OpenCode serve wrapper script
+  ansible.builtin.template:
+    src: opencode-serve.sh.j2
+    dest: /usr/local/bin/opencode-serve
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags:
+    - opencode
+    - system
+
+- name: Install OpenCode serve systemd unit
+  ansible.builtin.template:
+    src: opencode-serve.service.j2
+    dest: /etc/systemd/system/opencode-serve.service
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags:
+    - opencode
+    - system
+
+- name: Reload systemd daemon for OpenCode
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  tags:
+    - opencode
+    - system
+
+- name: Enable and start OpenCode serve service
+  ansible.builtin.systemd:
+    name: opencode-serve
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - opencode
+    - system
