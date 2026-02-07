@@ -13,13 +13,52 @@
     - opencode
     - config
 
+- name: Check installed OpenCode version
+  ansible.builtin.command:
+    cmd: "{{ host_user_home }}/.opencode/bin/opencode --version"
+  become: true
+  become_user: "{{ host_user }}"
+  register: opencode_version
+  changed_when: false
+  failed_when: false
+  tags:
+    - opencode
+    - install
+
+- name: Fetch OpenCode latest release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/anomalyco/opencode/releases/latest
+    return_content: true
+  register: opencode_release
+  changed_when: false
+  failed_when: false
+  tags:
+    - opencode
+    - install
+
+- name: Set OpenCode version facts
+  ansible.builtin.set_fact:
+    opencode_latest_version: "{{ ((opencode_release.json | default({})).tag_name | default('')) | regex_replace('^v', '') }}"
+    opencode_installed_version: "{{ (opencode_version.stdout | default('')) | regex_search('[0-9]+(\\.[0-9]+)+') | default('') }}"
+  tags:
+    - opencode
+    - install
+
+- name: Warn when OpenCode latest version is unavailable
+  ansible.builtin.debug:
+    msg: "Unable to determine latest OpenCode version; skipping update check."
+  when: opencode_latest_version | length == 0
+  tags:
+    - opencode
+    - install
+
 - name: Install or update OpenCode
   ansible.builtin.shell: |
     set -euo pipefail
     if command -v curl >/dev/null 2>&1; then
-      curl -fsSL https://opencode.ai/install | bash
+      curl -fsSL https://opencode.ai/install | bash -s -- --version {{ opencode_latest_version }}
     elif command -v wget >/dev/null 2>&1; then
-      wget -qO- https://opencode.ai/install | bash
+      wget -qO- https://opencode.ai/install | bash -s -- --version {{ opencode_latest_version }}
     else
       echo "Missing curl or wget" >&2
       exit 1
@@ -28,6 +67,7 @@
   become_user: "{{ host_user }}"
   args:
     executable: /bin/bash
+  when: opencode_latest_version | length > 0 and (opencode_version.rc != 0 or opencode_installed_version != opencode_latest_version)
   tags:
     - opencode
     - install
