@@ -1,13 +1,2 @@
 ---
-ufw_allowed_ports:
-  - 80        # HTTP
-  - 443       # HTTPS
-  - 22        # SSH
-  - 3306      # MySQL
-  - 5432      # PostgreSQL
-  - 8080      # Alternative HTTP
-  - 21        # FTP
-  - 25        # SMTP
-  - 3389      # RDP
-  - 5900      # VNC
 ufw_tailscale_interface: "tailscale0"

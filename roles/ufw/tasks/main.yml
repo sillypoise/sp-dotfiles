@@ -18,21 +18,6 @@
     enabled: true
     state: started
 
-- name: Set default UFW policies
-  ansible.builtin.ufw:
-    state: enabled
-    policy: allow
-    direction: outgoing
-  notify: Restart UFW
-
-- name: Block HTTP/HTTPS on all public interfaces
-  ansible.builtin.ufw:
-    rule: deny
-    port: "{{ item }}"
-    proto: tcp
-  loop: "{{ ufw_allowed_ports | difference([22]) }}"  # Excludes SSH port
-
-# Allow all traffic on the Tailscale interface
 - name: Allow all traffic on Tailscale interface
   ansible.builtin.ufw:
     rule: allow
@@ -40,10 +25,30 @@
     from_ip: "any"
   notify: Restart UFW
 
-# Allow SSH on the public interface (to ensure access even if Tailscale is unavailable)
 - name: Allow SSH on public interface
   ansible.builtin.ufw:
     rule: allow
-    port: 22
+    port: "{{ ssh_port | default(22) }}"
     proto: tcp
+  notify: Restart UFW
+
+- name: Set default UFW policies (incoming)
+  ansible.builtin.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  notify: Restart UFW
+
+- name: Set default UFW policies (outgoing)
+  ansible.builtin.ufw:
+    state: enabled
+    policy: allow
+    direction: outgoing
+  notify: Restart UFW
+
+- name: Set default UFW policies (routed)
+  ansible.builtin.ufw:
+    state: enabled
+    policy: deny
+    direction: routed
   notify: Restart UFW
