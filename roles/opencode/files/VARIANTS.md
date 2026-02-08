@@ -25,6 +25,17 @@ guides as needed.
 
 ---
 
+## UIStyle (Language-agnostic)
+
+- UIStyle — Strict / Full
+  - Path: `ui/uistyle-strict-full.md`
+  - Scope: Cross-platform UI rulebook (comprehensive)
+- UIStyle — Strict / Compact
+  - Path: `ui/uistyle-strict-compact.md`
+  - Scope: Cross-platform UI rulebook (summary)
+
+---
+
 ## Programming Languages
 
 - TypeScript TigerStyle (Strict/Pragmatic, Full/Compact)

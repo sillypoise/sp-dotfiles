@@ -9,3 +9,17 @@ list.
 ## Active Guides
 
 - `tigerstyle-strict-full.md`
+
+## Profile Examples
+
+Use these examples in repo-local `.opencode/AGENTS.md`.
+
+### Full Profile (recommended)
+
+- `tigerstyle-strict-full.md`
+- `ui/uistyle-strict-full.md`
+
+### Compact Profile
+
+- `tigerstyle-strict-compact.md`
+- `ui/uistyle-strict-compact.md`
