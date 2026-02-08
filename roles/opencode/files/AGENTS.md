@@ -9,6 +9,7 @@ list.
 ## Active Guides
 
 - `tigerstyle-strict-full.md`
+- `ui/uistyle-strict-full.md`
 
 ## Profile Examples
 
