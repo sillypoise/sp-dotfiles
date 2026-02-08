@@ -19,7 +19,21 @@ Use these examples in repo-local `.opencode/AGENTS.md`.
 - `tigerstyle-strict-full.md`
 - `ui/uistyle-strict-full.md`
 
+### Frontend Full Profile
+
+- `tigerstyle-strict-full.md`
+- `ui/uistyle-strict-full.md`
+- `css/cssstyle-pragmatic-full.md`
+
+Note: If CSSStyle implementation guidance conflicts with UIStyle heuristics, UIStyle takes precedence.
+
 ### Compact Profile
 
 - `tigerstyle-strict-compact.md`
 - `ui/uistyle-strict-compact.md`
+
+### Frontend Compact Profile
+
+- `tigerstyle-strict-compact.md`
+- `ui/uistyle-strict-compact.md`
+- `css/cssstyle-pragmatic-compact.md`

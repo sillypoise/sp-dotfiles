@@ -36,6 +36,17 @@ guides as needed.
 
 ---
 
+## CSSStyle (Language-agnostic)
+
+- CSSStyle — Pragmatic / Full
+  - Path: `css/cssstyle-pragmatic-full.md`
+  - Scope: Cross-platform CSS implementation playbook (comprehensive)
+- CSSStyle — Pragmatic / Compact
+  - Path: `css/cssstyle-pragmatic-compact.md`
+  - Scope: Cross-platform CSS implementation playbook (summary)
+
+---
+
 ## Programming Languages
 
 - TypeScript TigerStyle (Strict/Pragmatic, Full/Compact)
@@ -72,3 +83,5 @@ guides as needed.
 
 - Per-repo `AGENTS.md` should list the local paths of the guides it wants.
 - Use `opencode.json` `instructions` to load `AGENTS.md`.
+- Load CSSStyle when you want implementation-level CSS defaults and patterns.
+- If CSSStyle guidance conflicts with UIStyle heuristics, UIStyle takes precedence.
