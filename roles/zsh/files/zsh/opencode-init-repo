@@ -27,11 +27,27 @@ fi
 mkdir -p "${target_dir}"
 
 if command -v rsync >/dev/null 2>&1; then
-  rsync -a --exclude "opencode.json" "${bundle_root}/" "${target_dir}/"
+  rsync -a --prune-empty-dirs \
+    --include "*/" \
+    --include "*.md" \
+    --exclude "*" \
+    "${bundle_root}/" "${target_dir}/"
 else
-  cp -R "${bundle_root}/". "${target_dir}/"
-  rm -f "${target_dir}/opencode.json"
+  shopt -s globstar nullglob
+  for source_file in "${bundle_root}"/**/*.md; do
+    relative_path="${source_file#"${bundle_root}/"}"
+    destination_path="${target_dir}/${relative_path}"
+    mkdir -p "$(dirname "${destination_path}")"
+    cp "${source_file}" "${destination_path}"
+  done
+  shopt -u globstar nullglob
 fi
+
+cat >"${target_dir}/.gitignore" <<'EOF'
+credentials/
+*.env
+opencode.json
+EOF
 
 config_path="${repo_root}/opencode.json"
 cat >"${config_path}" <<'EOF'

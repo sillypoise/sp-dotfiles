@@ -95,4 +95,8 @@ To scaffold a repo with the bundle, run:
 opencode-init-repo
 ```
 
+`opencode-init-repo` copies only guide bundle markdown files into `.opencode/`
+and writes a repo-local `opencode.json`. It does not copy runtime config or
+secrets from `~/.config/opencode`.
+
 Then edit `.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.

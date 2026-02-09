@@ -9,8 +9,10 @@ This repository ships an OpenCode guide bundle under `roles/opencode/files/`.
 The bundle includes `AGENTS.md`, `VARIANTS.md`, TigerStyle variants, and
 framework/library best-practice guides.
 
-To initialize a repo with the bundle, run `opencode-init-repo` (alias: `oci`),
-then edit `.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.
+To initialize a repo with the bundle, run `opencode-init-repo` (alias: `oci`).
+It copies only guide bundle markdown files into `.opencode/` and writes a
+repo-local `opencode.json` (no runtime config or secrets). Then edit
+`.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.
 
 ## Build, Test, and Lint Commands
 
