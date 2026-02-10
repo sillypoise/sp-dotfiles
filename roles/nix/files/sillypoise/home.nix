@@ -64,7 +64,7 @@
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
       volta                      # JavaScript tool manager
-      weboscat                   # CLI websocket client
+      websocat                   # CLI websocket client
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
     ] ++ (if builtins.hasAttr "claude-code" pkgs then [ pkgs."claude-code" ] else [ ]);
