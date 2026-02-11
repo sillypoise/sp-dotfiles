@@ -11,6 +11,15 @@ list.
 - `tigerstyle-strict-full.md`
 - `ui/uistyle-strict-full.md`
 
+## Mandatory Self-Review
+
+Before finalizing any implementation task, re-review your own changes against all active guides.
+
+- Treat every MUST/SHALL rule in active guides as a blocking requirement.
+- Explicitly verify negative/error/boundary paths, not just happy paths.
+- In your final summary, call out which guide rules most directly shaped the implementation.
+- If a rule is intentionally not applied, state why and mark it as a project-level exception.
+
 ## Profile Examples
 
 Use these examples in repo-local `.opencode/AGENTS.md`.
