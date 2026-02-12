@@ -54,7 +54,7 @@
       # opencode                 # AI coding agent built for the terminal
       pnpm                       # Fast, disk space efficient package manager
       podman                     # Docker alternative: manage pods, containers and container images
-      postgresql_17              # PostgreSQL 17
+      postgresql                 # PostgreSQL client tools (psql)
       # python312Packages.setuptools  # Required for datasette (pkg_resources)
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
