@@ -32,6 +32,7 @@ alias vim="nvim"
 alias svim='sudo vim'
 alias reload="source ~/.zshrc"
 alias zj="zellij"
+alias zjls="zellij list-sessions"
 alias zshrc="nvim ~/.zshrc"
 alias fjson="pbpaste | jq '.' | pbcopy"
 alias watch='watch -d'
