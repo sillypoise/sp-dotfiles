@@ -1,0 +1,5 @@
+\timing on
+\x auto
+\set ON_ERROR_STOP on
+\pset null '[null]'
+\set COMP_KEYWORD_CASE upper

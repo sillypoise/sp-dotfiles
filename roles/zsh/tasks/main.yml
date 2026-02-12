@@ -39,6 +39,17 @@
   tags:
     - environment
 
+- name: Copy .psqlrc for host user
+  ansible.builtin.copy:
+    src: "psqlrc"
+    dest: "{{ host_user_home }}/.psqlrc"
+    mode: "0644"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - environment
+    - zsh
+
 - name: Copy custom Zsh config directory
   ansible.builtin.copy:
     src: "zsh"
