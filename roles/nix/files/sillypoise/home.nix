@@ -43,6 +43,7 @@
       go                         # Go programming language
       httpie                     # Command-line HTTP client
       jq                         # JSON processor
+      just                       # Command runner
       k9s                        # k8s tui
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
