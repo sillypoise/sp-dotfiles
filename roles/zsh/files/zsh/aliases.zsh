@@ -27,6 +27,7 @@ alias rm='rm -iv'
 alias rmdir='rmdir -v'
 alias sqsh="squoosh-cli"
 alias pnpma="pnpm approve-builds"
+alias juc='just --choose'
 # alias speedtest='curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python -'
 alias vim="nvim"
 alias svim='sudo vim'
