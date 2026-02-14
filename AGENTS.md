@@ -6,13 +6,20 @@ dotfiles repository.
 ## OpenCode Guide Bundle
 
 This repository ships an OpenCode guide bundle under `roles/opencode/files/`.
-The bundle includes `AGENTS.md`, `VARIANTS.md`, TigerStyle variants, and
-framework/library best-practice guides.
+This bundle is a distribution snapshot used by the dotfiles role to populate
+`~/.config/opencode`.
 
-To initialize a repo with the bundle, run `opencode-init-repo` (alias: `oci`).
-It copies only guide bundle markdown files into `.opencode/` and writes a
-repo-local `opencode.json` (no runtime config or secrets). Then edit
-`.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.
+Guide-family authoring, derivation, and governance should happen in the
+dedicated guides repository. Keep this repo focused on environment replication
+and distribution plumbing.
+
+Run `dotfiles -t opencode` to install OpenCode and clone the shared guides
+repository to the local user environment.
+
+To initialize a repo-local overlay, run `opencode-init-repo` (alias: `oci`).
+It creates `.opencode/AGENTS.md` from the shared template and writes a
+repo-local `opencode.json` that loads both shared guides and repo-local
+context.
 
 ## Build, Test, and Lint Commands
 

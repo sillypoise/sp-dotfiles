@@ -12,49 +12,43 @@ if [ -z "${repo_root}" ]; then
   exit 1
 fi
 
-bundle_root="${HOME}/.config/opencode"
-if [ ! -d "${bundle_root}" ]; then
-  echo "Missing bundle at ${bundle_root}" >&2
+guides_root="${HOME}/.local/share/opencode-guides"
+if [ ! -d "${guides_root}" ]; then
+  echo "Missing shared guides repo at ${guides_root}" >&2
+  exit 1
+fi
+
+template_path="${guides_root}/templates/repo-AGENTS.md"
+if [ ! -f "${template_path}" ]; then
+  echo "Missing repo overlay template at ${template_path}" >&2
   exit 1
 fi
 
 target_dir="${repo_root}/.opencode"
-if [ -d "${target_dir}" ] && [ "$(ls -A "${target_dir}")" ]; then
-  echo "${target_dir} already exists and is not empty" >&2
+target_agents="${target_dir}/AGENTS.md"
+if [ -f "${target_agents}" ] && [ -s "${target_agents}" ]; then
+  echo "${target_agents} already exists and is not empty" >&2
   exit 1
 fi
 
 mkdir -p "${target_dir}"
 
-if command -v rsync >/dev/null 2>&1; then
-  rsync -a --prune-empty-dirs \
-    --include "*/" \
-    --include "*.md" \
-    --exclude "*" \
-    "${bundle_root}/" "${target_dir}/"
-else
-  shopt -s globstar nullglob
-  for source_file in "${bundle_root}"/**/*.md; do
-    relative_path="${source_file#"${bundle_root}/"}"
-    destination_path="${target_dir}/${relative_path}"
-    mkdir -p "$(dirname "${destination_path}")"
-    cp "${source_file}" "${destination_path}"
-  done
-  shopt -u globstar nullglob
-fi
+cp "${template_path}" "${target_agents}"
 
 cat >"${target_dir}/.gitignore" <<'EOF'
 credentials/
 *.env
-opencode.json
 EOF
 
 config_path="${repo_root}/opencode.json"
 cat >"${config_path}" <<'EOF'
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["{file:.opencode/AGENTS.md}"]
+  "instructions": [
+    "{file:~/.local/share/opencode-guides/files/AGENTS.md}",
+    "{file:.opencode/AGENTS.md}"
+  ]
 }
 EOF
 
-echo "Initialized ${target_dir} and ${config_path}"
+echo "Initialized ${target_agents} and ${config_path}"

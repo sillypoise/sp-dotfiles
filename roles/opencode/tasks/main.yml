@@ -13,6 +13,19 @@
     - opencode
     - config
 
+- name: Ensure local shared directory exists for OpenCode guides
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.local/share"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - opencode
+    - config
+
 - name: Check installed OpenCode version
   ansible.builtin.command:
     cmd: "{{ host_user_home }}/.opencode/bin/opencode --version"
@@ -72,14 +85,79 @@
     - opencode
     - install
 
-- name: Install opencode guide bundle
+- name: Clone OpenCode guides repo with GitHub CLI
+  ansible.builtin.command:
+    cmd: "gh repo clone {{ opencode_guides_repo }} {{ opencode_guides_clone_path }}"
+  become: true
+  become_user: "{{ host_user }}"
+  when: facts_gh_authed
+  changed_when: not ansible_check_mode
+  args:
+    creates: "{{ opencode_guides_clone_path }}/.git"
+  tags:
+    - opencode
+    - config
+
+- name: Clone OpenCode guides repo with git (fallback)
+  ansible.builtin.git:
+    repo: "git@github.com:{{ opencode_guides_repo }}.git"
+    dest: "{{ opencode_guides_clone_path }}"
+    version: "{{ opencode_guides_ref }}"
+    force: no
+  become: true
+  become_user: "{{ host_user }}"
+  when: not facts_gh_authed
+  tags:
+    - opencode
+    - config
+
+- name: Check OpenCode guides repository checkout
+  ansible.builtin.stat:
+    path: "{{ opencode_guides_clone_path }}/.git"
+  become: true
+  become_user: "{{ host_user }}"
+  register: opencode_guides_checkout
+  tags:
+    - opencode
+    - config
+
+- name: Update OpenCode guides checkout to requested ref
+  ansible.builtin.shell: |
+    set -euo pipefail
+    before="$(git -C "{{ opencode_guides_clone_path }}" rev-parse HEAD 2>/dev/null || true)"
+    git -C "{{ opencode_guides_clone_path }}" fetch --tags --prune origin
+    if git -C "{{ opencode_guides_clone_path }}" rev-parse --verify --quiet "refs/tags/{{ opencode_guides_ref }}" >/dev/null; then
+      git -C "{{ opencode_guides_clone_path }}" checkout --force "tags/{{ opencode_guides_ref }}"
+    else
+      git -C "{{ opencode_guides_clone_path }}" checkout "{{ opencode_guides_ref }}"
+      git -C "{{ opencode_guides_clone_path }}" pull --ff-only origin "{{ opencode_guides_ref }}"
+    fi
+    after="$(git -C "{{ opencode_guides_clone_path }}" rev-parse HEAD)"
+    if [ "${before}" != "${after}" ]; then
+      echo changed
+    fi
+  become: true
+  become_user: "{{ host_user }}"
+  args:
+    executable: /bin/bash
+  register: opencode_guides_update
+  changed_when: "'changed' in opencode_guides_update.stdout"
+  when: opencode_guides_checkout.stat.exists
+  tags:
+    - opencode
+    - config
+
+- name: Write OpenCode global instructions config
   ansible.builtin.copy:
-    src: "."
-    dest: "{{ host_user_home }}/.config/opencode/"
+    content: |
+      {
+        "$schema": "https://opencode.ai/config.json",
+        "instructions": ["{file:{{ opencode_guides_clone_path }}/files/AGENTS.md}"]
+      }
+    dest: "{{ host_user_home }}/.config/opencode/opencode.json"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: "0644"
-    directory_mode: "0755"
   become: true
   become_user: "{{ host_user }}"
   tags:

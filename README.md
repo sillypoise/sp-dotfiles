@@ -86,17 +86,30 @@ dotfiles -t ne<tab>
 
 ## OpenCode Guide Bundle
 
-This repo ships a guide bundle under `roles/opencode/files/` for OpenCode. It includes
-`AGENTS.md`, `VARIANTS.md`, TigerStyle variants, and framework/library best practices.
+This repo ships a guide bundle under `roles/opencode/files/` for OpenCode.
+In this repository, the bundle should be treated as a distribution snapshot used to populate
+`~/.config/opencode`.
 
-To scaffold a repo with the bundle, run:
+Guide-family authoring and governance should happen in the dedicated guides repository.
+This repo focuses on environment replication and distribution plumbing.
+
+To install OpenCode and clone the shared guides repository into your environment, run:
+
+```bash
+dotfiles -t opencode
+```
+
+To initialize a project repo with a local overlay, run:
 
 ```bash
 opencode-init-repo
 ```
 
-`opencode-init-repo` copies only guide bundle markdown files into `.opencode/`
-and writes a repo-local `opencode.json`. It does not copy runtime config or
-secrets from `~/.config/opencode`.
+`opencode-init-repo` creates `.opencode/AGENTS.md` from the shared guides template and writes a
+repo-local `opencode.json` that loads both:
 
-Then edit `.opencode/AGENTS.md` to select guides from `.opencode/VARIANTS.md`.
+- shared guides selector (`~/.local/share/opencode-guides/files/AGENTS.md`)
+- repo-local overlay (`.opencode/AGENTS.md`)
+
+Then edit `.opencode/AGENTS.md` to add repo-specific context and optional guide additions from the
+shared guides `VARIANTS.md`.

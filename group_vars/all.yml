@@ -57,6 +57,11 @@ host_user: "sillypoise"
 automated_user: "flubber"
 gh_user: "sillypoise"
 
+# OpenCode guides source-of-truth repo
+opencode_guides_repo: "sillypoise/sp-opencode-guides"
+opencode_guides_ref: "main"
+opencode_guides_clone_path: "{{ host_user_home }}/.local/share/opencode-guides"
+
 # System identity
 system_hostname: "sp-dev"
 
