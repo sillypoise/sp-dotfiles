@@ -45,8 +45,8 @@ cat >"${config_path}" <<'EOF'
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
-    "{file:~/.local/share/opencode-guides/files/AGENTS.md}",
-    "{file:.opencode/AGENTS.md}"
+    "~/.local/share/opencode-guides/files/AGENTS.md",
+    ".opencode/AGENTS.md"
   ]
 }
 EOF

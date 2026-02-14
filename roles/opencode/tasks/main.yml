@@ -152,7 +152,7 @@
     content: |
       {
         "$schema": "https://opencode.ai/config.json",
-        "instructions": ["{file:{{ opencode_guides_clone_path }}/files/AGENTS.md}"]
+        "instructions": ["{{ opencode_guides_clone_path }}/files/AGENTS.md"]
       }
     dest: "{{ host_user_home }}/.config/opencode/opencode.json"
     owner: "{{ host_user }}"
