@@ -60,6 +60,7 @@
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
       sd                         # Modern sed alternative
+      subversion                 # Apache subversion VCS
       # sqlite-utils               # SQLite utility and CLI
       starship                   # Customizable shell prompt
       # tailscale                # Mesh VPN service
