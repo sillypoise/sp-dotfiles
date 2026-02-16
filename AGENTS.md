@@ -1,169 +1,194 @@
-# AGENTS.md
+# Repo-Local AGENTS Overlay
 
-This file provides guidance for AI coding agents working in this Ansible
-dotfiles repository.
+<!-- BEGIN MANAGED OVERLAY -->
+Do not edit this managed block directly. Use `opencode-sync-repo --write` to update it from the
+shared template.
 
-## OpenCode Guides
+Overlay-Template-Version: 0.1.0
+Overlay-Template-Hash: daa048881844f8343f919402a5e8fcb380f2d7df158357c7d1c6b8850b247f88
+Guide-Bundle-Version: 0.1.1
+Guide-Bundle-Source-Ref: v0.1.1
 
-This repository no longer owns OpenCode guide content.
-The dotfiles role installs OpenCode and clones the shared guides repository to
-the user environment.
+This file is a repo-local overlay for project-specific instructions.
+It supplements the shared guide bundle and should only contain context that is specific to this
+repository.
 
-Guide-family authoring, derivation, and governance should happen in the
-dedicated guides repository. Keep this repo focused on environment replication
-and distribution plumbing.
+Do not include secrets, credentials, or tokens.
 
-Run `dotfiles -t opencode` to install OpenCode and clone the shared guides
-repository to the local user environment.
+## Guide Layering Contract
 
-To initialize a repo-local overlay, run `opencode-init-repo` (alias: `oci`).
-It creates a repo-root `AGENTS.md` from the shared template and writes a
-repo-local `opencode.json` that loads both shared guides and repo-local
-context.
+This overlay extends and complements (does not replace) the shared guide policy loaded from
+`files/AGENTS.md`.
 
-To refresh only the managed scaffold section in repo `AGENTS.md` while
-preserving repo-specific context, use `opencode-sync-repo` (dry-run by
-default, `--write` to apply).
+The shared policy is the primary behavioral instruction source. This overlay adds repository-specific
+constraints, context, workflows, and optional active-guide additions.
 
-## Build, Test, and Lint Commands
+Agents MUST apply both layers together:
 
-### Main Commands
-```bash
-# Run full configuration update
-dotfiles
+1. Follow shared policy as baseline behavior.
+2. Apply repo-specific constraints from this overlay in addition to shared policy.
 
-# Run specific role (with tab completion support)
-dotfiles -t <role>
+When guidance appears to conflict, preserve shared mandatory requirements and treat overlay guidance
+as project-specific augmentation that narrows or clarifies behavior for this repository.
 
-# Run as specific user with specific tags
-dotfiles -u <user> -t <tag>
+## Mandatory Guide Compliance Loop
 
-# Debug mode with verbose output
-dotfiles -t <role> -vvv
-```
+For non-trivial tasks, the agent MUST:
 
-### Test and Validation
-```bash
-# Test a specific role
-dotfiles -t <role>
+1. Identify which active guides apply before implementation.
+2. Apply active guide rules during implementation and self-review.
+3. In the final response, include a rule-application trace with concrete references:
+   - Rule ID (or section heading if no stable ID),
+   - where applied (`path:line`),
+   - one short note on how it shaped the change.
+4. Explicitly verify negative/error/boundary paths, not only happy paths.
+5. If a rule is intentionally not applied, state why and mark it as a project-level exception.
+6. If active guides do not cover the task domain, suggest 1-2 minimal guide additions from
+   `VARIANTS.md`.
 
-# Test the dedicated validation role
-dotfiles -t test
+When guidance conflicts, follow canonical precedence from the guide system.
 
-# Verify 1Password CLI authentication
-op whoami
-```
+## Response Prefix Contract
 
-### Linting
-- No automated linting is configured (no ansible-lint or yamllint).
-- Manual validation is expected by running roles via the dotfiles script.
+For implementation tasks, start the final response with:
 
-## Code Style Guidelines
+`Guide check: active guides applied.`
+<!-- END MANAGED OVERLAY -->
 
-### YAML Formatting
-- Indentation: 2 spaces, no tabs.
+## Repo-Specific Context
+
+Use concise, factual notes for architecture, workflows, constraints, and release expectations.
+
+When durable repo facts are learned during work, update this section to keep it current.
+Only include stable information that helps future tasks.
+
+<!-- BEGIN REPO CONTEXT -->
+### Repository Purpose
+
+This repository is an Ansible-based dotfiles system focused on environment replication and
+distribution plumbing.
+
+This repository does not own shared OpenCode guide-family content. Guide authoring,
+derivation, and governance happen in the dedicated guides repository.
+
+### OpenCode Integration Workflow
+
+Run `dotfiles -t opencode` to install OpenCode and clone shared guides into the local user
+environment.
+
+To initialize a repo-local overlay, run `opencode-init-repo` (alias: `oci`). It creates
+repo-root `AGENTS.md` from the shared template and writes repo-local `opencode.json` that
+loads shared guides plus repo-local context.
+
+To refresh only the managed scaffold section of repo `AGENTS.md` while preserving
+repo-specific context, use `opencode-sync-repo` (dry-run by default, `--write` to apply).
+
+### Build, Test, Validation
+
+Main execution commands:
+
+- `dotfiles` (full configuration update)
+- `dotfiles -t <role>` (run specific role)
+- `dotfiles -u <user> -t <tag>` (specific user and tag)
+- `dotfiles -t <role> -vvv` (debug verbosity)
+
+Validation commands:
+
+- `dotfiles -t <role>` (role-level validation)
+- `dotfiles -t test` (dedicated validation role)
+- `op whoami` (verify 1Password CLI auth)
+
+Linting policy:
+
+- No automated linting is configured (`ansible-lint`/`yamllint` absent).
+- Manual validation is done by running roles through `dotfiles`.
+
+### Style and Authoring Conventions
+
+YAML:
+
+- 2-space indentation, no tabs.
 - Keep lines under 120 characters where practical.
 - Use a single blank line to separate logical blocks.
 - Avoid trailing whitespace.
 
-### Ansible Module Usage
-- Always use fully qualified module names, e.g. `ansible.builtin.copy`.
+Ansible module/task conventions:
+
+- Use fully qualified module names (for example `ansible.builtin.copy`).
 - Prefer idempotent modules over shell commands.
-- If a shell command is required, ensure idempotency with `creates:` or
-  `changed_when: false` when appropriate.
-- Provide `executable: /bin/bash` when the shell relies on bash features.
-
-### Task Structure
-```yaml
-- name: Descriptive task name
-  ansible.builtin.module:
-    key: value
-  become: true
-  become_user: "{{ host_user }}"
-  when: facts_sillypoise_exists
-  changed_when: false
-  no_log: true
-  tags:
-    - tag_name
-```
-
-### Naming Conventions
-
-#### Roles
-- Lowercase, descriptive names: `bash`, `git`, `nvim`, `openssh`.
-- Use hyphens for multi-word names.
-- Create roles under `roles/<role>/`.
-
-#### Tasks
-- Use descriptive names, often with a pipe separator.
-- Examples: `Debug | Show current Ansible user`,
-  `system setup | nix | install home-manager`.
-
-#### Variables and Facts
-- Variables: lowercase with underscores (`host_user`, `automated_user`).
-- Facts: `facts_` prefix (`facts_nix_installed`, `facts_zsh_config_installed`).
-- Define defaults in `group_vars/all.yml`.
-
-#### Tags
+- If shell is required, preserve idempotency (`creates:` or `changed_when: false` as
+  appropriate).
+- Set `executable: /bin/bash` when bash features are used.
 - Every task should have tags.
-- Common tags: `environment`, `config`, `secrets`, `bootstrap`, `system`.
-- Use the role name as a tag when it fits.
 - Pre-tasks use the `always` tag.
 
-### Imports and Includes
+Naming:
+
+- Roles: lowercase descriptive names, hyphenated as needed, under `roles/<role>/`.
+- Variables: lowercase with underscores (for example `host_user`).
+- Facts: `facts_` prefix (for example `facts_is_arch`).
+- Define defaults in `group_vars/all.yml`.
+
+Imports/includes:
+
 - Prefer `ansible.builtin.import_tasks` for static includes.
 - Use `ansible.builtin.include_role` for role orchestration.
 
-## Security and Secrets
+### Security and Secrets
 
-### Secret Handling
-- Use `.tpl` for templates that contain `op://` references.
+Secret handling:
+
+- Templates containing `op://` references use `.tpl`.
 - Inject secrets with `op inject`.
 - Never commit real secrets; only commit templates.
 - Use `no_log: true` for secret operations.
-- Service account flow: set `OP_SERVICE_ACCOUNT_TOKEN` for first run, then re-run after
-  `vars.secret` injects the long-term token.
+- Service account bootstrap: set `OP_SERVICE_ACCOUNT_TOKEN` for first run, then re-run
+  after `vars.secret` injects the long-term token.
 
-### File Permissions
+File permissions:
+
 - Secrets: `0600`.
 - Config files: `0644`.
 - Directories: `0755`.
 - Scripts: `0755`.
 
-## Repository Architecture
+### Architecture and Platform Notes
 
-### Core Files
-- `main.yml`: orchestrates role execution.
-- `bin/dotfiles`: bootstrap/update script that runs the playbook.
-- `group_vars/all.yml`: default roles and global variables.
-- `pre_tasks/facts.yml`: fact gathering and detection.
+Core files:
 
-### Distro Support
+- `main.yml` orchestrates role execution.
+- `bin/dotfiles` bootstraps/updates and runs the playbook.
+- `group_vars/all.yml` holds default roles and global variables.
+- `pre_tasks/facts.yml` handles fact gathering and detection.
+
+Distro support:
+
 - Supported: Arch Linux and Ubuntu LTS (starter-level support).
-- `bin/dotfiles` detects the distro and installs base dependencies.
-- On first run (with no tags), `bin/dotfiles` runs the `bootstrap` role as root.
-- Use `facts_is_arch` and `facts_is_ubuntu` for OS-specific branches.
+- `bin/dotfiles` detects distro and installs base dependencies.
+- First run with no tags executes the `bootstrap` role as root.
+- Use `facts_is_arch` and `facts_is_ubuntu` for OS-specific branching.
 - Use `sudo_group` for sudo membership (`wheel` on Arch, `sudo` on Ubuntu).
 
-### Role Structure
-```
-roles/<role>/
-  tasks/main.yml
-  files/
-  templates/
-```
+Role structure:
 
-### Templates
-- Jinja2 templates use `.j2`.
-- Secret templates use `.tpl` and are injected via 1Password CLI.
+- `roles/<role>/tasks/main.yml`
+- optional `roles/<role>/files/`
+- optional `roles/<role>/templates/`
 
-### Role Order
-- Role execution follows the order listed in `group_vars/all.yml`.
+Template conventions:
+
+- Jinja templates use `.j2`.
+- Secret templates use `.tpl` with 1Password injection.
+
+Role order:
+
+- Role execution follows `default_roles` in `group_vars/all.yml`.
 - Keep dependency order in mind when reordering roles.
 
-## Development Workflow
+### Development Workflow Expectations
 
-### Adding a Role
+Adding a role:
+
 1. Create `roles/<role>/tasks/main.yml`.
 2. Add role to `default_roles` in `group_vars/all.yml`.
 3. Add variables to `group_vars/all.yml` if needed.
@@ -171,16 +196,34 @@ roles/<role>/
 5. Tag tasks appropriately.
 6. Test with `dotfiles -t <role>`.
 
-### Error Handling and Idempotency
+Idempotency and safe execution:
+
 - Use `creates:` to avoid re-running installation commands.
 - Use `changed_when: false` for read-only commands.
 - Guard tasks with `when:` facts to ensure safe execution.
 
-### Root-Run Considerations
+Root-run safety:
+
 - First-run executes as root; avoid root-owned files in user homes.
 - Any task writing into a user home must set `owner`/`group` or run with `become_user`.
-- Shell/command tasks that depend on user env or write under user home should use `become_user`.
+- Shell/command tasks that depend on user env or write under user home should use
+  `become_user`.
 
-## Cursor/Copilot Rules
-- No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md`
-  were found in this repository.
+### Additional Repo Fact
+
+No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` are present in
+this repository.
+<!-- END REPO CONTEXT -->
+
+## Optional Active-Guide Additions
+
+Add project-specific guides here when needed (for example, language or framework guides from
+`VARIANTS.md`). Keep defaults high-signal and only add guides required by this repo.
+
+Example:
+
+- `go/tigerstyle-go-strict-full.md`
+- `nextjs/nextjs-strict-full.md`
+
+<!-- BEGIN LOCAL GUIDE ADDITIONS -->
+<!-- END LOCAL GUIDE ADDITIONS -->
