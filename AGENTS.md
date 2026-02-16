@@ -3,11 +3,11 @@
 This file provides guidance for AI coding agents working in this Ansible
 dotfiles repository.
 
-## OpenCode Guide Bundle
+## OpenCode Guides
 
-This repository ships an OpenCode guide bundle under `roles/opencode/files/`.
-This bundle is a distribution snapshot used by the dotfiles role to populate
-`~/.config/opencode`.
+This repository no longer owns OpenCode guide content.
+The dotfiles role installs OpenCode and clones the shared guides repository to
+the user environment.
 
 Guide-family authoring, derivation, and governance should happen in the
 dedicated guides repository. Keep this repo focused on environment replication
@@ -17,7 +17,7 @@ Run `dotfiles -t opencode` to install OpenCode and clone the shared guides
 repository to the local user environment.
 
 To initialize a repo-local overlay, run `opencode-init-repo` (alias: `oci`).
-It creates `.opencode/AGENTS.md` from the shared template and writes a
+It creates a repo-root `AGENTS.md` from the shared template and writes a
 repo-local `opencode.json` that loads both shared guides and repo-local
 context.
 

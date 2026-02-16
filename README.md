@@ -84,11 +84,11 @@ dotfiles -t t<tab>
 dotfiles -t ne<tab>
 ```
 
-## OpenCode Guide Bundle
+## OpenCode Guides
 
-This repo ships a guide bundle under `roles/opencode/files/` for OpenCode.
-In this repository, the bundle should be treated as a distribution snapshot used to populate
-`~/.config/opencode`.
+This repository does not own OpenCode guide content.
+Guide families are maintained in the dedicated guides repository and cloned to
+the user environment by the `opencode` role.
 
 Guide-family authoring and governance should happen in the dedicated guides repository.
 This repo focuses on environment replication and distribution plumbing.
@@ -105,11 +105,11 @@ To initialize a project repo with a local overlay, run:
 opencode-init-repo
 ```
 
-`opencode-init-repo` creates `.opencode/AGENTS.md` from the shared guides template and writes a
+`opencode-init-repo` creates a repo-root `AGENTS.md` from the shared guides template and writes a
 repo-local `opencode.json` that loads both:
 
 - shared guides selector (`~/.local/share/opencode-guides/files/AGENTS.md`)
-- repo-local overlay (`.opencode/AGENTS.md`)
+- repo-local overlay (`AGENTS.md`)
 
-Then edit `.opencode/AGENTS.md` to add repo-specific context and optional guide additions from the
-shared guides `VARIANTS.md`.
+Then edit `AGENTS.md` to add repo-specific context and optional guide additions from the shared
+guides `VARIANTS.md`.

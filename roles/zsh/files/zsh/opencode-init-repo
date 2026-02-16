@@ -24,21 +24,13 @@ if [ ! -f "${template_path}" ]; then
   exit 1
 fi
 
-target_dir="${repo_root}/.opencode"
-target_agents="${target_dir}/AGENTS.md"
+target_agents="${repo_root}/AGENTS.md"
 if [ -f "${target_agents}" ] && [ -s "${target_agents}" ]; then
   echo "${target_agents} already exists and is not empty" >&2
   exit 1
 fi
 
-mkdir -p "${target_dir}"
-
 cp "${template_path}" "${target_agents}"
-
-cat >"${target_dir}/.gitignore" <<'EOF'
-credentials/
-*.env
-EOF
 
 config_path="${repo_root}/opencode.json"
 cat >"${config_path}" <<'EOF'
@@ -46,7 +38,7 @@ cat >"${config_path}" <<'EOF'
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
     "~/.local/share/opencode-guides/files/AGENTS.md",
-    ".opencode/AGENTS.md"
+    "AGENTS.md"
   ]
 }
 EOF
