@@ -21,6 +21,10 @@ It creates a repo-root `AGENTS.md` from the shared template and writes a
 repo-local `opencode.json` that loads both shared guides and repo-local
 context.
 
+To refresh only the managed scaffold section in repo `AGENTS.md` while
+preserving repo-specific context, use `opencode-sync-repo` (dry-run by
+default, `--write` to apply).
+
 ## Build, Test, and Lint Commands
 
 ### Main Commands

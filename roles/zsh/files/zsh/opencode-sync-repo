@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Synchronize repo-local AGENTS.md managed overlay section.
+
+Default mode is dry-run. Use --write to apply updates.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+GUIDES_ROOT = Path.home() / ".local" / "share" / "opencode-guides"
+BUNDLE_PATH = GUIDES_ROOT / "files" / "GUIDE_BUNDLE.json"
+
+BEGIN_MANAGED = "<!-- BEGIN MANAGED OVERLAY -->"
+END_MANAGED = "<!-- END MANAGED OVERLAY -->"
+BEGIN_CONTEXT = "<!-- BEGIN REPO CONTEXT -->"
+END_CONTEXT = "<!-- END REPO CONTEXT -->"
+BEGIN_ADDITIONS = "<!-- BEGIN LOCAL GUIDE ADDITIONS -->"
+END_ADDITIONS = "<!-- END LOCAL GUIDE ADDITIONS -->"
+
+
+def die(message: str) -> None:
+    print(message, file=sys.stderr)
+    raise SystemExit(1)
+
+
+def repo_root() -> Path:
+    proc = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        die("Run opencode-sync-repo inside a git repository")
+    return Path(proc.stdout.strip())
+
+
+def load_bundle() -> dict:
+    if not BUNDLE_PATH.exists():
+        die(f"Missing bundle contract: {BUNDLE_PATH}")
+    try:
+        return json.loads(BUNDLE_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        die(f"Invalid GUIDE_BUNDLE.json: {exc}")
+
+
+def render_template(template_text: str, bundle: dict) -> str:
+    template_meta = bundle.get("template", {})
+    replacements = {
+        "__TEMPLATE_VERSION__": str(template_meta.get("version", "unknown")),
+        "__TEMPLATE_SHA256__": str(template_meta.get("sha256", "unknown")),
+        "__BUNDLE_VERSION__": str(bundle.get("version", "unknown")),
+        "__BUNDLE_SOURCE_REF__": str(bundle.get("source_ref", "unknown")),
+    }
+    rendered = template_text
+    for token, value in replacements.items():
+        rendered = rendered.replace(token, value)
+    return rendered
+
+
+def find_segment(text: str, begin: str, end: str, label: str) -> tuple[int, int]:
+    begin_count = text.count(begin)
+    end_count = text.count(end)
+    if begin_count != 1 or end_count != 1:
+        die(
+            f"Marker contract violation for {label}: "
+            f"{begin_count}x '{begin}', {end_count}x '{end}'"
+        )
+
+    begin_idx = text.index(begin)
+    end_idx = text.index(end)
+    if end_idx < begin_idx:
+        die(f"Marker order violation for {label}")
+
+    end_idx = end_idx + len(end)
+    return begin_idx, end_idx
+
+
+def extract_overlay_hash(text: str) -> str:
+    match = re.search(r"^Overlay-Template-Hash:\s*(\S+)\s*$", text, re.MULTILINE)
+    return match.group(1) if match else "unknown"
+
+
+def extract_overlay_version(text: str) -> str:
+    match = re.search(r"^Overlay-Template-Version:\s*(\S+)\s*$", text, re.MULTILINE)
+    return match.group(1) if match else "unknown"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Sync repo-local AGENTS managed overlay section")
+    parser.add_argument("--write", action="store_true", help="Apply updates to AGENTS.md")
+    args = parser.parse_args()
+
+    root = repo_root()
+    target_agents = root / "AGENTS.md"
+    if not target_agents.exists():
+        die("Missing repo AGENTS.md. Run opencode-init-repo first.")
+
+    bundle = load_bundle()
+    template_rel = bundle.get("template", {}).get("path")
+    if not template_rel:
+        die("GUIDE_BUNDLE.json missing template.path")
+    template_path = GUIDES_ROOT / template_rel
+    if not template_path.exists():
+        die(f"Missing overlay template: {template_path}")
+
+    target_text = target_agents.read_text(encoding="utf-8")
+    template_text = render_template(template_path.read_text(encoding="utf-8"), bundle)
+
+    # Hard-fail safety contract: all marker pairs must exist exactly once in both files.
+    target_managed = find_segment(target_text, BEGIN_MANAGED, END_MANAGED, "target managed")
+    find_segment(target_text, BEGIN_CONTEXT, END_CONTEXT, "target context")
+    find_segment(target_text, BEGIN_ADDITIONS, END_ADDITIONS, "target additions")
+
+    template_managed = find_segment(template_text, BEGIN_MANAGED, END_MANAGED, "template managed")
+    find_segment(template_text, BEGIN_CONTEXT, END_CONTEXT, "template context")
+    find_segment(template_text, BEGIN_ADDITIONS, END_ADDITIONS, "template additions")
+
+    managed_replacement = template_text[template_managed[0] : template_managed[1]]
+    updated_text = (
+        target_text[: target_managed[0]]
+        + managed_replacement
+        + target_text[target_managed[1] :]
+    )
+
+    changed = updated_text != target_text
+
+    current_hash = extract_overlay_hash(target_text)
+    current_version = extract_overlay_version(target_text)
+    expected_hash = bundle.get("template", {}).get("sha256", "unknown")
+    expected_version = bundle.get("template", {}).get("version", "unknown")
+    bundle_version = bundle.get("version", "unknown")
+    source_ref = bundle.get("source_ref", "unknown")
+
+    print(f"Bundle version: {bundle_version} ({source_ref})")
+    print(f"Target overlay template: version={current_version}, hash={current_hash}")
+    print(f"Expected template: version={expected_version}, hash={expected_hash}")
+
+    if not changed:
+        print("Repo AGENTS managed overlay is up to date.")
+        return 0
+
+    if not args.write:
+        print("Repo AGENTS managed overlay is out of date (dry-run).")
+        print("Re-run with --write to update only the managed section.")
+        return 0
+
+    target_agents.write_text(updated_text, encoding="utf-8")
+    print(f"Updated managed overlay section in {target_agents}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

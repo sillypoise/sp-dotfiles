@@ -88,6 +88,19 @@
     - environment
     - zsh
 
+- name: Install opencode-sync-repo
+  ansible.builtin.copy:
+    src: "zsh/opencode-sync-repo"
+    dest: "{{ host_user_home }}/.local/bin/opencode-sync-repo"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - environment
+    - zsh
+
 - name: Warn when OP service account token is missing
   ansible.builtin.debug:
     msg: "OP_SERVICE_ACCOUNT_TOKEN is not set; skipping 1Password secret injection for Zsh."

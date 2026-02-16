@@ -147,6 +147,17 @@
     - opencode
     - config
 
+- name: Validate OpenCode guides checkout
+  ansible.builtin.command:
+    cmd: "{{ opencode_guides_clone_path }}/bin/validate-opencode-guides"
+  become: true
+  become_user: "{{ host_user }}"
+  changed_when: false
+  when: opencode_guides_checkout.stat.exists
+  tags:
+    - opencode
+    - config
+
 - name: Write OpenCode global instructions config
   ansible.builtin.copy:
     content: |

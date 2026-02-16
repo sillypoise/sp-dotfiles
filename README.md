@@ -113,3 +113,15 @@ repo-local `opencode.json` that loads both:
 
 Then edit `AGENTS.md` to add repo-specific context and optional guide additions from the shared
 guides `VARIANTS.md`.
+
+To check whether your local overlay scaffold is current with the shared template:
+
+```bash
+opencode-sync-repo
+```
+
+To update only the managed overlay section (preserving repo context and local additions):
+
+```bash
+opencode-sync-repo --write
+```

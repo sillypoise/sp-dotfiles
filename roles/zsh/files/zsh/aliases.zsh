@@ -17,6 +17,7 @@ alias ls="exa"
 alias ll="exa -l"
 alias oc="opencode"
 alias oci="opencode-init-repo"
+alias osr="opencode-sync-repo"
 alias sed="sd"
 alias extip='curl https://myip.wtf/text'
 alias extipjson='curl https://myip.wtf/json'

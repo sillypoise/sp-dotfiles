@@ -24,13 +24,38 @@ if [ ! -f "${template_path}" ]; then
   exit 1
 fi
 
+bundle_path="${guides_root}/files/GUIDE_BUNDLE.json"
+if [ ! -f "${bundle_path}" ]; then
+  echo "Missing guide bundle contract at ${bundle_path}" >&2
+  exit 1
+fi
+
 target_agents="${repo_root}/AGENTS.md"
 if [ -f "${target_agents}" ] && [ -s "${target_agents}" ]; then
   echo "${target_agents} already exists and is not empty" >&2
   exit 1
 fi
 
-cp "${template_path}" "${target_agents}"
+python3 - "${template_path}" "${bundle_path}" >"${target_agents}" <<'PY'
+import json
+import pathlib
+import sys
+
+template = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+bundle = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+
+replacements = {
+    "__TEMPLATE_VERSION__": str(bundle["template"]["version"]),
+    "__TEMPLATE_SHA256__": str(bundle["template"]["sha256"]),
+    "__BUNDLE_VERSION__": str(bundle["version"]),
+    "__BUNDLE_SOURCE_REF__": str(bundle["source_ref"]),
+}
+
+for token, value in replacements.items():
+    template = template.replace(token, value)
+
+sys.stdout.write(template)
+PY
 
 config_path="${repo_root}/opencode.json"
 cat >"${config_path}" <<'EOF'
