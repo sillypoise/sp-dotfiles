@@ -25,6 +25,7 @@ alias extipjson='curl https://myip.wtf/json'
 alias mkdir='mkdir -pv'
 alias mv='mv -iv'
 alias ports='netstat -tulanp'
+alias pk='portkill'
 alias rm='rm -iv'
 alias rmdir='rmdir -v'
 alias sqsh="squoosh-cli"
