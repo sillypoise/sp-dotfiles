@@ -1,13 +1,14 @@
 # Repo-Local AGENTS Overlay
 
 <!-- BEGIN MANAGED OVERLAY -->
+
 Do not edit this managed block directly. Use `opencode-sync-repo --write` to update it from the
 shared template.
 
 Overlay-Template-Version: 0.1.0
 Overlay-Template-Hash: daa048881844f8343f919402a5e8fcb380f2d7df158357c7d1c6b8850b247f88
-Guide-Bundle-Version: 0.1.1
-Guide-Bundle-Source-Ref: v0.1.1
+Guide-Bundle-Version: 0.2.0
+Guide-Bundle-Source-Ref: v0.2.0
 
 This file is a repo-local overlay for project-specific instructions.
 It supplements the shared guide bundle and should only contain context that is specific to this
@@ -53,6 +54,7 @@ When guidance conflicts, follow canonical precedence from the guide system.
 For implementation tasks, start the final response with:
 
 `Guide check: active guides applied.`
+
 <!-- END MANAGED OVERLAY -->
 
 ## Repo-Specific Context
@@ -63,6 +65,7 @@ When durable repo facts are learned during work, update this section to keep it 
 Only include stable information that helps future tasks.
 
 <!-- BEGIN REPO CONTEXT -->
+
 ### Repository Purpose
 
 This repository is an Ansible-based dotfiles system focused on environment replication and
@@ -213,6 +216,7 @@ Root-run safety:
 
 No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` are present in
 this repository.
+
 <!-- END REPO CONTEXT -->
 
 ## Optional Active-Guide Additions
