@@ -1,6 +1,238 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+BEGIN_MANAGED='<!-- BEGIN MANAGED OVERLAY -->'
+END_MANAGED='<!-- END MANAGED OVERLAY -->'
+BEGIN_CONTEXT='<!-- BEGIN REPO CONTEXT -->'
+END_CONTEXT='<!-- END REPO CONTEXT -->'
+BEGIN_ADDITIONS='<!-- BEGIN LOCAL GUIDE ADDITIONS -->'
+END_ADDITIONS='<!-- END LOCAL GUIDE ADDITIONS -->'
+
+auto_yes=0
+no_input=0
+
+usage() {
+  cat <<'EOF'
+Usage: opencode-init-repo [--yes] [--no-input]
+
+Initialize repo-local OpenCode overlay files in the current git repository.
+
+Options:
+  -y, --yes       Auto-confirm prompts
+      --no-input  Non-interactive mode; fail instead of prompting
+  -h, --help      Show this help message
+EOF
+}
+
+confirm() {
+  local prompt="$1"
+  local reply=""
+
+  if [ "$auto_yes" -eq 1 ]; then
+    return 0
+  fi
+
+  if [ "$no_input" -eq 1 ]; then
+    echo "${prompt} (non-interactive mode; declining)" >&2
+    return 1
+  fi
+
+  read -r -p "${prompt} [y/N]: " reply
+  case "$reply" in
+    y|Y|yes|YES)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+marker_count() {
+  local marker="$1"
+  local file="$2"
+  grep -F -c "$marker" "$file" || true
+}
+
+detect_agents_state() {
+  local file="$1"
+  local managed_begin managed_end context_begin context_end additions_begin additions_end
+
+  if [ ! -f "$file" ] || [ ! -s "$file" ]; then
+    echo "missing_or_empty"
+    return 0
+  fi
+
+  managed_begin="$(marker_count "$BEGIN_MANAGED" "$file")"
+  managed_end="$(marker_count "$END_MANAGED" "$file")"
+  context_begin="$(marker_count "$BEGIN_CONTEXT" "$file")"
+  context_end="$(marker_count "$END_CONTEXT" "$file")"
+  additions_begin="$(marker_count "$BEGIN_ADDITIONS" "$file")"
+  additions_end="$(marker_count "$END_ADDITIONS" "$file")"
+
+  if [ "$managed_begin" -eq 1 ] && [ "$managed_end" -eq 1 ] && \
+     [ "$context_begin" -eq 1 ] && [ "$context_end" -eq 1 ] && \
+     [ "$additions_begin" -eq 1 ] && [ "$additions_end" -eq 1 ]; then
+    echo "overlay_managed"
+    return 0
+  fi
+
+  if [ "$managed_begin" -gt 0 ] || [ "$managed_end" -gt 0 ] || \
+     [ "$context_begin" -gt 0 ] || [ "$context_end" -gt 0 ] || \
+     [ "$additions_begin" -gt 0 ] || [ "$additions_end" -gt 0 ]; then
+    echo "malformed_overlay"
+    return 0
+  fi
+
+  echo "legacy_unmanaged"
+}
+
+backup_file() {
+  local file="$1"
+  local ts backup_path
+  ts="$(date +%Y%m%d-%H%M%S)"
+  backup_path="${file}.bak.${ts}"
+  cp "$file" "$backup_path"
+  echo "$backup_path"
+}
+
+render_template() {
+  local template_path="$1"
+  local bundle_path="$2"
+
+  python3 - "$template_path" "$bundle_path" <<'PY'
+import json
+import pathlib
+import sys
+
+template = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+bundle = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+
+replacements = {
+    "__TEMPLATE_VERSION__": str(bundle["template"]["version"]),
+    "__TEMPLATE_SHA256__": str(bundle["template"]["sha256"]),
+    "__BUNDLE_VERSION__": str(bundle["version"]),
+    "__BUNDLE_SOURCE_REF__": str(bundle["source_ref"]),
+}
+
+for token, value in replacements.items():
+    template = template.replace(token, value)
+
+sys.stdout.write(template)
+PY
+}
+
+render_template_with_legacy_context() {
+  local template_path="$1"
+  local bundle_path="$2"
+  local legacy_path="$3"
+
+  python3 - "$template_path" "$bundle_path" "$legacy_path" <<'PY'
+import json
+import pathlib
+import sys
+
+template_path = pathlib.Path(sys.argv[1])
+bundle_path = pathlib.Path(sys.argv[2])
+legacy_path = pathlib.Path(sys.argv[3])
+
+template = template_path.read_text(encoding="utf-8")
+bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+legacy = legacy_path.read_text(encoding="utf-8").strip("\n")
+
+replacements = {
+    "__TEMPLATE_VERSION__": str(bundle["template"]["version"]),
+    "__TEMPLATE_SHA256__": str(bundle["template"]["sha256"]),
+    "__BUNDLE_VERSION__": str(bundle["version"]),
+    "__BUNDLE_SOURCE_REF__": str(bundle["source_ref"]),
+}
+
+for token, value in replacements.items():
+    template = template.replace(token, value)
+
+begin = "<!-- BEGIN REPO CONTEXT -->"
+end = "<!-- END REPO CONTEXT -->"
+begin_idx = template.find(begin)
+end_idx = template.find(end)
+if begin_idx == -1 or end_idx == -1 or end_idx < begin_idx:
+    raise SystemExit("Template marker contract invalid: repo context markers not found")
+
+inner_start = begin_idx + len(begin)
+inner_text = template[inner_start:end_idx].strip("\n")
+
+parts = []
+if inner_text:
+    parts.append(inner_text)
+if legacy:
+    parts.append("### Migrated Legacy AGENTS.md Content\n\n" + legacy)
+
+if parts:
+    new_inner = "\n\n" + "\n\n".join(parts) + "\n\n"
+else:
+    new_inner = "\n\n"
+
+updated = template[:inner_start] + new_inner + template[end_idx:]
+sys.stdout.write(updated)
+PY
+}
+
+write_opencode_config() {
+  local config_path="$1"
+  local tmp_config
+  tmp_config="$(mktemp)"
+
+  cat >"$tmp_config" <<'EOF'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "~/.local/share/opencode-guides/files/AGENTS.md",
+    "AGENTS.md"
+  ]
+}
+EOF
+
+  if [ -f "$config_path" ] && [ -s "$config_path" ]; then
+    if cmp -s "$tmp_config" "$config_path"; then
+      rm -f "$tmp_config"
+      return 0
+    fi
+
+    if ! confirm "${config_path} exists and differs. Overwrite it"; then
+      echo "Skipped updating ${config_path}" >&2
+      rm -f "$tmp_config"
+      return 0
+    fi
+  fi
+
+  mv "$tmp_config" "$config_path"
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -y|--yes)
+      auto_yes=1
+      ;;
+    --no-input)
+      no_input=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [ "$auto_yes" -eq 1 ] && [ "$no_input" -eq 1 ]; then
+  echo "Cannot combine --yes and --no-input" >&2
+  exit 1
+fi
+
 if ! command -v git >/dev/null 2>&1; then
   echo "git is required for opencode-init-repo" >&2
   exit 1
@@ -31,41 +263,54 @@ if [ ! -f "${bundle_path}" ]; then
 fi
 
 target_agents="${repo_root}/AGENTS.md"
-if [ -f "${target_agents}" ] && [ -s "${target_agents}" ]; then
-  echo "${target_agents} already exists and is not empty" >&2
-  exit 1
-fi
+agents_state="$(detect_agents_state "${target_agents}")"
+tmp_agents="$(mktemp)"
+backup_path=""
 
-python3 - "${template_path}" "${bundle_path}" >"${target_agents}" <<'PY'
-import json
-import pathlib
-import sys
+case "$agents_state" in
+  missing_or_empty)
+    render_template "${template_path}" "${bundle_path}" >"${tmp_agents}"
+    ;;
+  overlay_managed)
+    if ! confirm "${target_agents} already uses managed overlay markers. Overwrite it with a fresh template"; then
+      echo "No changes made to ${target_agents}. Use opencode-sync-repo to refresh managed content." >&2
+      rm -f "$tmp_agents"
+      exit 1
+    fi
+    backup_path="$(backup_file "${target_agents}")"
+    render_template "${template_path}" "${bundle_path}" >"${tmp_agents}"
+    ;;
+  legacy_unmanaged)
+    if ! confirm "Legacy AGENTS.md detected. Migrate existing content into repo context markers and overwrite"; then
+      echo "No changes made to ${target_agents}" >&2
+      rm -f "$tmp_agents"
+      exit 1
+    fi
+    backup_path="$(backup_file "${target_agents}")"
+    render_template_with_legacy_context "${template_path}" "${bundle_path}" "${target_agents}" >"${tmp_agents}"
+    ;;
+  malformed_overlay)
+    if ! confirm "${target_agents} has partial/invalid overlay markers. Backup, then regenerate with migrated legacy content"; then
+      echo "No changes made to ${target_agents}" >&2
+      rm -f "$tmp_agents"
+      exit 1
+    fi
+    backup_path="$(backup_file "${target_agents}")"
+    render_template_with_legacy_context "${template_path}" "${bundle_path}" "${target_agents}" >"${tmp_agents}"
+    ;;
+  *)
+    echo "Unexpected AGENTS.md state: ${agents_state}" >&2
+    rm -f "$tmp_agents"
+    exit 1
+    ;;
+esac
 
-template = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
-bundle = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
-
-replacements = {
-    "__TEMPLATE_VERSION__": str(bundle["template"]["version"]),
-    "__TEMPLATE_SHA256__": str(bundle["template"]["sha256"]),
-    "__BUNDLE_VERSION__": str(bundle["version"]),
-    "__BUNDLE_SOURCE_REF__": str(bundle["source_ref"]),
-}
-
-for token, value in replacements.items():
-    template = template.replace(token, value)
-
-sys.stdout.write(template)
-PY
+mv "${tmp_agents}" "${target_agents}"
 
 config_path="${repo_root}/opencode.json"
-cat >"${config_path}" <<'EOF'
-{
-  "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    "~/.local/share/opencode-guides/files/AGENTS.md",
-    "AGENTS.md"
-  ]
-}
-EOF
+write_opencode_config "${config_path}"
 
 echo "Initialized ${target_agents} and ${config_path}"
+if [ -n "$backup_path" ]; then
+  echo "Backed up previous AGENTS.md to ${backup_path}"
+fi

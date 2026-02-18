@@ -163,7 +163,15 @@
     content: |
       {
         "$schema": "https://opencode.ai/config.json",
-        "instructions": ["{{ opencode_guides_clone_path }}/files/AGENTS.md"]
+        "instructions": ["{{ opencode_guides_clone_path }}/files/AGENTS.md"],
+        "permission": {
+          "external_directory": {
+            "~/.local/share/opencode-guides/**": "allow"
+          },
+          "read": {
+            "~/.local/share/opencode-guides/**": "allow"
+          }
+        }
       }
     dest: "{{ host_user_home }}/.config/opencode/opencode.json"
     owner: "{{ host_user }}"
