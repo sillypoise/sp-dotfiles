@@ -60,7 +60,7 @@ gh_user: "sillypoise"
 
 # OpenCode guides source-of-truth repo
 opencode_guides_repo: "sillypoise/sp-opencode-guides"
-opencode_guides_ref: "v0.3.0"
+opencode_guides_ref: "v0.3.1"
 opencode_guides_clone_path: "{{ host_user_home }}/.local/share/opencode-guides"
 
 # System identity

@@ -1,14 +1,13 @@
 # Repo-Local AGENTS Overlay
 
 <!-- BEGIN MANAGED OVERLAY -->
-
 Do not edit this managed block directly. Use `opencode-sync-repo --write` to update it from the
 shared template.
 
 Overlay-Template-Version: 0.1.0
-Overlay-Template-Hash: daa048881844f8343f919402a5e8fcb380f2d7df158357c7d1c6b8850b247f88
-Guide-Bundle-Version: 0.2.0
-Guide-Bundle-Source-Ref: v0.2.0
+Overlay-Template-Hash: 646ce926fbe1275e002ef90674b2bbb53b801cae33409ba975c1700dcdbdd519
+Guide-Bundle-Version: 0.3.0
+Guide-Bundle-Source-Ref: v0.3.0
 
 This file is a repo-local overlay for project-specific instructions.
 It supplements the shared guide bundle and should only contain context that is specific to this
@@ -54,7 +53,6 @@ When guidance conflicts, follow canonical precedence from the guide system.
 For implementation tasks, start the final response with:
 
 `Guide check: active guides applied.`
-
 <!-- END MANAGED OVERLAY -->
 
 ## Repo-Specific Context
