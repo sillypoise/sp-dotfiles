@@ -1,13 +1,14 @@
 # Repo-Local AGENTS Overlay
 
 <!-- BEGIN MANAGED OVERLAY -->
+
 Do not edit this managed block directly. Use `opencode-sync-repo --write` to update it from the
 shared template.
 
-Overlay-Template-Version: 0.1.0
+Overlay-Template-Version: 0.1.1
 Overlay-Template-Hash: 646ce926fbe1275e002ef90674b2bbb53b801cae33409ba975c1700dcdbdd519
-Guide-Bundle-Version: 0.3.0
-Guide-Bundle-Source-Ref: v0.3.0
+Guide-Bundle-Version: 0.3.1
+Guide-Bundle-Source-Ref: v0.3.1
 
 This file is a repo-local overlay for project-specific instructions.
 It supplements the shared guide bundle and should only contain context that is specific to this
@@ -53,7 +54,21 @@ When guidance conflicts, follow canonical precedence from the guide system.
 For implementation tasks, start the final response with:
 
 `Guide check: active guides applied.`
+
 <!-- END MANAGED OVERLAY -->
+
+## Optional Active-Guide Additions
+
+Add project-specific guides here when needed (for example, language or framework guides from
+`VARIANTS.md`). Keep defaults high-signal and only add guides required by this repo.
+
+Example:
+
+- `go/tigerstyle-go-strict-full.md`
+- `nextjs/nextjs-strict-full.md`
+
+<!-- BEGIN LOCAL GUIDE ADDITIONS -->
+<!-- END LOCAL GUIDE ADDITIONS -->
 
 ## Repo-Specific Context
 
@@ -216,16 +231,3 @@ No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` are pr
 this repository.
 
 <!-- END REPO CONTEXT -->
-
-## Optional Active-Guide Additions
-
-Add project-specific guides here when needed (for example, language or framework guides from
-`VARIANTS.md`). Keep defaults high-signal and only add guides required by this repo.
-
-Example:
-
-- `go/tigerstyle-go-strict-full.md`
-- `nextjs/nextjs-strict-full.md`
-
-<!-- BEGIN LOCAL GUIDE ADDITIONS -->
-<!-- END LOCAL GUIDE ADDITIONS -->
