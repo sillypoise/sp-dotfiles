@@ -187,7 +187,15 @@ write_opencode_config() {
   "instructions": [
     "~/.local/share/opencode-guides/files/AGENTS.md",
     "AGENTS.md"
-  ]
+  ],
+  "permission": {
+    "external_directory": {
+      "~/.local/share/opencode-guides/**": "allow"
+    },
+    "read": {
+      "~/.local/share/opencode-guides/**": "allow"
+    }
+  }
 }
 EOF
 
