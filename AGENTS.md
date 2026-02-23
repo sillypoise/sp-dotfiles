@@ -1,7 +1,6 @@
 # Repo-Local AGENTS Overlay
 
 <!-- BEGIN MANAGED OVERLAY -->
-
 Do not edit this managed block directly. Use `opencode-sync-repo --write` to update it from the
 shared template.
 
@@ -54,7 +53,6 @@ When guidance conflicts, follow canonical precedence from the guide system.
 For implementation tasks, start the final response with:
 
 `Guide check: active guides applied.`
-
 <!-- END MANAGED OVERLAY -->
 
 ## Optional Active-Guide Additions
