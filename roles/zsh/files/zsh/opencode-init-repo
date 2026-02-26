@@ -284,6 +284,7 @@ target_agents="${repo_root}/AGENTS.md"
 agents_state="$(detect_agents_state "${target_agents}")"
 tmp_agents="$(mktemp)"
 backup_path=""
+agents_written=0
 
 case "$agents_state" in
   missing_or_empty)
@@ -292,11 +293,13 @@ case "$agents_state" in
   overlay_managed)
     if ! confirm "${target_agents} already uses managed overlay markers. Overwrite it with a fresh template"; then
       echo "No changes made to ${target_agents}. Use opencode-sync-repo to refresh managed content." >&2
+      echo "Continuing to evaluate ${repo_root}/opencode.json" >&2
       rm -f "$tmp_agents"
-      exit 1
+      tmp_agents=""
+    else
+      backup_path="$(backup_file "${target_agents}")"
+      render_template "${template_path}" "${bundle_path}" >"${tmp_agents}"
     fi
-    backup_path="$(backup_file "${target_agents}")"
-    render_template "${template_path}" "${bundle_path}" >"${tmp_agents}"
     ;;
   legacy_unmanaged)
     if ! confirm "Legacy AGENTS.md detected. Migrate existing content into repo context markers and overwrite"; then
@@ -323,12 +326,19 @@ case "$agents_state" in
     ;;
 esac
 
-mv "${tmp_agents}" "${target_agents}"
+if [ -n "${tmp_agents}" ]; then
+  mv "${tmp_agents}" "${target_agents}"
+  agents_written=1
+fi
 
 config_path="${repo_root}/opencode.json"
 write_opencode_config "${config_path}"
 
-echo "Initialized ${target_agents} and ${config_path}"
+if [ "${agents_written}" -eq 1 ]; then
+  echo "Initialized ${target_agents} and ${config_path}"
+else
+  echo "Initialized ${config_path}"
+fi
 if [ -n "$backup_path" ]; then
   echo "Backed up previous AGENTS.md to ${backup_path}"
 fi
