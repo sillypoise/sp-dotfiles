@@ -32,3 +32,25 @@
   tags:
     - volta
     - node
+
+- name: Check if Wrangler is installed via Volta
+  ansible.builtin.command: "volta which wrangler"
+  register: wrangler_check
+  failed_when: false
+  changed_when: false
+  become: true
+  become_user: "{{ host_user }}"
+  when: volta_check.rc == 0
+  tags:
+    - volta
+    - wrangler
+    - check
+
+- name: Install Wrangler via Volta
+  ansible.builtin.shell: "volta install wrangler"
+  become: true
+  become_user: "{{ host_user }}"
+  when: volta_check.rc == 0 and wrangler_check.rc != 0
+  tags:
+    - volta
+    - wrangler
