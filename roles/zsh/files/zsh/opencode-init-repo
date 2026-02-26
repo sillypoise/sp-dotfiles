@@ -181,7 +181,7 @@ write_opencode_config() {
   local tmp_config
   tmp_config="$(mktemp)"
 
-  cat >"$tmp_config" <<'EOF'
+cat >"$tmp_config" <<'EOF'
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
@@ -194,6 +194,16 @@ write_opencode_config() {
     },
     "read": {
       "~/.local/share/opencode-guides/**": "allow"
+    }
+  },
+  "agent": {
+    "build": {
+      "model": "openai/gpt-5.3-codex",
+      "variant": "medium"
+    },
+    "plan": {
+      "model": "openai/gpt-5.3-codex",
+      "variant": "high"
     }
   }
 }

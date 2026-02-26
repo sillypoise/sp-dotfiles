@@ -171,9 +171,32 @@
           "read": {
             "~/.local/share/opencode-guides/**": "allow"
           }
+        },
+        "agent": {
+          "build": {
+            "model": "openai/gpt-5.3-codex",
+            "variant": "medium"
+          },
+          "plan": {
+            "model": "openai/gpt-5.3-codex",
+            "variant": "high"
+          }
         }
       }
     dest: "{{ host_user_home }}/.config/opencode/opencode.json"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0644"
+  become: true
+  become_user: "{{ host_user }}"
+  tags:
+    - opencode
+    - config
+
+- name: Write OpenCode TUI config
+  ansible.builtin.copy:
+    src: "opencode-tui.json"
+    dest: "{{ host_user_home }}/.config/opencode/tui.json"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: "0644"
