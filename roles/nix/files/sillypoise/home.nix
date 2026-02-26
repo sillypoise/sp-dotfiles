@@ -67,6 +67,7 @@
       tree-sitter                # Syntax parsing tool for editors
       volta                      # JavaScript tool manager
       websocat                   # CLI websocket client
+      wrangler                   # Cloudflare Workers CLI
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
     ] ++ (if builtins.hasAttr "claude-code" pkgs then [ pkgs."claude-code" ] else [ ]);
