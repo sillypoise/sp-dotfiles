@@ -63,6 +63,7 @@
       subversion                 # Apache subversion VCS
       # sqlite-utils               # SQLite utility and CLI
       starship                   # Customizable shell prompt
+      tenv                       # Terraform/OpenTofu version manager
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
       volta                      # JavaScript tool manager

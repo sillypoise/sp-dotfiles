@@ -21,6 +21,11 @@ if [ -d "$HOME/.volta" ]; then
     addToPathFront "$VOLTA_HOME/bin"
 fi
 
+# tenv setup: expose managed tool shims (terraform/tofu/terragrunt/etc.)
+if command -v tenv &>/dev/null && [ -d "$HOME/.tenv" ]; then
+    export PATH="$(tenv update-path)"
+fi
+
 # Rustup setup
 if command -v rustup &>/dev/null; then
     addToPath "$HOME/.cargo/bin"
