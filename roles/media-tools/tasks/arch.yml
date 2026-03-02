@@ -1,0 +1,9 @@
+---
+- name: media-tools | install ffmpeg (Arch)
+  ansible.builtin.pacman:
+    name: ffmpeg
+    state: present
+  tags:
+    - media-tools
+    - ffmpeg
+    - packages

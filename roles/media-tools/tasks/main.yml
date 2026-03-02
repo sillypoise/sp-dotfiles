@@ -1,0 +1,34 @@
+---
+- name: media-tools | install ffmpeg package (Arch)
+  ansible.builtin.import_tasks: arch.yml
+  when: facts_is_arch
+  tags:
+    - media-tools
+    - ffmpeg
+    - packages
+
+- name: media-tools | install ffmpeg package (Ubuntu)
+  ansible.builtin.import_tasks: ubuntu.yml
+  when: facts_is_ubuntu
+  tags:
+    - media-tools
+    - ffmpeg
+    - packages
+
+- name: media-tools | fail for unsupported distro
+  ansible.builtin.fail:
+    msg: "media-tools supports Arch Linux and Ubuntu only."
+  when: not facts_is_arch and not facts_is_ubuntu
+  tags:
+    - media-tools
+    - ffmpeg
+    - yt-dlp
+    - packages
+
+- name: media-tools | install yt-dlp binary
+  ansible.builtin.import_tasks: yt-dlp.yml
+  when: facts_is_arch or facts_is_ubuntu
+  tags:
+    - media-tools
+    - yt-dlp
+    - packages

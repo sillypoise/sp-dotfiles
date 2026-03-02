@@ -3,6 +3,7 @@ default_roles:
   - bash
   - zsh
   - nix
+  - media-tools
   - volta
   - git
   - ssh
@@ -30,6 +31,9 @@ facts_tailscale_authed: false
 # Nix/Home Manager releases
 nixpkgs_release: "nixos-25.11"
 home_manager_release: "release-25.11"
+
+# Media tools releases
+media_tools_yt_dlp_version: "2026.02.21"
 
 # Base package lists by distro
 packages_common:
