@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+unalias juc >/dev/null 2>&1
+
 juc() {
   if ! command -v just >/dev/null 2>&1; then
     print "juc: just is not installed"
