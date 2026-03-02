@@ -18,7 +18,7 @@ juc() {
     return 1
   fi
 
-  local json selected recipe query
+  local json selected recipe query param_output
   local -a menu_lines fzf_args
   local line name kind default input
   local -a param_lines args words
@@ -95,11 +95,15 @@ juc() {
     return 0
   fi
 
-  param_lines=("${(@f)$(
+  param_output="$(
     print -r -- "$json" | jq -r --arg recipe "$recipe" '
       .recipes
       | to_entries
-      | map(select((.value.namepath // .key) == $recipe))
+      | map(select(
+          (.value.namepath // .key) == $recipe
+          or .key == $recipe
+          or .value.name == $recipe
+        ))
       | first
       | (.value.parameters // [])
       | .[]
@@ -110,9 +114,18 @@ juc() {
         ]
       | @tsv
     '
-  )}")
+  )"
+
+  param_lines=()
+  if [[ -n "$param_output" ]]; then
+    param_lines=("${(@f)param_output}")
+  fi
 
   for line in "${param_lines[@]}"; do
+    if [[ -z "$line" ]]; then
+      continue
+    fi
+
     name="${line%%$'\t'*}"
     line="${line#*$'\t'}"
     kind="${line%%$'\t'*}"
