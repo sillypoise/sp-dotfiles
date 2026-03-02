@@ -23,30 +23,31 @@
     - yt-dlp
     - packages
 
-- name: media-tools | fetch yt-dlp SHA256SUMS
+- name: media-tools | fetch yt-dlp release metadata
   ansible.builtin.uri:
-    url: "https://github.com/yt-dlp/yt-dlp/releases/download/{{ media_tools_yt_dlp_version }}/SHA2-256SUMS"
+    url: "https://api.github.com/repos/yt-dlp/yt-dlp/releases/tags/{{ media_tools_yt_dlp_version }}"
     return_content: true
     status_code: 200
-  register: media_tools_yt_dlp_checksums
+  register: media_tools_yt_dlp_release
   changed_when: false
   retries: 3
   delay: 2
-  until: media_tools_yt_dlp_checksums is succeeded
+  until: media_tools_yt_dlp_release is succeeded
   tags:
     - media-tools
     - yt-dlp
     - packages
 
-- name: media-tools | extract yt-dlp checksum for selected asset
+- name: media-tools | select yt-dlp release asset metadata
   ansible.builtin.set_fact:
-    media_tools_yt_dlp_sha256: >-
+    media_tools_yt_dlp_asset_info: >-
       {{
         (
-          media_tools_yt_dlp_checksums.content
-          | regex_findall('(?m)^([A-Fa-f0-9]{64})\\s+\\*?' ~ media_tools_yt_dlp_asset ~ '$')
+          media_tools_yt_dlp_release.json.assets
+          | selectattr('name', 'equalto', media_tools_yt_dlp_asset)
+          | list
           | first
-          | default('')
+          | default({})
         )
       }}
   tags:
@@ -54,10 +55,32 @@
     - yt-dlp
     - packages
 
-- name: media-tools | fail when yt-dlp checksum is missing
+- name: media-tools | extract yt-dlp asset url and digest
+  ansible.builtin.set_fact:
+    media_tools_yt_dlp_download_url: "{{ media_tools_yt_dlp_asset_info.browser_download_url | default('') }}"
+    media_tools_yt_dlp_sha256: >-
+      {{
+        (media_tools_yt_dlp_asset_info.digest | default(''))
+        | regex_replace('^sha256:', '')
+      }}
+  tags:
+    - media-tools
+    - yt-dlp
+    - packages
+
+- name: media-tools | fail when yt-dlp release asset metadata is missing
   ansible.builtin.fail:
-    msg: "Unable to find checksum for {{ media_tools_yt_dlp_asset }} in SHA2-256SUMS"
-  when: media_tools_yt_dlp_sha256 | length == 0
+    msg: "Unable to resolve metadata for asset {{ media_tools_yt_dlp_asset }} in yt-dlp release {{ media_tools_yt_dlp_version }}"
+  when: media_tools_yt_dlp_download_url | length == 0
+  tags:
+    - media-tools
+    - yt-dlp
+    - packages
+
+- name: media-tools | fail when yt-dlp digest is invalid
+  ansible.builtin.fail:
+    msg: "Invalid sha256 digest for {{ media_tools_yt_dlp_asset }} in release metadata"
+  when: not (media_tools_yt_dlp_sha256 is match('^[A-Fa-f0-9]{64}$'))
   tags:
     - media-tools
     - yt-dlp
@@ -77,7 +100,7 @@
 
 - name: media-tools | install yt-dlp binary with checksum verification
   ansible.builtin.get_url:
-    url: "https://github.com/yt-dlp/yt-dlp/releases/download/{{ media_tools_yt_dlp_version }}/{{ media_tools_yt_dlp_asset }}"
+    url: "{{ media_tools_yt_dlp_download_url }}"
     dest: /usr/local/bin/yt-dlp
     owner: root
     group: root
