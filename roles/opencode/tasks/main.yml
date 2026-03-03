@@ -164,6 +164,22 @@
       {
         "$schema": "https://opencode.ai/config.json",
         "instructions": ["{{ opencode_guides_clone_path }}/files/AGENTS.md"],
+        "lsp": {
+          "astro": {},
+          "bash": {},
+          "clangd": {},
+          "eslint": {},
+          "typescript": {},
+          "pyright": {},
+          "gopls": {},
+          "nixd": {},
+          "oxlint": {},
+          "rust": {},
+          "sourcekit-lsp": {},
+          "terraform": {},
+          "lua-ls": {},
+          "zls": {}
+        },
         "permission": {
           "external_directory": {
             "~/.local/share/opencode-guides/**": "allow"
