@@ -204,6 +204,17 @@ cat >"$tmp_config" <<'EOF'
     "lua-ls": {},
     "zls": {}
   },
+  "mcp": {
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app/mcp",
+      "enabled": true,
+      "oauth": false,
+      "headers": {
+        "Authorization": "Bearer {env:LINEAR_API_TOKEN}"
+      }
+    }
+  },
   "permission": {
     "external_directory": {
       "~/.local/share/opencode-guides/**": "allow"
