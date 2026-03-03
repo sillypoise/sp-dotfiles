@@ -2,4 +2,5 @@ Host github.com
   HostName github.com
   User git
   IdentityFile ~/.ssh/gh_id_ed25519
+  AddKeysToAgent yes
   IdentitiesOnly yes

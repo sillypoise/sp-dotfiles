@@ -43,7 +43,7 @@ alias weather='curl wttr.in'
 alias wget='wget -c'
 
 # SSH
-alias sshg='eval $(ssh-agent) && ssh-add ~/.ssh/gh_id_ed25519'
+alias sshg='ensure_ssh_github_key_loaded'
 alias sshgv='eval $(ssh-agent) && ssh-add ~/.ssh/vanta_gh_id_ed25519'
 alias ssha='eval $(ssh-agent) && ssh-add ~/.ssh/aws_id_ed25519'
 alias sshsp='eval $(ssh-agent) && ssh-add ~/.ssh/sp_work_ed25519'
