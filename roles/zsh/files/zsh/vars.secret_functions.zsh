@@ -66,13 +66,17 @@ function secret-refresh() {
     return 1
   fi
   
-  # Run op inject to update vars.secret from template
-  if op inject -i "$HOME/.config/zsh/vars.secret.tpl" -o "$HOME/.config/zsh/vars.secret" -f; then
-    _task_done
-    # Now reload the secrets
-    secret --reload
-  else
+  if ! op inject -i "$HOME/.config/zsh/vars.secret.tpl" -o "$HOME/.config/zsh/vars.secret" -f; then
     echo -e " ${RED}[${CROSS_MARK}${RED}] Failed to inject secrets from 1Password"
     return 1
   fi
+
+  if ! op inject -i "$HOME/.config/zsh/vars.autoload.secret.tpl" -o "$HOME/.config/zsh/vars.autoload.secret.zsh" -f; then
+    echo -e " ${RED}[${CROSS_MARK}${RED}] Failed to inject autoload secrets from 1Password"
+    return 1
+  fi
+
+  _cmd "source '$HOME/.config/zsh/vars.autoload.secret.zsh'"
+  _task_done
+  secret --reload
 }

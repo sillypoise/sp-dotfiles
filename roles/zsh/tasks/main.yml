@@ -123,12 +123,19 @@
     - op
   changed_when: false
 
-- name: Ensure op_token.zsh has secure permissions
-  ansible.builtin.file:
-    path: "{{ host_user_home }}/.config/zsh/vars.secret"
-    owner: "{{ host_user }}"
-    group: "{{ host_user }}"
-    mode: '0600'
+- name: Inject autoload secrets into Zsh config
+  become: true
+  become_user: "{{ host_user }}"
+  ansible.builtin.shell: "op inject -i {{ host_user_home }}/.config/zsh/vars.autoload.secret.tpl -o {{ host_user_home }}/.config/zsh/vars.autoload.secret.zsh -f"
+  register: inject_autoload_result
+  no_log: true
+  environment:
+    OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+  tags:
+    - secrets
+    - op
+  changed_when: false
 
 - name: Ensure vars.secret has secure permissions
   ansible.builtin.file:
@@ -136,3 +143,16 @@
     owner: "{{ host_user }}"
     group: "{{ host_user }}"
     mode: '0600'
+  tags:
+    - secrets
+    - op
+
+- name: Ensure vars.autoload.secret.zsh has secure permissions
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/zsh/vars.autoload.secret.zsh"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0600'
+  tags:
+    - secrets
+    - op
