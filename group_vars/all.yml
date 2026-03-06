@@ -27,6 +27,7 @@ facts_home_manager_installed: false
 facts_zsh_installed: false
 facts_tailscale_installed: false
 facts_tailscale_authed: false
+tailscale_accept_dns: true
 
 # Nix/Home Manager releases
 nixpkgs_release: "nixos-25.11"

@@ -62,6 +62,95 @@ _transfer_peer_host() {
   print "${peer#*@}"
 }
 
+_transfer_peer_user() {
+  local peer="$1"
+  print "${peer%@*}"
+}
+
+_transfer_host_has_dns() {
+  local host="$1"
+
+  if command -v getent >/dev/null 2>&1; then
+    getent hosts "$host" >/dev/null 2>&1
+    return $?
+  fi
+
+  return 1
+}
+
+_transfer_resolve_tailscale_host_ip() {
+  local host="$1"
+
+  if ! command -v tailscale >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    return 1
+  fi
+
+  python3 - "$host" <<'PY'
+import json
+import subprocess
+import sys
+
+target = (sys.argv[1] or "").strip().lower().rstrip(".")
+if not target:
+    raise SystemExit(1)
+
+try:
+    status = subprocess.run(
+        ["tailscale", "status", "--json"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    data = json.loads(status.stdout)
+except Exception:
+    raise SystemExit(1)
+
+def norm(value):
+    return (value or "").strip().lower().rstrip(".")
+
+def peer_matches(peer):
+    host_name = norm(peer.get("HostName"))
+    dns_name = norm(peer.get("DNSName"))
+    names = {name for name in [host_name, dns_name] if name}
+    if dns_name:
+        names.add(dns_name.split(".")[0])
+    return target in names
+
+for peer in (data.get("Peer") or {}).values():
+    if not peer_matches(peer):
+        continue
+    ips = peer.get("TailscaleIPs") or []
+    if not ips:
+        raise SystemExit(1)
+
+    ipv4 = next((ip for ip in ips if ":" not in ip), None)
+    print(ipv4 or ips[0])
+    raise SystemExit(0)
+
+raise SystemExit(1)
+PY
+}
+
+_transfer_resolve_peer_endpoint() {
+  local peer="$1"
+  local peer_host peer_user resolved_ip
+
+  peer_host="$(_transfer_peer_host "$peer")"
+  peer_user="$(_transfer_peer_user "$peer")"
+
+  if _transfer_host_has_dns "$peer_host"; then
+    print "$peer"
+    return 0
+  fi
+
+  resolved_ip="$(_transfer_resolve_tailscale_host_ip "$peer_host")" || return 1
+  print "${peer_user}@${resolved_ip}"
+}
+
 _transfer_peer_is_local() {
   local peer_host="$1"
   local short_host fqdn_host
@@ -88,8 +177,12 @@ _transfer_peer_is_local() {
 
 _transfer_connection_hint() {
   local peer="$1"
+  local resolved_peer="${2:-}"
 
   print "transfer: unable to connect to $peer with SSH keys."
+  if [[ -n "$resolved_peer" && "$resolved_peer" != "$peer" ]]; then
+    print "  hint: resolved endpoint used: $resolved_peer"
+  fi
   print "  hint: verify with: ssh $peer"
   print "  hint: choose another endpoint with: rpeer user@host"
 }
@@ -99,6 +192,7 @@ _transfer_run() {
   local dry_run="$2"
   local src="${3:-}"
   local dst="${4:-}"
+  local peer_endpoint=""
   local peer_host=""
   local rc
   local -a args
@@ -125,6 +219,8 @@ _transfer_run() {
 
   _transfer_require_tools || return 1
 
+  peer_endpoint="$(_transfer_resolve_peer_endpoint "$RDS_PEER")" || peer_endpoint="$RDS_PEER"
+
   args=(-a --human-readable --progress --partial)
   if [[ "$dry_run" == "1" ]]; then
     args+=(--dry-run --itemize-changes)
@@ -134,10 +230,10 @@ _transfer_run() {
     if [[ -z "$dst" ]]; then
       dst="~"
     fi
-    rsync "${args[@]}" -- "$src" "${RDS_PEER}:${dst}"
+    rsync "${args[@]}" -- "$src" "${peer_endpoint}:${dst}"
     rc=$?
     if [[ "$rc" -eq 255 ]]; then
-      _transfer_connection_hint "$RDS_PEER"
+      _transfer_connection_hint "$RDS_PEER" "$peer_endpoint"
     fi
     return "$rc"
   fi
@@ -146,10 +242,10 @@ _transfer_run() {
     if [[ -z "$dst" ]]; then
       dst="."
     fi
-    rsync "${args[@]}" -- "${RDS_PEER}:${src}" "$dst"
+    rsync "${args[@]}" -- "${peer_endpoint}:${src}" "$dst"
     rc=$?
     if [[ "$rc" -eq 255 ]]; then
-      _transfer_connection_hint "$RDS_PEER"
+      _transfer_connection_hint "$RDS_PEER" "$peer_endpoint"
     fi
     return "$rc"
   fi

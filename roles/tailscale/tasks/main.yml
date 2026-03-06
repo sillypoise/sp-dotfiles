@@ -87,7 +87,7 @@
       - tailscale
       - up
       - "--authkey={{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
-      - "--accept-dns=false"
+      - "--accept-dns={{ tailscale_accept_dns | ternary('true', 'false') }}"
   register: tailscale_up
   changed_when: tailscale_up.rc == 0
   become: true
@@ -95,3 +95,19 @@
     TAILSCALE_AUTHKEY: "{{ lookup('env', 'TAILSCALE_AUTHKEY') }}"
   no_log: true  # keep the auth key secure
   when: facts_zsh_config_installed and not facts_tailscale_authed and (lookup('env', 'TAILSCALE_AUTHKEY') | length > 0)
+  tags:
+    - tailscale
+    - network
+
+- name: Apply Tailscale DNS preference for authenticated node
+  ansible.builtin.command:
+    argv:
+      - tailscale
+      - set
+      - "--accept-dns={{ tailscale_accept_dns | ternary('true', 'false') }}"
+  become: true
+  changed_when: false
+  when: facts_tailscale_installed and facts_tailscale_authed
+  tags:
+    - tailscale
+    - network
