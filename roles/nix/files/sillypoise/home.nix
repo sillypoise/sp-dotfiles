@@ -55,6 +55,7 @@
       pnpm                       # Fast, disk space efficient package manager
       podman                     # Docker alternative: manage pods, containers and container images
       postgresql                 # PostgreSQL client tools (psql)
+      poppler-utils              # PDF utilities (pdftotext, pdfinfo, etc.)
       # python312Packages.setuptools  # Required for datasette (pkg_resources)
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
@@ -66,6 +67,7 @@
       tenv                       # Terraform/OpenTofu version manager
       # tailscale                # Mesh VPN service
       tree-sitter                # Syntax parsing tool for editors
+      typst                      # Markup-based typesetting system
       volta                      # JavaScript tool manager
       websocat                   # CLI websocket client
       zellij                     # Terminal workspace manager
