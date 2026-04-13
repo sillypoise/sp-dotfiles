@@ -21,6 +21,7 @@
         ps.ruff
         ps.uv
       ]))
+      aria2                      # utility downloader
       aws-vault                  # AWS credential management
       awscli2                    # AWS CLI
       bat                        # Improved cat with syntax highlighting
