@@ -1,0 +1,200 @@
+---
+- name: pi | select release asset for architecture
+  ansible.builtin.set_fact:
+    pi_coding_agent_asset_name: >-
+      {{
+        'pi-linux-arm64.tar.gz'
+        if ansible_architecture in ['aarch64', 'arm64']
+        else 'pi-linux-x64.tar.gz'
+        if ansible_architecture in ['x86_64', 'amd64']
+        else ''
+      }}
+  tags:
+    - pi
+    - install
+
+- name: pi | fail when architecture is unsupported
+  ansible.builtin.fail:
+    msg: "Unsupported architecture for pi binary install: {{ ansible_architecture }}"
+  when: pi_coding_agent_asset_name | length == 0
+  tags:
+    - pi
+    - install
+
+- name: pi | check installed pi version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pi --version
+  register: pi_coding_agent_version_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - pi
+    - install
+
+- name: pi | fetch latest release metadata
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/badlogic/pi-mono/releases/latest
+    return_content: true
+    status_code: 200
+  register: pi_coding_agent_release
+  changed_when: false
+  retries: 3
+  delay: 2
+  until: pi_coding_agent_release is succeeded
+  tags:
+    - pi
+    - install
+
+- name: pi | set version facts
+  ansible.builtin.set_fact:
+    pi_coding_agent_latest_version: >-
+      {{
+        (pi_coding_agent_release.json.tag_name | default(''))
+        | regex_replace('^v', '')
+      }}
+    pi_coding_agent_installed_version: >-
+      {{
+        (pi_coding_agent_version_check.stdout | default(''))
+        | regex_search('[0-9]+(\\.[0-9]+)+')
+        | default('')
+      }}
+  tags:
+    - pi
+    - install
+
+- name: pi | fail when latest version is unavailable
+  ansible.builtin.fail:
+    msg: Unable to determine the latest pi coding agent release version.
+  when: pi_coding_agent_latest_version | length == 0
+  tags:
+    - pi
+    - install
+
+- name: pi | select release asset metadata
+  ansible.builtin.set_fact:
+    pi_coding_agent_asset_info: >-
+      {{
+        (
+          pi_coding_agent_release.json.assets
+          | selectattr('name', 'equalto', pi_coding_agent_asset_name)
+          | list
+          | first
+          | default({})
+        )
+      }}
+  tags:
+    - pi
+    - install
+
+- name: pi | extract asset url and digest
+  ansible.builtin.set_fact:
+    pi_coding_agent_download_url: >-
+      {{ pi_coding_agent_asset_info.browser_download_url | default('') }}
+    pi_coding_agent_sha256: >-
+      {{
+        (pi_coding_agent_asset_info.digest | default(''))
+        | regex_replace('^sha256:', '')
+      }}
+  tags:
+    - pi
+    - install
+
+- name: pi | fail when release asset metadata is missing
+  ansible.builtin.fail:
+    msg: >-
+      Unable to resolve metadata for asset {{ pi_coding_agent_asset_name }} in
+      pi release {{ pi_coding_agent_latest_version }}.
+  when: pi_coding_agent_download_url | length == 0
+  tags:
+    - pi
+    - install
+
+- name: pi | fail when digest is invalid
+  ansible.builtin.fail:
+    msg: >-
+      Invalid sha256 digest for {{ pi_coding_agent_asset_name }} in the pi
+      release metadata.
+  when: not (pi_coding_agent_sha256 is match('^[A-Fa-f0-9]{64}$'))
+  tags:
+    - pi
+    - install
+
+- name: pi | ensure /usr/local/bin exists
+  ansible.builtin.file:
+    path: /usr/local/bin
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags:
+    - pi
+    - install
+
+- name: pi | install or update binary
+  when: >-
+    pi_coding_agent_version_check.rc != 0 or
+    pi_coding_agent_installed_version != pi_coding_agent_latest_version
+  tags:
+    - pi
+    - install
+  block:
+    - name: pi | create temporary directory
+      ansible.builtin.tempfile:
+        state: directory
+        prefix: pi-
+      register: pi_coding_agent_temp_dir
+
+    - name: pi | download release archive
+      ansible.builtin.get_url:
+        url: "{{ pi_coding_agent_download_url }}"
+        dest: "{{ pi_coding_agent_temp_dir.path }}/{{ pi_coding_agent_asset_name }}"
+        mode: "0644"
+        checksum: "sha256:{{ pi_coding_agent_sha256 }}"
+      register: pi_coding_agent_download
+      retries: 3
+      delay: 2
+      until: pi_coding_agent_download is succeeded
+
+    - name: pi | extract release archive
+      ansible.builtin.unarchive:
+        src: "{{ pi_coding_agent_temp_dir.path }}/{{ pi_coding_agent_asset_name }}"
+        dest: "{{ pi_coding_agent_temp_dir.path }}"
+        remote_src: true
+
+    - name: pi | install pi binary
+      ansible.builtin.copy:
+        src: "{{ pi_coding_agent_temp_dir.path }}/pi/pi"
+        dest: /usr/local/bin/pi
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0755"
+
+  always:
+    - name: pi | remove temporary directory
+      ansible.builtin.file:
+        path: "{{ pi_coding_agent_temp_dir.path }}"
+        state: absent
+      when: pi_coding_agent_temp_dir is defined
+
+- name: pi | verify installed pi version
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pi --version
+  register: pi_coding_agent_installed_check
+  changed_when: false
+  tags:
+    - pi
+    - verification
+
+- name: pi | assert installed version matches latest release
+  ansible.builtin.assert:
+    that:
+      - pi_coding_agent_installed_check.rc == 0
+      - pi_coding_agent_installed_check.stdout is search(pi_coding_agent_latest_version)
+    fail_msg: >-
+      pi was not installed correctly. Expected version
+      {{ pi_coding_agent_latest_version }}, got
+      {{ pi_coding_agent_installed_check.stdout | default('missing output') }}.
+  tags:
+    - pi
+    - verification
