@@ -55,7 +55,7 @@
     pi_coding_agent_installed_version: >-
       {{
         (pi_coding_agent_version_check.stdout | default(''))
-        | regex_search('[0-9]+(\\.[0-9]+)+')
+        | regex_search('[0-9]+(\.[0-9]+)+')
         | default('')
       }}
   tags:
@@ -64,7 +64,7 @@
 
 - name: pi | fail when latest version is unavailable
   ansible.builtin.fail:
-    msg: Unable to determine the latest pi coding agent release version.
+    msg: Unable to determine the latest pi release version.
   when: pi_coding_agent_latest_version | length == 0
   tags:
     - pi
@@ -130,7 +130,18 @@
     - pi
     - install
 
-- name: pi | install or update binary
+- name: pi | ensure /usr/local/lib exists
+  ansible.builtin.file:
+    path: /usr/local/lib
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags:
+    - pi
+    - install
+
+- name: pi | install or update bundle
   when: >-
     pi_coding_agent_version_check.rc != 0 or
     pi_coding_agent_installed_version != pi_coding_agent_latest_version
@@ -155,20 +166,25 @@
       delay: 2
       until: pi_coding_agent_download is succeeded
 
-    - name: pi | extract release archive
+    - name: pi | remove existing pi bundle before install
+      ansible.builtin.file:
+        path: /usr/local/lib/pi
+        state: absent
+
+    - name: pi | install pi bundle
       ansible.builtin.unarchive:
         src: "{{ pi_coding_agent_temp_dir.path }}/{{ pi_coding_agent_asset_name }}"
-        dest: "{{ pi_coding_agent_temp_dir.path }}"
+        dest: /usr/local/lib
         remote_src: true
 
-    - name: pi | install pi binary
-      ansible.builtin.copy:
-        src: "{{ pi_coding_agent_temp_dir.path }}/pi/pi"
+    - name: pi | link pi executable
+      ansible.builtin.file:
+        src: /usr/local/lib/pi/pi
         dest: /usr/local/bin/pi
-        remote_src: true
+        state: link
+        force: true
         owner: root
         group: root
-        mode: "0755"
 
   always:
     - name: pi | remove temporary directory
