@@ -41,7 +41,7 @@ media_tools_yt_dlp_version: "2026.02.21"
 pi_default_provider: "openai-codex"
 pi_default_model: "gpt-5.4"
 pi_default_thinking_level: "high"
-pi_guides_enable_global: false
+pi_guides_enable_global: true
 pi_guides_source: "git:github.com/sillypoise/pi-guides@v0.1.0"
 pi_keybindings:
   app.interrupt:
