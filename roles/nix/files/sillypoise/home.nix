@@ -37,6 +37,7 @@
       duf                        # df alternative
       eza                        # Enhanced ls with better formatting
       fd                         # Simple and fast file search
+      file                       # Program that shows the type of files
       fzf                        # Command-line fuzzy finder
       gh                         # GitHub CLI
       git                        # Version control system

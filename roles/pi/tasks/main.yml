@@ -214,3 +214,41 @@
   tags:
     - pi
     - verification
+
+- name: pi | ensure global config directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.pi/agent"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  tags:
+    - pi
+    - config
+
+- name: pi | write global settings
+  ansible.builtin.copy:
+    content: |
+      {
+        "defaultProvider": "{{ pi_default_provider }}",
+        "defaultModel": "{{ pi_default_model }}",
+        "defaultThinkingLevel": "{{ pi_default_thinking_level }}"
+      }
+    dest: "{{ host_user_home }}/.pi/agent/settings.json"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0644"
+  tags:
+    - pi
+    - config
+
+- name: pi | write global keybindings
+  ansible.builtin.copy:
+    content: "{{ pi_keybindings | to_nice_json }}"
+    dest: "{{ host_user_home }}/.pi/agent/keybindings.json"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0644"
+  tags:
+    - pi
+    - config

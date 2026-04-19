@@ -37,6 +37,18 @@ home_manager_release: "release-25.11"
 # Media tools releases
 media_tools_yt_dlp_version: "2026.02.21"
 
+# Pi defaults
+pi_default_provider: "openai-codex"
+pi_default_model: "gpt-5.4"
+pi_default_thinking_level: "high"
+pi_keybindings:
+  tui.editor.cursorUp:
+    - up
+    - ctrl+p
+  tui.editor.cursorDown:
+    - down
+    - ctrl+n
+
 # Base package lists by distro
 packages_common:
   - git
