@@ -44,6 +44,7 @@
       gnused                     # GNU sed (stream editor)
       go                         # Go programming language
       httpie                     # Command-line HTTP client
+      jjui                       # tui fo jj
       jq                         # JSON processor
       just                       # Command runner
       k9s                        # k8s tui
