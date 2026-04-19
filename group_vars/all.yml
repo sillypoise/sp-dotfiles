@@ -42,12 +42,27 @@ pi_default_provider: "openai-codex"
 pi_default_model: "gpt-5.4"
 pi_default_thinking_level: "high"
 pi_keybindings:
-  tui.editor.cursorUp:
-    - up
-    - ctrl+p
+  app.interrupt:
+    - ctrl+x
+  app.model.cycleForward: []
+  app.session.toggleNamedFilter: []
+  app.session.togglePath: []
   tui.editor.cursorDown:
     - down
+  tui.editor.cursorUp:
+    - up
+  tui.editor.pageDown:
+    - pageDown
+    - ctrl+down
+  tui.editor.pageUp:
+    - pageUp
+    - ctrl+up
+  tui.select.down:
+    - down
     - ctrl+n
+  tui.select.up:
+    - up
+    - ctrl+p
 
 # Base package lists by distro
 packages_common:
