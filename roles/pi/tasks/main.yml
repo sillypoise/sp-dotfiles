@@ -236,6 +236,143 @@
     - pi
     - config
 
+- name: pi | set pi-guides package facts
+  ansible.builtin.set_fact:
+    pi_guides_source_kind: >-
+      {{
+        'git'
+        if (
+          pi_guides_source.startswith('git:') or
+          pi_guides_source.startswith('https://') or
+          pi_guides_source.startswith('http://') or
+          pi_guides_source.startswith('ssh://')
+        )
+        else 'local'
+      }}
+    pi_guides_expected_version: >-
+      {{
+        pi_guides_source | regex_replace('^.*@v?([0-9]+(\.[0-9]+)+)$', '\1')
+        if (pi_guides_source is match('^.*@v?[0-9]+(\.[0-9]+)+$'))
+        else ''
+      }}
+    pi_guides_git_install_path: "{{ host_user_home }}/.pi/agent/git/github.com/sillypoise/pi-guides"
+    pi_guides_git_remote_url: "git@github.com:sillypoise/pi-guides.git"
+  when: pi_guides_enable_global
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | fail when pi-guides source kind is unsupported for managed refresh
+  ansible.builtin.fail:
+    msg: >-
+      Managed pi-guides refresh currently supports git, ssh, https, and local path sources.
+      Got: {{ pi_guides_source }}
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind not in ['git', 'local']
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | check installed pi-guides package manifest
+  ansible.builtin.stat:
+    path: "{{ pi_guides_git_install_path }}/package.json"
+  register: pi_guides_manifest_stat
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | read installed pi-guides package manifest
+  ansible.builtin.slurp:
+    src: "{{ pi_guides_git_install_path }}/package.json"
+  register: pi_guides_manifest_slurp
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_manifest_stat.stat.exists
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | set installed pi-guides package version
+  ansible.builtin.set_fact:
+    pi_guides_installed_version: >-
+      {{ (pi_guides_manifest_slurp.content | b64decode | from_json).version | default('') }}
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_manifest_stat.stat.exists
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | read installed pi-guides git remote
+  ansible.builtin.command:
+    cmd: git -C {{ pi_guides_git_install_path }} remote get-url origin
+  register: pi_guides_remote_check
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ host_user }}"
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_manifest_stat.stat.exists
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | decide whether pi-guides refresh is required
+  ansible.builtin.set_fact:
+    pi_guides_refresh_required: >-
+      {{
+        (not pi_guides_manifest_stat.stat.exists) or
+        (
+          (pi_guides_expected_version | length > 0) and
+          (pi_guides_installed_version | default('') != pi_guides_expected_version)
+        ) or
+        ((pi_guides_remote_check.stdout | default('') | trim) != pi_guides_git_remote_url)
+      }}
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | refresh managed global pi-guides package
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_refresh_required
+  tags:
+    - pi
+    - config
+    - packages
+  block:
+    - name: pi | remove stale managed pi-guides checkout
+      ansible.builtin.file:
+        path: "{{ pi_guides_git_install_path }}"
+        state: absent
+
+    - name: pi | install managed global pi-guides package
+      ansible.builtin.command:
+        cmd: /usr/local/bin/pi install {{ pi_guides_source }}
+      become: true
+      become_user: "{{ host_user }}"
+      register: pi_guides_install_result
+      changed_when: true
+
 - name: pi | write global settings
   ansible.builtin.copy:
     content: >-
@@ -260,6 +397,72 @@
   tags:
     - pi
     - config
+
+- name: pi | verify managed pi-guides package manifest exists
+  ansible.builtin.stat:
+    path: "{{ pi_guides_git_install_path }}/package.json"
+  register: pi_guides_verified_manifest_stat
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+  tags:
+    - pi
+    - verification
+    - packages
+
+- name: pi | read verified pi-guides package manifest
+  ansible.builtin.slurp:
+    src: "{{ pi_guides_git_install_path }}/package.json"
+  register: pi_guides_verified_manifest_slurp
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_verified_manifest_stat.stat.exists
+  tags:
+    - pi
+    - verification
+    - packages
+
+- name: pi | read verified pi-guides git remote
+  ansible.builtin.command:
+    cmd: git -C {{ pi_guides_git_install_path }} remote get-url origin
+  register: pi_guides_verified_remote_check
+  changed_when: false
+  failed_when: false
+  become: true
+  become_user: "{{ host_user }}"
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - pi_guides_verified_manifest_stat.stat.exists
+  tags:
+    - pi
+    - verification
+    - packages
+
+- name: pi | assert managed pi-guides package matches desired source
+  ansible.builtin.assert:
+    that:
+      - pi_guides_verified_manifest_stat.stat.exists
+      - pi_guides_verified_remote_check.rc == 0
+      - (pi_guides_verified_remote_check.stdout | trim) == pi_guides_git_remote_url
+      - >-
+        (pi_guides_expected_version | length == 0) or
+        ((pi_guides_verified_manifest_slurp.content | b64decode | from_json).version ==
+        pi_guides_expected_version)
+    fail_msg: >-
+      Managed global pi-guides package does not match the desired source.
+      Source={{ pi_guides_source }}
+      Remote={{ pi_guides_verified_remote_check.stdout | default('missing') | trim }}
+      Version={{ ((pi_guides_verified_manifest_slurp.content | b64decode | from_json).version)
+      if (pi_guides_verified_manifest_stat.stat.exists) else 'missing' }}
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+  tags:
+    - pi
+    - verification
+    - packages
 
 - name: pi | write global keybindings
   ansible.builtin.copy:

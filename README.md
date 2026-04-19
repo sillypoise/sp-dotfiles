@@ -95,6 +95,8 @@ Current distribution model:
 - optional global registration of the `pi-guides` package is controlled by:
   - `pi_guides_enable_global`
   - `pi_guides_source`
+- when global guides are enabled, the `pi` role also refreshes and verifies the installed
+  `pi-guides` package checkout so package state matches the configured pinned source
 
 Recommended usage:
 

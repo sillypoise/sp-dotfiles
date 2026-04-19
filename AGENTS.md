@@ -95,6 +95,14 @@ Global registration of the `pi-guides` package is controlled by:
 - `pi_guides_enable_global`
 - `pi_guides_source`
 
+When global guides are enabled, the role manages both:
+
+- declared global settings in `~/.pi/agent/settings.json`
+- installed global package state under `~/.pi/agent/git/...`
+
+That keeps pinned package updates converged instead of relying on manual `pi remove` or
+`pi install` repair steps.
+
 When the package is globally available, initialize a personal repo with `/guide-init --no-settings`.
 When a repo should pin its own package source, use `/guide-init <pinned-package-source>` and commit
 `.pi/settings.json`.
