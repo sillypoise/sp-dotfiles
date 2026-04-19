@@ -226,14 +226,33 @@
     - pi
     - config
 
+- name: pi | fail when pi-guides global enablement lacks a source
+  ansible.builtin.fail:
+    msg: pi_guides_enable_global requires a non-empty pi_guides_source.
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source | length == 0
+  tags:
+    - pi
+    - config
+
 - name: pi | write global settings
   ansible.builtin.copy:
-    content: |
-      {
-        "defaultProvider": "{{ pi_default_provider }}",
-        "defaultModel": "{{ pi_default_model }}",
-        "defaultThinkingLevel": "{{ pi_default_thinking_level }}"
-      }
+    content: >-
+      {{
+        {
+          'defaultProvider': pi_default_provider,
+          'defaultModel': pi_default_model,
+          'defaultThinkingLevel': pi_default_thinking_level
+        }
+        | combine(
+          {'packages': [pi_guides_source]}
+          if pi_guides_enable_global
+          else {},
+          recursive=True
+        )
+        | to_nice_json
+      }}
     dest: "{{ host_user_home }}/.pi/agent/settings.json"
     owner: "{{ host_user }}"
     group: "{{ host_user }}"

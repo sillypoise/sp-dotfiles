@@ -84,6 +84,31 @@ dotfiles -t t<tab>
 dotfiles -t ne<tab>
 ```
 
+## Pi Guides
+
+The `pi` role owns pi installation and the global pi baseline.
+
+Current distribution model:
+
+- pi itself is installed globally
+- `~/.pi/agent/settings.json` is managed by the `pi` role
+- optional global registration of the `pi-guides` package is controlled by:
+  - `pi_guides_enable_global`
+  - `pi_guides_source`
+
+Recommended usage:
+
+- enable the package globally for workstation-wide slash commands and extension availability
+- use `/guide-init --no-settings` in personal repos when the package is already global
+- use `/guide-init <pinned-package-source>` in shared repos that should commit `.pi/settings.json`
+
+Important nuance:
+
+- global package install makes guide tooling available everywhere
+- guides only become active in a repo when that repo has `.pi/guides.json`
+
+This is the pi-native replacement for the old shared-guide-clone model.
+
 ## OpenCode Guides
 
 This repository does not own OpenCode guide content.

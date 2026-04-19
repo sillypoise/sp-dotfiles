@@ -85,6 +85,26 @@ distribution plumbing.
 This repository does not own shared OpenCode guide-family content. Guide authoring,
 derivation, and governance happen in the dedicated guides repository.
 
+### Pi Integration Workflow
+
+Run `dotfiles -t pi` to install pi and write the global pi baseline in
+`~/.pi/agent/settings.json`.
+
+Global registration of the `pi-guides` package is controlled by:
+
+- `pi_guides_enable_global`
+- `pi_guides_source`
+
+When the package is globally available, initialize a personal repo with `/guide-init --no-settings`.
+When a repo should pin its own package source, use `/guide-init <pinned-package-source>` and commit
+`.pi/settings.json`.
+
+Pi guide activation stays repo-local:
+
+- `.pi/guides.json` selects guides
+- `AGENTS.md` stores repo facts and workflow notes
+- global package availability only makes the tooling available; it does not force activation
+
 ### OpenCode Integration Workflow
 
 Run `dotfiles -t opencode` to install OpenCode and clone shared guides into the local user
