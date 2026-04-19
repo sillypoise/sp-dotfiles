@@ -257,6 +257,7 @@
       }}
     pi_guides_git_install_path: "{{ host_user_home }}/.pi/agent/git/github.com/sillypoise/pi-guides"
     pi_guides_git_remote_url: "git@github.com:sillypoise/pi-guides.git"
+    pi_guides_git_remote_url_normalized: "git@github.com:sillypoise/pi-guides"
   when: pi_guides_enable_global
   tags:
     - pi
@@ -340,7 +341,10 @@
           (pi_guides_expected_version | length > 0) and
           (pi_guides_installed_version | default('') != pi_guides_expected_version)
         ) or
-        ((pi_guides_remote_check.stdout | default('') | trim) != pi_guides_git_remote_url)
+        (
+          (pi_guides_remote_check.stdout | default('') | trim | regex_replace('\.git$', '')) !=
+          pi_guides_git_remote_url_normalized
+        )
       }}
   when:
     - pi_guides_enable_global
@@ -445,7 +449,9 @@
     that:
       - pi_guides_verified_manifest_stat.stat.exists
       - pi_guides_verified_remote_check.rc == 0
-      - (pi_guides_verified_remote_check.stdout | trim) == pi_guides_git_remote_url
+      - >-
+        (pi_guides_verified_remote_check.stdout | trim | regex_replace('\.git$', '')) ==
+        pi_guides_git_remote_url_normalized
       - >-
         (pi_guides_expected_version | length == 0) or
         ((pi_guides_verified_manifest_slurp.content | b64decode | from_json).version ==
