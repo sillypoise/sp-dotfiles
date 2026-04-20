@@ -42,7 +42,7 @@ pi_default_provider: "openai-codex"
 pi_default_model: "gpt-5.4"
 pi_default_thinking_level: "high"
 pi_guides_enable_global: true
-pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.1.2"
+pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.2.0"
 pi_keybindings:
   app.interrupt:
     - ctrl+x
