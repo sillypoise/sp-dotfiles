@@ -34,6 +34,7 @@
       # datasette                  # Publish and explore SQLite databases
       delta                      # Git diff viewer with syntax highlighting
       deno                       # JavaScript runtime
+      duckdb                     # Embeddable SQL OLAP DBMS
       duf                        # df alternative
       eza                        # Enhanced ls with better formatting
       fd                         # Simple and fast file search
