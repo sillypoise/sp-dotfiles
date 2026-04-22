@@ -9,3 +9,14 @@
     - media-tools
     - ffmpeg
     - packages
+
+- name: media-tools | install libvips (Ubuntu)
+  ansible.builtin.apt:
+    name: libvips-tools
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  tags:
+    - media-tools
+    - libvips
+    - packages

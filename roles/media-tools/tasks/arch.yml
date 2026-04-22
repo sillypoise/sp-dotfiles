@@ -7,3 +7,12 @@
     - media-tools
     - ffmpeg
     - packages
+
+- name: media-tools | install libvips (Arch)
+  ansible.builtin.pacman:
+    name: vips
+    state: present
+  tags:
+    - media-tools
+    - libvips
+    - packages

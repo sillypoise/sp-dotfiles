@@ -1,18 +1,20 @@
 ---
-- name: media-tools | install ffmpeg package (Arch)
+- name: media-tools | install distro media packages (Arch)
   ansible.builtin.import_tasks: arch.yml
   when: facts_is_arch
   tags:
     - media-tools
     - ffmpeg
+    - libvips
     - packages
 
-- name: media-tools | install ffmpeg package (Ubuntu)
+- name: media-tools | install distro media packages (Ubuntu)
   ansible.builtin.import_tasks: ubuntu.yml
   when: facts_is_ubuntu
   tags:
     - media-tools
     - ffmpeg
+    - libvips
     - packages
 
 - name: media-tools | fail for unsupported distro
@@ -22,6 +24,7 @@
   tags:
     - media-tools
     - ffmpeg
+    - libvips
     - yt-dlp
     - packages
 
