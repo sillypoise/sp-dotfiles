@@ -253,10 +253,10 @@
       - pi_enabled_models is iterable
       - pi_enabled_models is not string
       - >-
-        (pi_enabled_models | length == 0) or
-        ((pi_enabled_models | map('type_debug') | unique | list) == ['str'])
+        (pi_enabled_models | select('string') | list | length) ==
+        (pi_enabled_models | length)
       - >-
-        (pi_enabled_models | select('equalto', '') | list | length) == 0
+        (pi_enabled_models | map('trim') | select('equalto', '') | list | length) == 0
     fail_msg: pi_enabled_models must be a list of non-empty model pattern strings.
   tags:
     - pi
