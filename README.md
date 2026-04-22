@@ -92,6 +92,11 @@ Current distribution model:
 
 - pi itself is installed globally
 - `~/.pi/agent/settings.json` is managed by the `pi` role
+- the global settings baseline currently comes from:
+  - `pi_default_provider`
+  - `pi_default_model`
+  - `pi_default_thinking_level`
+  - `pi_enabled_models`
 - optional global registration of the `pi-guides` package is controlled by:
   - `pi_guides_enable_global`
   - `pi_guides_source`
