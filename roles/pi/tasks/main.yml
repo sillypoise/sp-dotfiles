@@ -226,6 +226,17 @@
     - pi
     - config
 
+- name: pi | write global append system instructions
+  ansible.builtin.copy:
+    src: APPEND_SYSTEM.md
+    dest: "{{ host_user_home }}/.pi/agent/APPEND_SYSTEM.md"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0644"
+  tags:
+    - pi
+    - config
+
 - name: pi | fail when pi-guides global enablement lacks a source
   ansible.builtin.fail:
     msg: pi_guides_enable_global requires a non-empty pi_guides_source.

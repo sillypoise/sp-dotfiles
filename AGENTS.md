@@ -98,6 +98,7 @@ Global registration of the `pi-guides` package is controlled by:
 When global guides are enabled, the role manages both:
 
 - declared global settings in `~/.pi/agent/settings.json`
+- shared system prompt additions in `~/.pi/agent/APPEND_SYSTEM.md`
 - installed global package state under `~/.pi/agent/git/...`
 
 That keeps pinned package updates converged instead of relying on manual `pi remove` or
