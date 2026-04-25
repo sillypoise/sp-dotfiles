@@ -50,6 +50,8 @@ pi_enabled_models:
 #   - "gemini-2.5-pro"
 pi_guides_enable_global: true
 pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.2.0"
+pi_extra_packages:
+  - "npm:@ff-labs/pi-fff"
 pi_keybindings:
   app.interrupt:
     - ctrl+x

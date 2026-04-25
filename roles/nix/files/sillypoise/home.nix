@@ -74,6 +74,7 @@
       typst                      # Markup-based typesetting system
       volta                      # JavaScript tool manager
       websocat                   # CLI websocket client
+      zig                        # Systems programming language toolchain
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
     ] ++ (if builtins.hasAttr "claude-code" pkgs then [ pkgs."claude-code" ] else [ ]);

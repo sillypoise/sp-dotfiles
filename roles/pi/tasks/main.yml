@@ -262,6 +262,22 @@
     - pi
     - config
 
+- name: pi | assert extra packages are a string list with no empty entries
+  ansible.builtin.assert:
+    that:
+      - pi_extra_packages is iterable
+      - pi_extra_packages is not string
+      - >-
+        (pi_extra_packages | select('string') | list | length) ==
+        (pi_extra_packages | length)
+      - >-
+        (pi_extra_packages | map('trim') | select('equalto', '') | list | length) == 0
+    fail_msg: pi_extra_packages must be a list of non-empty package source strings.
+  tags:
+    - pi
+    - config
+    - packages
+
 - name: pi | set pi-guides package facts
   ansible.builtin.set_fact:
     pi_guides_source_kind: >-
@@ -419,8 +435,10 @@
           recursive=True
         )
         | combine(
-          {'packages': [pi_guides_source]}
-          if pi_guides_enable_global
+          {
+            'packages': (([pi_guides_source] if pi_guides_enable_global else []) + pi_extra_packages)
+          }
+          if (pi_guides_enable_global or (pi_extra_packages | length > 0))
           else {},
           recursive=True
         )
