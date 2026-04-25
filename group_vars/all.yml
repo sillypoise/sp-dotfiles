@@ -50,8 +50,15 @@ pi_enabled_models:
 #   - "gemini-2.5-pro"
 pi_guides_enable_global: true
 pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.2.0"
-pi_extra_packages:
-  - "npm:@ff-labs/pi-fff"
+pi_extra_packages: []
+pi_managed_source_packages:
+  - name: "fff.nvim"
+    repo: "https://github.com/dmtrKovalenko/fff.nvim.git"
+    ref: "4b13a91aa57c5e9ed32ee381d9ee521800818370"
+    checkout_path: "{{ host_user_home }}/.pi/agent/src/fff.nvim"
+    package_path: "{{ host_user_home }}/.pi/agent/src/fff.nvim/packages/pi-fff"
+    dependency_marker: "node_modules/@ff-labs/fff-node/package.json"
+    install_command: "npm install --omit=dev"
 pi_keybindings:
   app.interrupt:
     - ctrl+x

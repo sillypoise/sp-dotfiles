@@ -278,6 +278,17 @@
     - config
     - packages
 
+- name: pi | assert managed source packages are a list
+  ansible.builtin.assert:
+    that:
+      - pi_managed_source_packages is iterable
+      - pi_managed_source_packages is not string
+    fail_msg: pi_managed_source_packages must be a list of package records.
+  tags:
+    - pi
+    - config
+    - packages
+
 - name: pi | set pi-guides package facts
   ansible.builtin.set_fact:
     pi_guides_source_kind: >-
@@ -419,6 +430,69 @@
       register: pi_guides_install_result
       changed_when: true
 
+- name: pi | ensure managed source package directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.pi/agent/src"
+    state: directory
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: "0755"
+  when: pi_managed_source_packages | length > 0
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | install managed source package checkouts
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.checkout_path }}"
+    version: "{{ item.ref }}"
+    update: true
+    force: true
+  become: true
+  become_user: "{{ host_user }}"
+  loop: "{{ pi_managed_source_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: pi_managed_source_package_git_results
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | check managed source package dependencies
+  ansible.builtin.stat:
+    path: "{{ item.package_path }}/{{ item.dependency_marker }}"
+  loop: "{{ pi_managed_source_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: pi_managed_source_package_dependency_markers
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | install managed source package dependencies
+  ansible.builtin.command:
+    cmd: "{{ item.install_command }}"
+    chdir: "{{ item.package_path }}"
+  become: true
+  become_user: "{{ host_user }}"
+  loop: "{{ pi_managed_source_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+    index_var: package_index
+  register: pi_managed_source_package_install_results
+  changed_when: true
+  when: >-
+    pi_managed_source_package_git_results.results[package_index].changed or
+    not pi_managed_source_package_dependency_markers.results[package_index].stat.exists
+  tags:
+    - pi
+    - config
+    - packages
+
 - name: pi | write global settings
   ansible.builtin.copy:
     content: >-
@@ -436,9 +510,17 @@
         )
         | combine(
           {
-            'packages': (([pi_guides_source] if pi_guides_enable_global else []) + pi_extra_packages)
+            'packages': (
+              ([pi_guides_source] if pi_guides_enable_global else []) +
+              (pi_managed_source_packages | map(attribute='package_path') | list) +
+              pi_extra_packages
+            )
           }
-          if (pi_guides_enable_global or (pi_extra_packages | length > 0))
+          if (
+            pi_guides_enable_global or
+            (pi_managed_source_packages | length > 0) or
+            (pi_extra_packages | length > 0)
+          )
           else {},
           recursive=True
         )
