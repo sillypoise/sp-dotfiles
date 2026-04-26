@@ -16,6 +16,7 @@
       (python312.withPackages (ps: [
         ps.datasette
         ps.llm
+        ps.pillow
         ps.setuptools
         ps.sqlite-utils
         ps.ruff
@@ -45,6 +46,7 @@
       gnused                     # GNU sed (stream editor)
       go                         # Go programming language
       httpie                     # Command-line HTTP client
+      imagemagick                # Image manipulation command-line tools
       jjui                       # tui fo jj
       jq                         # JSON processor
       just                       # Command runner

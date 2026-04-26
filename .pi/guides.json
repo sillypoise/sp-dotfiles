@@ -4,5 +4,8 @@
   "mode": "compact",
   "additions": [],
   "removals": [],
-  "variants": {}
+  "variants": {},
+  "behavior": {
+    "autoCommit": true
+  }
 }
