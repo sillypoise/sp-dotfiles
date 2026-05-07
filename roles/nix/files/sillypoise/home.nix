@@ -69,6 +69,7 @@
       sd                         # Modern sed alternative
       subversion                 # Apache subversion VCS
       # sqlite-utils               # SQLite utility and CLI
+      sqlite                     # sqlite cli
       starship                   # Customizable shell prompt
       tenv                       # Terraform/OpenTofu version manager
       # tailscale                # Mesh VPN service
