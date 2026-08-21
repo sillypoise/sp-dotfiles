@@ -35,6 +35,23 @@ aws-use() {
     aws-who
 }
 
+aws-run() {
+    if (( $# < 2 )); then
+        print -u2 "Usage: aws-run PROFILE COMMAND [ARGUMENT ...]"
+        return 2
+    fi
+
+    local profile="$1"
+    shift
+
+    if ! aws configure list-profiles | grep -Fxq -- "$profile"; then
+        print -u2 "Unknown AWS profile: $profile"
+        return 2
+    fi
+
+    AWS_PROFILE="$profile" "$@"
+}
+
 aws-who() {
     if [[ -z "${AWS_PROFILE:-}" ]]; then
         print -u2 "AWS_PROFILE is not set. Run aws-login PROFILE or aws-use PROFILE."
