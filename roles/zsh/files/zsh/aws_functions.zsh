@@ -10,7 +10,8 @@ aws-login() {
         print -u2 "Unknown AWS profile: $profile"
         return 2
     fi
-    if ! aws sso login --profile "$profile"; then
+    # Device authorization works when the CLI and browser run on different machines.
+    if ! aws sso login --profile "$profile" --no-browser --use-device-code; then
         return 1
     fi
 
