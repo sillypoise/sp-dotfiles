@@ -3,6 +3,7 @@ default_roles:
   - bash
   - zsh
   - nix
+  - aws
   - media-tools
   - volta
   - git
@@ -36,6 +37,21 @@ home_manager_release: "release-25.11"
 
 # Media tools releases
 media_tools_yt_dlp_version: "2026.02.21"
+
+# AWS IAM Identity Center
+aws_identity_center:
+  session_name: "sp"
+  start_url: "https://ssoins-7223cce72b420872.portal.us-east-1.app.aws"
+  region: "us-east-1"
+aws_profiles:
+  - name: "sp"
+    account_id: "397483721549"
+    permission_set: "AdministratorAccess"
+    region: "us-east-1"
+  - name: "sp-ro"
+    account_id: "397483721549"
+    permission_set: "ReadOnlyAccess"
+    region: "us-east-1"
 
 # Pi defaults
 pi_default_provider: "openai-codex"

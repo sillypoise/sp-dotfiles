@@ -1,0 +1,14 @@
+# Managed by sp-dotfiles. Authentication tokens remain in the local AWS SSO cache.
+[sso-session {{ aws_identity_center.session_name }}]
+sso_start_url = {{ aws_identity_center.start_url }}
+sso_region = {{ aws_identity_center.region }}
+sso_registration_scopes = sso:account:access
+{% for profile in aws_profiles %}
+
+[profile {{ profile.name }}]
+sso_session = {{ aws_identity_center.session_name }}
+sso_account_id = {{ profile.account_id }}
+sso_role_name = {{ profile.permission_set }}
+region = {{ profile.region }}
+output = json
+{% endfor %}

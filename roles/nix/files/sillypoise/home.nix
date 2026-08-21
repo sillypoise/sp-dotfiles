@@ -13,7 +13,7 @@
 
     # Package Management
     home.packages = with pkgs; [
-      (python312.withPackages (ps: [
+      (python313.withPackages (ps: [
         ps.datasette
         ps.llm
         ps.pillow
