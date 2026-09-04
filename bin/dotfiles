@@ -97,12 +97,17 @@ function is_arch() {
 }
 
 tags_args=()
+selected_roles=()
 
 # Process command-line options for user (-u) and tags (-t)
 while getopts "u:t:" opt; do
     case $opt in
     u) USER_TO_RUN="$OPTARG" ;;
-    t) tags_args+=("--tags" "$OPTARG") ;;
+    t)
+        tags_args+=("--tags" "$OPTARG")
+        IFS=',' read -r -a requested_roles <<<"$OPTARG"
+        selected_roles+=("${requested_roles[@]}")
+        ;;
     *)
         echo "Usage: $0 [-u user] [-t tags]"
         exit 1
@@ -280,6 +285,25 @@ function confirmVaultAccess() {
     OP_AUTHENTICATED=true
 }
 
+function selected_roles_require_vault_access() {
+    local selected_role
+
+    # An untagged run includes every role, while tagged runs only need the vault for known consumers.
+    if [[ ${#selected_roles[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    for selected_role in "${selected_roles[@]}"; do
+        case "$selected_role" in
+        opencode | ssh | tailscale | test | users | zsh)
+            return 0
+            ;;
+        esac
+    done
+
+    return 1
+}
+
 # Initial distro setup
 # Note: base packages are also installed in the bootstrap role.
 # This duplication is intentional to keep first-run setup resilient.
@@ -335,15 +359,18 @@ if [[ ! -f "$DOTFILES_RUN_MARKER" && ${#tags_args[@]} -eq 0 ]]; then
     _cmd ansible-playbook -u root "$DOTFILES_DIR/main.yml" --tags bootstrap
 fi
 
-confirmVaultAccess
+if selected_roles_require_vault_access; then
+    confirmVaultAccess
 
-# Run Ansible playbook if 1Password authentication is successful
-if [[ "$OP_INSTALLED" == "true" && "$OP_AUTHENTICATED" == "true" ]]; then
-    printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
-    ansible-playbook -u "$USER_TO_RUN" "$DOTFILES_DIR/main.yml" "${tags_args[@]}" "$@"
-else
-    printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
+    if [[ "$OP_INSTALLED" == "true" && "$OP_AUTHENTICATED" == "true" ]]; then
+        printf "${OVERWRITE}${LGREEN} [✓]  ${LGREEN}1Password Authentication successful!${NC}\n"
+    else
+        printf "${OVERWRITE}${LRED} [X]  ${LRED}1Password Authentication failed.${NC}\n"
+        exit 1
+    fi
 fi
+
+ansible-playbook -u "$USER_TO_RUN" "$DOTFILES_DIR/main.yml" "${tags_args[@]}" "$@"
 
 popd 2>&1 >/dev/null
 
