@@ -59,6 +59,7 @@ pi_default_model: "gpt-5.6-sol"
 pi_default_thinking_level: "low"
 # Keep Ctrl+P model cycling short and predictable across hosts.
 pi_enabled_models:
+  - "openai-codex/gpt-6-astra"
   - "openai-codex/gpt-5.6-sol"
   - "openai-codex/gpt-5.6-terra"
   - "openai-codex/gpt-5.6-luna"
