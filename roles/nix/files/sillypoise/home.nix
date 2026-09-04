@@ -63,6 +63,7 @@
       postgresql                 # PostgreSQL client tools (psql)
       poppler-utils              # PDF utilities (pdftotext, pdfinfo, etc.)
       # python312Packages.setuptools  # Required for datasette (pkg_resources)
+      railway                    # Railway.app CLI
       ripgrep                    # Fast, recursive file search
       rsync                      # File synchronization utility
       rustup                     # Rust toolchain installer
