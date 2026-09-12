@@ -57,7 +57,7 @@ aws_profiles:
 pi_default_provider: "openai-codex"
 pi_default_model: "gpt-6-astra"
 pi_default_thinking_level: "low"
-# Keep Ctrl+P model cycling short and predictable across hosts.
+# Keep explicit model picks alongside the Anthropic Claude family for model cycling.
 pi_enabled_models:
   - "openai-codex/gpt-6-astra"
   - "openai-codex/gpt-5.6-sol"
@@ -65,7 +65,7 @@ pi_enabled_models:
   - "openai-codex/gpt-5.6-luna"
   - "openai-codex/gpt-5.5"
   - "kimi-for-coding"
-#   - "claude-sonnet-4.5"
+  - "anthropic/claude-*"
 #   - "gemini-2.5-pro"
 pi_guides_enable_global: true
 pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.6.0"
