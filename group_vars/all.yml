@@ -32,8 +32,8 @@ facts_tailscale_authed: false
 tailscale_accept_dns: true
 
 # Nix/Home Manager releases
-nixpkgs_release: "nixos-25.11"
-home_manager_release: "release-25.11"
+nixpkgs_release: "nixos-26.05"
+home_manager_release: "release-26.05"
 
 # Media tools releases
 media_tools_yt_dlp_version: "2026.02.21"
