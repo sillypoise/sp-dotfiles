@@ -1,0 +1,78 @@
+---
+- name: update | validate supported platform
+  ansible.builtin.assert:
+    that:
+      - facts_is_arch or facts_is_ubuntu
+      - not (facts_is_arch and facts_is_ubuntu)
+    fail_msg: "Package updates support only Arch Linux and Ubuntu."
+  tags: [update]
+
+# Check the binary used by the Nix role rather than relying on a login shell's PATH.
+- name: update | inspect managed Nix installation
+  ansible.builtin.stat:
+    path: /nix/var/nix/profiles/default/bin/nix
+  register: update_nix_binary
+  tags: [update]
+
+- name: update | inspect Home Manager configuration
+  ansible.builtin.stat:
+    path: "{{ host_user_home }}/.config/home-manager/{{ item }}"
+  loop:
+    - flake.nix
+    - home.nix
+  register: update_home_manager_files
+  when: update_nix_binary.stat.exists
+  tags: [update]
+
+- name: update | require configured Home Manager before upgrades
+  ansible.builtin.assert:
+    that:
+      - update_nix_binary.stat.executable | default(false)
+      - item.stat.isreg | default(false)
+    fail_msg: "Nix/Home Manager is incomplete. Run dotfiles -t nix before dotfiles -t update."
+  loop: "{{ update_home_manager_files.results }}"
+  when: update_nix_binary.stat.exists
+  tags: [update]
+
+- name: update | upgrade Ubuntu packages without removals
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: safe
+    force_apt_get: true
+    fail_on_autoremove: true
+    autoremove: false
+  when: facts_is_ubuntu
+  tags: [update]
+
+- name: update | perform full Arch system upgrade
+  community.general.pacman:
+    update_cache: true
+    upgrade: true
+  when: facts_is_arch
+  tags: [update]
+
+- name: update | explain skipped Nix update
+  ansible.builtin.debug:
+    msg: "Managed Nix is not installed; only OS packages were updated."
+  when: not update_nix_binary.stat.exists
+  tags: [update]
+
+- name: update | refresh existing Home Manager flake inputs
+  become_user: "{{ host_user }}"
+  ansible.builtin.shell: |
+    set -e
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix flake update
+  args:
+    executable: /bin/bash
+    chdir: "{{ host_user_home }}/.config/home-manager"
+  changed_when: true
+  when: update_nix_binary.stat.exists
+  tags: [update]
+
+- name: update | apply updated Home Manager configuration
+  ansible.builtin.import_role:
+    name: nix
+    tasks_from: apply
+  when: update_nix_binary.stat.exists
+  tags: [update]

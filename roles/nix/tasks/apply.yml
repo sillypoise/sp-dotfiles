@@ -1,0 +1,16 @@
+---
+- name: system setup | nix | apply home-manager config (flake)
+  become_user: "{{ host_user }}"
+  ansible.builtin.shell: |
+    set -e
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    nix run home-manager/{{ home_manager_release | quote }} -- switch \
+      --flake {{ (host_user_home ~ '/.config/home-manager') | quote }}
+  args:
+    executable: /bin/bash
+  register: hm_result
+  changed_when: "'Activating installPackages' in hm_result.stdout"
+  tags:
+    - nix
+    - home-manager
+    - packages

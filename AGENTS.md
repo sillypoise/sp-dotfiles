@@ -252,6 +252,15 @@ Root-run safety:
 - Shell/command tasks that depend on user env or write under user home should use
   `become_user`.
 
+### Package Upgrade Workflow
+
+`dotfiles -t update` explicitly upgrades Ubuntu/Arch system packages and refreshes and applies
+existing Home Manager flake inputs. The role is intentionally absent from `default_roles`.
+It does not reboot, autoremove, change Nix release branches, or update unrelated installers.
+The Nix and update roles share `roles/nix/tasks/apply.yml` for Home Manager activation.
+Run `/usr/bin/python3 -m unittest discover -s tests -v` for update-role branching tests with
+simulated package/Nix operations (requires Ansible and its existing PyYAML dependency).
+
 ### Additional Repo Fact
 
 No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` are present in
