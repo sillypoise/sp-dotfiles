@@ -1,0 +1,66 @@
+---
+- name: update | check for a newer stable Nixpkgs release
+  when:
+    - update_nix_binary.stat.exists
+    - not ansible_check_mode
+    - nixpkgs_release is match('^nixos-[0-9]{2}\.(05|11)$')
+  tags: [update]
+  block:
+    # This metadata service lists release cycles newest first; it never supplies executable code.
+    - name: update | fetch NixOS release metadata
+      become: false
+      ansible.builtin.uri:
+        url: https://endoflife.date/api/nixos.json
+        method: GET
+        return_content: true
+        validate_certs: true
+        follow_redirects: none
+        use_netrc: false
+        timeout: 10
+        status_code: 200
+      register: update_nixos_releases
+
+    - name: update | validate release list
+      ansible.builtin.assert:
+        that:
+          - update_nixos_releases.json is defined
+          - update_nixos_releases.json | type_debug == 'list'
+          - update_nixos_releases.json | length > 0
+        quiet: true
+
+    - name: update | validate latest release record
+      ansible.builtin.assert:
+        that:
+          - update_nixos_releases.json[0] is mapping
+          - update_nixos_releases.json[0].cycle is defined
+          - update_nixos_releases.json[0].releaseDate is defined
+        quiet: true
+
+    - name: update | validate release version and publication date
+      ansible.builtin.assert:
+        that:
+          - update_nixos_releases.json[0].cycle is match('^[0-9]{2}\.(05|11)$')
+          - update_nixos_releases.json[0].releaseDate is match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          - update_nixos_releases.json[0].releaseDate <= ansible_date_time.date
+        quiet: true
+
+    - name: update | remind about newer stable release
+      ansible.builtin.debug:
+        msg: >-
+          A newer stable Nixpkgs release is available: {{ update_nixos_releases.json[0].cycle }}
+          (configured: {{ nixpkgs_release }}).
+          Review https://nixos.org/manual/nixos/stable/release-notes.html
+          and update nixpkgs_release and home_manager_release together in group_vars/all.yml,
+          commit and push the change, then run dotfiles -t nix followed by dotfiles -t update.
+          No release pins were changed.
+      when: >-
+        update_nixos_releases.json[0].cycle is
+        version(nixpkgs_release | replace('nixos-', ''), '>')
+
+  rescue:
+    - name: update | report unavailable release check
+      ansible.builtin.debug:
+        msg: >-
+          Package updates completed, but the Nixpkgs release reminder check was unavailable
+          (lookup failed or metadata was invalid). Check https://nixos.org/download/ manually.
+          No release pins were changed.

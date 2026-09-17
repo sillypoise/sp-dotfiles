@@ -76,3 +76,7 @@
     tasks_from: apply
   when: update_nix_binary.stat.exists
   tags: [update]
+
+- name: update | check release reminder after package updates
+  ansible.builtin.import_tasks: release-reminder.yml
+  tags: [update]

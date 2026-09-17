@@ -258,6 +258,9 @@ Root-run safety:
 existing Home Manager flake inputs. The role is intentionally absent from `default_roles`.
 It does not reboot, autoremove, change Nix release branches, or update unrelated installers.
 The Nix and update roles share `roles/nix/tasks/apply.yml` for Home Manager activation.
+After successful updates, an advisory endoflife.date lookup checks for a newer stable release
+than `nixpkgs_release`; errors warn without undoing updates. Release upgrades remain explicit:
+change both release settings, commit/push, then run `dotfiles -t nix` and `dotfiles -t update`.
 Run `/usr/bin/python3 -m unittest discover -s tests -v` for update-role branching tests with
 simulated package/Nix operations (requires Ansible and its existing PyYAML dependency).
 

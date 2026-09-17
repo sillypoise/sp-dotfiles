@@ -19,6 +19,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 def simulated_tasks(*, nix_exists, files_exist, executable, failure):
     tasks = yaml.safe_load((ROOT / "roles/update/tasks/main.yml").read_text())
     apply_tasks = yaml.safe_load((ROOT / "roles/nix/tasks/apply.yml").read_text())
+    tasks.pop()  # Release lookup is exercised separately without network access.
     tasks[-1:] = [dict(apply_tasks[0], when=tasks[-1]["when"])]
     events = iter(["apt", "pacman", "lock", "apply"])
     for task in tasks:
@@ -98,7 +99,8 @@ class UpdateRoleTests(unittest.TestCase):
         self.assertNotIn("creates", lock["args"])  # Missing and existing locks both update.
         self.assertEqual(lock["become_user"], "{{ host_user }}")
         self.assertIn("set -e", lock["ansible.builtin.shell"])
-        self.assertEqual(tasks[-1]["ansible.builtin.import_role"]["tasks_from"], "apply")
+        self.assertEqual(tasks[-2]["ansible.builtin.import_role"]["tasks_from"], "apply")
+        self.assertEqual(tasks[-1]["ansible.builtin.import_tasks"], "release-reminder.yml")
 
 
 if __name__ == "__main__":

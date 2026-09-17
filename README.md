@@ -111,6 +111,31 @@ or run autoremove. Review any reboot requirements yourself. Other installers (np
 AUR helpers, etc.) are outside this role's scope. Upgrade checks require network and package-manager
 locks; duration and download size depend on the available updates.
 
+### Nixpkgs and Home Manager release upgrades
+
+After successful package updates, `update` checks endoflife.date's NixOS release metadata
+(newest cycle first) and reminds you if it is newer than the repo's `nixpkgs_release` setting.
+This advisory HTTPS lookup has a 10-second socket timeout. Lookup errors or unexpected metadata
+produce an unavailable-check warning without failing completed upgrades. It never changes pins.
+The check is skipped when managed Nix is absent, in Ansible check mode, or for non-stable pins
+such as `nixos-unstable`. It compares the repo setting, not a manually edited deployed flake.
+
+To upgrade releases through dotfiles:
+
+1. Review the NixOS/Nixpkgs and Home Manager release notes for compatibility changes.
+2. Update both settings in `group_vars/all.yml`, for example:
+   ```yaml
+   nixpkgs_release: "nixos-26.05"
+   home_manager_release: "release-26.05"
+   ```
+3. Commit and push the change so the wrapper's `/opt/dotfiles` checkout can pull it.
+4. Run `dotfiles -t nix` to deploy and apply the new release configuration.
+5. Run `dotfiles -t update` to refresh its inputs and apply available package updates.
+
+No direct Nix or Home Manager commands are needed. These steps change the Nixpkgs package set
+and Home Manager release, not the host OS or Nix package-manager binary. The existing `nix` role
+installs that binary when absent but does not currently manage binary upgrades.
+
 ## Pi Guides
 
 The `pi` role owns pi installation and the global pi baseline.
