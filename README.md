@@ -111,6 +111,14 @@ or run autoremove. Review any reboot requirements yourself. Other installers (np
 AUR helpers, etc.) are outside this role's scope. Upgrade checks require network and package-manager
 locks; duration and download size depend on the available updates.
 
+### Nixpkgs 26.05 package compatibility
+
+The managed package list no longer includes Neofetch/Fastfetch. Datasette is temporarily omitted
+because its `asgi-csrf` dependency is marked broken with patched `python-multipart` versions
+([upstream issue](https://github.com/simonw/asgi-csrf/issues/38)). Applying the configuration removes
+these managed commands, not your databases. Restore `ps.datasette` once the upstream dependency
+and Nixpkgs package are compatible; do not bypass the broken-package check.
+
 ### Nixpkgs and Home Manager release upgrades
 
 After successful package updates, `update` checks endoflife.date's NixOS release metadata

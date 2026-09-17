@@ -14,7 +14,9 @@
     # Package Management
     home.packages = with pkgs; [
       (python313.withPackages (ps: [
-        ps.datasette
+        # Restore Datasette once its CSRF dependency supports the patched python-multipart.
+        # Tracking: https://github.com/simonw/asgi-csrf/issues/38.
+        # ps.datasette
         ps.llm
         ps.pillow
         ps.setuptools
@@ -54,7 +56,6 @@
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
       mise
-      fastfetch                  # System information display
       neovim                     # Modern text editor
       ngrok                      # local revers proxy
       # opencode                 # AI coding agent built for the terminal
