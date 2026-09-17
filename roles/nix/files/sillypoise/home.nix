@@ -54,7 +54,7 @@
       lazydocker                 # Simplified Docker management
       lazygit                    # Simplified Git UI
       mise
-      neofetch                   # Modern fetch
+      fastfetch                  # System information display
       neovim                     # Modern text editor
       ngrok                      # local revers proxy
       # opencode                 # AI coding agent built for the terminal
