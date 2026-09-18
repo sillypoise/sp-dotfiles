@@ -71,4 +71,11 @@ alias gco="git checkout"
 alias ghas="gh auth switch"
 
 # Remote Development Servers
-alias rds-sp="ssh sillypoise@sp-dev"
+rds-sp() {
+  ssh sp-dev
+  local ssh_status=$?
+  # Restore terminal state if a remote TUI (such as zellij) exits uncleanly.
+  printf '\e[?1000l\e[?1002l\e[?1003l\e[?1005l\e[?1006l\e[?1015l\e[?1016l'
+  stty sane
+  return $ssh_status
+}
