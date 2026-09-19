@@ -71,11 +71,22 @@ alias gco="git checkout"
 alias ghas="gh auth switch"
 
 # Remote Development Servers
+unalias rds-sp 2>/dev/null
 rds-sp() {
-  ssh sp-dev
-  local ssh_status=$?
-  # Restore terminal state if a remote TUI (such as zellij) exits uncleanly.
-  printf '\e[?1000l\e[?1002l\e[?1003l\e[?1005l\e[?1006l\e[?1015l\e[?1016l'
-  stty sane
+  local ssh_status=255
+
+  {
+    ssh sp-dev
+    ssh_status=$?
+  } always {
+    # SSH normally restores the TTY itself. Force a full reset when an
+    # unclean disconnect leaves zellij's raw/input modes enabled.
+    if (( ssh_status == 255 )); then
+      /usr/bin/reset
+    else
+      stty sane 2>/dev/null
+      printf '\e[?1000l\e[?1002l\e[?1003l\e[?1005l\e[?1006l\e[?1015l\e[?1016l'
+    fi
+  }
   return $ssh_status
 }
