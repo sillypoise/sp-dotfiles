@@ -55,7 +55,7 @@ aws_profiles:
 
 # Pi defaults
 pi_default_provider: "openai-codex"
-pi_default_model: "openai-codex/gpt-6-sol"
+pi_default_model: "openai-codex/gpt-5.6-sol"
 pi_default_thinking_level: "low"
 # Keep explicit model picks alongside the Anthropic Claude family for model cycling.
 pi_enabled_models:
