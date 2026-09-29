@@ -55,7 +55,7 @@ aws_profiles:
 
 # Pi defaults
 pi_default_provider: "openai-codex"
-pi_default_model: "openai-codex/gpt-6.1-sol"
+pi_default_model: "gpt-6.1-sol"
 pi_default_thinking_level: "low"
 # Cycle through available GPT 5.6–6.1 variants and Kimi.
 pi_enabled_models:
