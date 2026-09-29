@@ -57,7 +57,7 @@ aws_profiles:
 pi_default_provider: "openai-codex"
 pi_default_model: "openai-codex/gpt-6.1-sol"
 pi_default_thinking_level: "low"
-# Keep model cycling within the currently available GPT 5.6–6.1 variants.
+# Cycle through available GPT 5.6–6.1 variants and Kimi.
 pi_enabled_models:
   - "openai-codex/gpt-5.6-luna"
   - "openai-codex/gpt-5.6-sol"
@@ -66,6 +66,7 @@ pi_enabled_models:
   - "openai-codex/gpt-6-luna"
   - "openai-codex/gpt-6-sol"
   - "openai-codex/gpt-6.1-sol"
+  - "kimi-for-coding"
 pi_guides_enable_global: true
 pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.6.0"
 pi_extra_packages: []
