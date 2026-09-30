@@ -68,7 +68,7 @@ pi_enabled_models:
   - "openai-codex/gpt-6.1-sol"
   - "kimi-for-coding"
 pi_guides_enable_global: true
-pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.6.0"
+pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.7.0"
 pi_extra_packages: []
 pi_managed_source_packages:
   - name: "fff.nvim"
