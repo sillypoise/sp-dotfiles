@@ -114,6 +114,13 @@ Pi guide activation stays repo-local:
 - `AGENTS.md` stores repo facts and workflow notes
 - global package availability only makes the tooling available; it does not force activation
 
+### Claude Code Package Source
+
+The Nix flake keeps the main package set on `nixpkgs_release` and sources only Claude Code
+from a separate locked `nixos-unstable` input. Run `dotfiles -t nix` after source configuration
+changes; `dotfiles -t update` refreshes the inputs of the deployed flake thereafter.
+A missing unstable Claude Code package fails evaluation rather than silently skipping installation.
+
 ### OpenCode Integration Workflow
 
 Run `dotfiles -t opencode` to install OpenCode and clone shared guides into the local user

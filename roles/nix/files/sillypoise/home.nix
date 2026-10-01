@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, claude_code, ... }:
 
 {
     # Required state version for compatibility
@@ -32,7 +32,7 @@
       broot                      # Enhanced directory navigation
       btop                       # Resource monitor
       bun                        # JavaScript runtime and package manager
-      # claude-code                # Agentic coding tool from Anthropic
+      claude_code                # Claude Code from the locked unstable input
       codex                      # Lightweight coding agent that runs in your terminal
       # datasette                  # Publish and explore SQLite databases
       delta                      # Git diff viewer with syntax highlighting
@@ -82,5 +82,5 @@
       zig                        # Systems programming language toolchain
       zellij                     # Terminal workspace manager
       zoxide                     # Directory navigation tool
-    ] ++ (if builtins.hasAttr "claude-code" pkgs then [ pkgs."claude-code" ] else [ ]);
+    ];
 }

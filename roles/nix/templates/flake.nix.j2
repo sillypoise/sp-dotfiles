@@ -3,11 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/{{ nixpkgs_release }}";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager/{{ home_manager_release }}";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, ... }:
   let
     system = "{{ nix_system }}";
     pkgs = import nixpkgs {
@@ -17,6 +18,11 @@
   in {
     homeConfigurations."{{ host_user }}" = home-manager.lib.homeManagerConfiguration {
       inherit pkgs;
+      # Only Claude Code uses unstable; other packages retain the stable package set.
+      extraSpecialArgs.claude_code = (import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      }).claude-code;
       modules = [ ./home.nix ];
     };
   };
