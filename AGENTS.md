@@ -271,6 +271,19 @@ change both release settings, commit/push, then run `dotfiles -t nix` and `dotfi
 Run `/usr/bin/python3 -m unittest discover -s tests -v` for update-role branching tests with
 simulated package/Nix operations (requires Ansible and its existing PyYAML dependency).
 
+### exe.dev SSH Key
+
+`dotfiles -t ssh` installs `~/.ssh/id_ed25519_exe` from the 1Password SSH Key item
+`op://Private/exe.dev/private key?ssh-format=openssh`. The service account needs read access
+to that vault. Missing CLI/token skips injection; injection or key validation errors fail the
+role without replacing the existing exe.dev key. Private staging is removed on success or failure.
+The injected key must be an unencrypted OpenSSH private key, as with the existing GitHub setup.
+Only `exe.dev` and `*.exe.xyz` select this key, with `IdentitiesOnly yes` and agent forwarding off.
+Register the item's public key at https://exe.dev/user/security, then test `ssh exe.dev whoami`.
+The role owns this additive configuration; GitHub configuration is unchanged.
+Run `/usr/bin/python3 -m unittest discover -s tests -p test_ssh_exe.py -v` for local checks
+using fake injection, including missing credentials, rejected access, and malformed keys.
+
 ### Additional Repo Fact
 
 No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` are present in

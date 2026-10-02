@@ -4,3 +4,8 @@ Host github.com
   IdentityFile ~/.ssh/gh_id_ed25519
   AddKeysToAgent yes
   IdentitiesOnly yes
+
+Host exe.dev *.exe.xyz
+  IdentityFile ~/.ssh/id_ed25519_exe
+  IdentitiesOnly yes
+  ForwardAgent no

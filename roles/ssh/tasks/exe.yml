@@ -1,0 +1,73 @@
+---
+# Keep secret staging private and clean it up even when injection or validation fails.
+- name: Install exe.dev SSH private key from 1Password
+  when: facts_op_installed and (lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') | length > 0)
+  tags:
+    - ssh
+    - security
+    - secrets
+  block:
+    - name: Create private staging directory for exe.dev key
+      ansible.builtin.tempfile:
+        state: directory
+        path: "{{ host_user_home }}/.ssh"
+        prefix: .exe-key-
+      become: true
+      become_user: "{{ host_user }}"
+      register: exe_key_staging
+
+    - name: Copy exe.dev SSH key template
+      ansible.builtin.copy:
+        src: id_ed25519_exe.tpl
+        dest: "{{ exe_key_staging.path }}/key.tpl"
+        owner: "{{ host_user }}"
+        group: "{{ host_user }}"
+        mode: '0600'
+
+    - name: Inject exe.dev SSH key into private staging directory
+      ansible.builtin.command:
+        argv:
+          - op
+          - inject
+          - --in-file
+          - "{{ exe_key_staging.path }}/key.tpl"
+          - --out-file
+          - "{{ exe_key_staging.path }}/key"
+          - --file-mode
+          - '0600'
+      become: true
+      become_user: "{{ host_user }}"
+      environment:
+        OP_SERVICE_ACCOUNT_TOKEN: "{{ lookup('env', 'OP_SERVICE_ACCOUNT_TOKEN') }}"
+      no_log: true
+
+    - name: Validate injected exe.dev SSH private key without prompting
+      ansible.builtin.command:
+        argv:
+          - ssh-keygen
+          - -y
+          - -P
+          - ''
+          - -f
+          - "{{ exe_key_staging.path }}/key"
+      become: true
+      become_user: "{{ host_user }}"
+      changed_when: false
+      no_log: true
+
+    - name: Install validated exe.dev SSH private key
+      ansible.builtin.copy:
+        src: "{{ exe_key_staging.path }}/key"
+        dest: "{{ host_user_home }}/.ssh/id_ed25519_exe"
+        remote_src: true
+        owner: "{{ host_user }}"
+        group: "{{ host_user }}"
+        mode: '0600'
+      no_log: true
+
+  always:
+    - name: Remove exe.dev SSH key staging directory
+      ansible.builtin.file:
+        path: "{{ exe_key_staging.path }}"
+        state: absent
+      when: exe_key_staging.path is defined

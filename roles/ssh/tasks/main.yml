@@ -117,6 +117,13 @@
     - security
     - cleanup
 
+- name: Configure exe.dev SSH private key
+  ansible.builtin.import_tasks: exe.yml
+  tags:
+    - ssh
+    - security
+    - secrets
+
 - name: Copy SSH config file
   ansible.builtin.copy:
     src: config
