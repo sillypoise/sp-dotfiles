@@ -26,6 +26,7 @@ alias mkdir='mkdir -pv'
 alias mv='mv -iv'
 alias ports='netstat -tulanp'
 alias pk='portkill'
+alias pid='pi durable'
 alias rm='rm -iv'
 alias rmdir='rmdir -v'
 alias sqsh="squoosh-cli"
