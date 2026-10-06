@@ -49,6 +49,7 @@
       go                         # Go programming language
       httpie                     # Command-line HTTP client
       imagemagick                # Image manipulation command-line tools
+      jujutsu                    # jj version control system
       jjui                       # tui fo jj
       jq                         # JSON processor
       just                       # Command runner
