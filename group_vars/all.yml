@@ -71,6 +71,13 @@ pi_guides_enable_global: true
 pi_guides_source: "git:git@github.com:sillypoise/pi-guides@v0.7.1"
 pi_extra_packages: []
 pi_managed_source_packages:
+  - name: "pi-claude-bridge"
+    repo: "https://github.com/elidickinson/pi-claude-bridge.git"
+    ref: "df907dbb5f9cec66446c89a9e2c8eb1c89a7828c"
+    checkout_path: "{{ host_user_home }}/.pi/agent/src/pi-claude-bridge"
+    package_path: "{{ host_user_home }}/.pi/agent/src/pi-claude-bridge"
+    dependency_marker: "node_modules/@anthropic-ai/claude-agent-sdk/package.json"
+    install_command: "npm install --omit=dev --legacy-peer-deps"
   - name: "fff.nvim"
     repo: "https://github.com/dmtrKovalenko/fff.nvim.git"
     ref: "4b13a91aa57c5e9ed32ee381d9ee521800818370"
