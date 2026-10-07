@@ -4,6 +4,5 @@
 export KIMI_API_KEY="op://sp-dev/kimi-api-token/KIMI_API_KEY"
 export GH_TOKEN="op://sp-dev/gh_pat/credential"
 export TYPESAFE_API_KEY="op://sp-dev/ues5w32xqcl666ikkdw6xp7owu/credential"
-export ANTHROPIC_API_KEY="op://sp-dev/claude/credential"
 export RAILWAY_TOKEN="op://sp-dev/55l3bnptha4rpifhfilz5zfrkq/credential"
 export LINEAR_API_TOKEN="op://sp-dev/linear/password"
