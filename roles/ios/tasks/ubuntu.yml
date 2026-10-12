@@ -1,0 +1,196 @@
+---
+# Full mode only. The Flutter and no-Xcode extras of the upstream package list are left out.
+- name: Install iOS toolchain build and device prerequisites
+  ansible.builtin.apt:
+    name:
+      - autoconf
+      - automake
+      - build-essential
+      - ca-certificates
+      - curl
+      - file
+      - git
+      - libcurl4-openssl-dev
+      - libheif-examples
+      - libimobiledevice-dev
+      - libssl-dev
+      - libtool
+      - libxml2-dev
+      - pkg-config
+      - poppler-utils
+      - python3
+      - python3-venv
+      - unzip
+      - usbmuxd
+      - zip
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  tags: [ios]
+
+- name: Install the iOS toolchain as the host user
+  become: true
+  become_user: "{{ host_user }}"
+  environment:
+    HOME: "{{ host_user_home }}"
+    # The installer finds the toolchain by resolving `swift`; a swiftly proxy would resolve to swiftly.
+    PATH: "{{ ios_swift_bin }}:{{ host_user_home }}/.local/bin:/usr/local/bin:/usr/bin:/bin"
+    PKG_CONFIG_PATH: "{{ ios_imobiledevice_prefix }}/lib/pkgconfig"
+  block:
+    - name: Create iOS toolchain directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - "{{ ios_source_dir }}"
+        - "{{ ios_imobiledevice_prefix }}"
+        - "{{ ios_state_dir }}"
+      tags: [ios]
+
+    - name: Fetch commit-pinned libimobiledevice sources
+      ansible.builtin.git:
+        repo: "{{ ios_imobiledevice_repo_base }}/{{ item.name }}"
+        dest: "{{ ios_source_dir }}/{{ item.name }}"
+        version: "{{ item.ref }}"
+        force: true
+      loop: "{{ ios_imobiledevice_sources }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags: [ios]
+
+    # Ubuntu's libimobiledevice 1.3.0 cannot build xtool. The newer stack goes into a private prefix
+    # so the system libraries, which usbmuxd loads, stay as packaged. List order is build order.
+    - name: Build the libimobiledevice stack into its private prefix
+      ansible.builtin.shell:
+        cmd: |
+          set -euo pipefail
+          git clean -fdxq
+          ./autogen.sh --prefix={{ ios_imobiledevice_prefix | quote }}
+          make -j"$(nproc)"
+          make install
+          touch {{ (ios_imobiledevice_prefix + '/.built-' + item.name) | quote }}
+        chdir: "{{ ios_source_dir }}/{{ item.name }}"
+        executable: /bin/bash
+        creates: "{{ ios_imobiledevice_prefix }}/.built-{{ item.name }}"
+      environment:
+        LDFLAGS: "-Wl,-rpath,{{ ios_imobiledevice_prefix }}/lib"
+      loop: "{{ ios_imobiledevice_sources }}"
+      loop_control:
+        label: "{{ item.name }}"
+      tags: [ios]
+
+    - name: Fetch the commit-pinned toolchain installer
+      ansible.builtin.git:
+        repo: "{{ ios_toolchain_repo }}"
+        dest: "{{ ios_toolchain_dir }}"
+        version: "{{ ios_toolchain_ref }}"
+        force: true
+      tags: [ios]
+
+    - name: Read the xtool revision the installer builds
+      ansible.builtin.command:
+        argv: [sed, -n, "s/^XTOOL_SHA=//p", "{{ ios_toolchain_dir }}/install-toolchain.sh"]
+      register: ios_xtool_revision
+      changed_when: false
+      check_mode: false
+      tags: [ios]
+
+    - name: Require a readable xtool revision
+      ansible.builtin.assert:
+        that: ios_xtool_revision.stdout | trim is match('^[a-f0-9]{40}$')
+        fail_msg: "install-toolchain.sh no longer declares XTOOL_SHA; review the pinned installer."
+      tags: [ios]
+
+    - name: Create the directory xtool is installed into
+      ansible.builtin.file:
+        path: "{{ ios_xtool_lib_dir }}"
+        state: directory
+        mode: "0755"
+      tags: [ios]
+
+    - name: List the private libimobiledevice libraries
+      ansible.builtin.find:
+        paths: "{{ ios_imobiledevice_prefix }}/lib"
+        patterns: "*.so.*"
+        file_type: any
+      register: ios_imobiledevice_libraries
+      tags: [ios]
+
+    # xtool searches only its own directory before the system paths.
+    - name: Link the private libraries next to xtool
+      ansible.builtin.file:
+        src: "{{ item.path }}"
+        dest: "{{ ios_xtool_lib_dir }}/{{ item.path | basename }}"
+        state: link
+      loop: "{{ ios_imobiledevice_libraries.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
+      tags: [ios]
+
+    # The installer leaves an existing venv and an installed package as they are.
+    - name: Install pinned pymobiledevice3 into the device-tools virtualenv
+      ansible.builtin.pip:
+        name: "pymobiledevice3=={{ ios_pymobiledevice3_version }}"
+        virtualenv: "{{ host_user_home }}/pymobile3-venv"
+        virtualenv_command: /usr/bin/python3 -m venv
+      tags: [ios]
+
+    - name: Check for the Xcode archive
+      ansible.builtin.stat:
+        path: "{{ ios_xcode_xip }}"
+        get_checksum: false
+      register: ios_xcode_archive
+      tags: [ios]
+
+    # Without the archive the installer builds the tools, then stops at the SDK step with status 1.
+    - name: Run the pinned toolchain installer in full mode
+      ansible.builtin.command:
+        argv: [/bin/bash, "{{ ios_toolchain_dir }}/install-toolchain.sh", --mode, full]
+        chdir: "{{ ios_toolchain_dir }}"
+        creates: "{{ ios_install_marker }}"
+      environment:
+        XCODE_XIP: "{{ ios_xcode_xip if ios_xcode_archive.stat.exists else '' }}"
+      register: ios_install
+      failed_when: ios_install.rc != 0 and 'One download left' not in ios_install.stdout
+      tags: [ios]
+
+    - name: Verify the installed tools
+      ansible.builtin.command:
+        argv: ["{{ host_user_home }}/.local/bin/{{ item.name }}", "{{ item.option }}"]
+        chdir: "{{ host_user_home }}"
+      loop:
+        - { name: xtool, option: --version }
+        - { name: rcodesign, option: --version }
+        - { name: ipsw, option: version }
+      changed_when: false
+      tags: [ios]
+
+    - name: Check Darwin SDK registration
+      ansible.builtin.command:
+        argv: ["{{ ios_swift_bin }}/swift", sdk, list]
+        chdir: "{{ host_user_home }}"
+      register: ios_sdk_list
+      changed_when: false
+      check_mode: false
+      tags: [ios]
+
+    # Later runs skip the installer once this revision has registered the SDK.
+    - name: Record the completed installation
+      ansible.builtin.copy:
+        dest: "{{ ios_install_marker }}"
+        content: "{{ ios_toolchain_ref }}\n"
+        mode: "0644"
+      when: "'darwin' in ios_sdk_list.stdout_lines"
+      tags: [ios]
+
+    - name: Report the pending Xcode download
+      ansible.builtin.debug:
+        msg: >-
+          iOS SDK pending: the tools are installed, but no Darwin SDK is registered. Download the
+          Xcode {{ ios_xcode_major }} .xip from https://developer.apple.com/download/all/?q=Xcode
+          (free Apple ID), save it as {{ ios_xcode_xip }}, and run `dotfiles -t ios` again.
+      when: "'darwin' not in ios_sdk_list.stdout_lines"
+      tags: [ios]
+  tags: [ios]

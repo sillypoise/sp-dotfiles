@@ -1,0 +1,27 @@
+---
+# Opt-in role: run it with `dotfiles -t ios`. Every input is checked before the first side effect.
+- name: Check the Swift toolchain provisioned by the swift role
+  ansible.builtin.stat:
+    path: "{{ ios_swift_bin }}/swift"
+  register: ios_swift_toolchain
+  tags: [ios]
+
+- name: Require supported iOS toolchain platform, pinned sources, and the Swift toolchain
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+      - ansible_distribution_version == '24.04'
+      - ansible_architecture == 'x86_64'
+      - ios_toolchain_ref is match('^[a-f0-9]{40}$')
+      - ios_imobiledevice_sources | length == 4
+      - ios_imobiledevice_sources | map(attribute='ref') | select('match', '^[a-f0-9]{40}$') | list | length == 4
+      - ios_pymobiledevice3_version is match('^[0-9]+\.[0-9]+\.[0-9]+$')
+      - ios_swift_toolchain.stat.exists
+    fail_msg: >-
+      iOS development requires Ubuntu 24.04 x86_64, commit-pinned sources, and Swift
+      {{ swift_toolchain_version }} from `dotfiles -t swift`.
+  tags: [ios]
+
+- name: Install the iOS toolchain
+  ansible.builtin.import_tasks: ubuntu.yml
+  tags: [ios]

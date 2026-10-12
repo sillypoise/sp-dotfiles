@@ -42,6 +42,39 @@ swiftly_version: "1.2.0"
 swiftly_archive_sha256: "0b26b568811404374c7d7f07276b6aad4145db5d1893a45f307de6a94ca8d9c3"
 swift_toolchain_version: "6.4.0"
 
+# iOS development on Linux (opt-in: `dotfiles -t ios`). See roles/ios/README.md.
+# The installer pins xtool, OpenAppleMacros, rcodesign, and ipsw itself.
+ios_toolchain_repo: "https://github.com/joshuaswarren/omarchy-apple-dev.git"
+ios_toolchain_ref: "7837b6885e209f06d1b040cc7f40282cf6858102"
+# Ubuntu's libimobiledevice is too old for xtool; these build in list order.
+ios_imobiledevice_repo_base: "https://github.com/libimobiledevice"
+ios_imobiledevice_sources:
+  - name: "libplist"
+    ref: "fe3dc34dc3484006e12b403f7ceb06f0ad40b6f4"
+  - name: "libimobiledevice-glue"
+    ref: "10ddafa16458a012bcbd3e83a6ab36a032dc84d8"
+  - name: "libtatsu"
+    ref: "e7d6ad13ef928aa609d0ccdfc586f7d6e8e049bf"
+  - name: "libimobiledevice"
+    ref: "fa0f79190142bc309307967c058f89c1b36eb6b8"
+ios_pymobiledevice3_version: "11.26.0"
+# The Xcode whose Swift matches swift_toolchain_version: 27 for 6.4, 26 for 6.3.
+ios_xcode_major: "27"
+# Downloaded by hand from developer.apple.com; the role never fetches it.
+ios_xcode_xip: "{{ host_user_home }}/Downloads/Xcode.xip"
+# Derived paths.
+ios_swift_bin: "{{ host_user_home }}/.local/share/swiftly/toolchains/{{ swift_toolchain_version }}/usr/bin"
+ios_source_dir: "{{ host_user_home }}/.cache/ios-dev/src"
+ios_state_dir: "{{ host_user_home }}/.local/state/ios-dev"
+ios_toolchain_dir: "{{ host_user_home }}/.local/share/omarchy-apple-dev"
+# A change to any pinned libimobiledevice commit selects a new prefix, so all four rebuild together.
+ios_imobiledevice_prefix: >-
+  {{ host_user_home }}/.local/lib/ios-dev/imobiledevice-{{
+  (ios_imobiledevice_sources | map(attribute='ref') | join('-') | hash('sha256'))[:12] }}
+ios_xtool_lib_dir: "{{ host_user_home }}/.local/lib/omarchy-apple-dev/xtool-{{ ios_xtool_revision.stdout | trim }}"
+ios_install_marker: >-
+  {{ ios_state_dir }}/installed-{{ ios_toolchain_ref[:12] }}-swift-{{ swift_toolchain_version }}
+
 # Media tools releases
 media_tools_yt_dlp_version: "2026.02.21"
 

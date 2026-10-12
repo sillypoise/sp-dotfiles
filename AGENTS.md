@@ -133,6 +133,17 @@ for the installation contract, update procedure, and scratch-package smoke test.
 The separate `~/.config/nvim` repository owns SourceKit LSP configuration.
 Run `/usr/bin/python3 -m unittest discover -s tests -p test_swift_role.py -v` for isolated checks.
 
+### iOS Development
+
+`dotfiles -t ios` installs xtool, the Darwin Swift SDK, and device tools for building iOS apps
+without a Mac, by running omarchy-apple-dev's installer at a pinned commit. The role is opt-in
+(absent from `default_roles`), supports only Ubuntu 24.04 x86_64, and requires the `swift` role's
+toolchain. The Xcode `.xip` must be downloaded by hand to `ios_xcode_xip`; until then the role
+succeeds and reports `iOS SDK pending`. libimobiledevice is built from pinned commits into a
+private prefix so the packaged `usbmuxd` keeps its system libraries. Pins live in
+`group_vars/all.yml`. See `roles/ios/README.md` for the contract and what is still unverified.
+Run `/usr/bin/python3 -m unittest discover -s tests -p test_ios_role.py -v` for isolated checks.
+
 ### OpenCode Integration Workflow
 
 Run `dotfiles -t opencode` to install OpenCode and clone shared guides into the local user
