@@ -146,6 +146,16 @@ class IosRoleTests(unittest.TestCase):
         state = self.home / ".local/state/ios-dev"
         return list(state.glob("installed-*")) if state.exists() else []
 
+    def test_unxip_system_headers_are_installed_before_the_build(self):
+        # Fake builds cannot detect absent host headers; check the real apt contract separately.
+        tasks = yaml.safe_load((ROOT / "roles/ios/tasks/ubuntu.yml").read_text())
+        packages = tasks[0]["ansible.builtin.apt"]
+        self.assertIn("liblzma-dev", packages["name"])
+        self.assertIn("zlib1g-dev", packages["name"])
+        self.assertEqual(packages["state"], "present")
+        self.assertTrue(tasks[0]["become"])
+        self.assertIn("block", tasks[1])
+
     def test_pending_then_complete_then_repeat(self):
         status, output = self.run_role()
         self.assertEqual(status, 0, output)

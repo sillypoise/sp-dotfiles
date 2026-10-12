@@ -49,6 +49,8 @@ The installer also edits three build-setting defaults inside the swiftly toolcha
 - **Pinned pymobiledevice3.** The installer takes the latest release; the role installs the
   pinned one first, which the installer then leaves alone.
 - **Full mode only.** Packages needed only for Flutter or the no-Xcode mode are not installed.
+  Full mode still needs `liblzma-dev` and `zlib1g-dev`: xtool's unxip dependency imports the
+  system LZMA and zlib headers on Linux. SwiftPM's apt provider hints do not install them.
 
 ## Repeat runs, updates, and failures
 
@@ -79,10 +81,14 @@ xtool dev build            # builds xtool/Hello.app for arm64 iOS
 
 ## Verification status
 
-The role's branching is covered by `tests/test_ios_role.py`, which uses fake sources and a fake
-installer. As of 2026-10-12 the role has not been run for real on this machine: the library
-builds, the xtool build against swiftly, and SDK extraction are unverified until the first
-`dotfiles -t ios`. Upstream verified Ubuntu 24.04 in a container in its no-Xcode mode only.
+The role's branching and required unxip development packages are covered by `tests/test_ios_role.py`,
+which uses fake sources and a fake installer. On 2026-10-12 the real role completed on this Ubuntu
+24.04 machine after adding the missing `liblzma-dev` prerequisite: the private library stack was
+reused, xtool built against swiftly, and xtool, rcodesign, and ipsw passed their executable checks.
+The original unxip LZMA and zlib modules also passed an isolated Swift compiler import check.
+The role reported `iOS SDK pending`: SDK extraction, app builds, signing, and device installation
+remain unverified until the Xcode archive is supplied and the interactive steps are completed.
+Upstream verified Ubuntu 24.04 in a container in its no-Xcode mode only.
 
 ```sh
 /usr/bin/python3 -m unittest discover -s tests -p test_ios_role.py -v

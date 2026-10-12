@@ -13,6 +13,8 @@
       - libcurl4-openssl-dev
       - libheif-examples
       - libimobiledevice-dev
+      # unxip's Linux C modules require the system LZMA and zlib headers.
+      - liblzma-dev
       - libssl-dev
       - libtool
       - libxml2-dev
@@ -23,6 +25,7 @@
       - unzip
       - usbmuxd
       - zip
+      - zlib1g-dev
     state: present
     update_cache: true
     cache_valid_time: 3600
