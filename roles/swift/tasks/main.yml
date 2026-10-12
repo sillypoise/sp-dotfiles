@@ -1,0 +1,34 @@
+---
+# Unsupported default runs skip Swift to preserve the existing Arch workflow.
+# Explicit requests fail before side effects rather than pretending to install it.
+- name: Require supported Swift platform and pinned versions
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+      - ansible_distribution_version == '24.04'
+      - ansible_architecture == 'x86_64'
+      - swiftly_version is match('^[0-9]+\.[0-9]+\.[0-9]+$')
+      - swift_toolchain_version is match('^[0-9]+\.[0-9]+\.[0-9]+$')
+      - swiftly_archive_sha256 is match('^[a-f0-9]{64}$')
+    fail_msg: "Swift requires Ubuntu 24.04 x86_64 and pinned versions with an archive checksum."
+  when: >-
+    'swift' in ansible_run_tags or
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+    and ansible_architecture == 'x86_64')
+  tags: [swift]
+
+- name: Install Swift on the supported platform
+  ansible.builtin.import_tasks: ubuntu.yml
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ansible_distribution_version == '24.04'
+    - ansible_architecture == 'x86_64'
+  tags: [swift]
+
+- name: Report skipped Swift provisioning on unsupported default runs
+  ansible.builtin.debug:
+    msg: "Skipping Swift: this role currently supports only Ubuntu 24.04 x86_64."
+  when: >-
+    ansible_distribution != 'Ubuntu' or ansible_distribution_version != '24.04'
+    or ansible_architecture != 'x86_64'
+  tags: [swift]

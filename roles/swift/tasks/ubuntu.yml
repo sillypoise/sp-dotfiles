@@ -1,0 +1,137 @@
+---
+- name: Install Ubuntu Swift prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - binutils
+      - git
+      - gnupg2
+      - libc6-dev
+      - libcurl4-openssl-dev
+      - libedit2
+      - libgcc-13-dev
+      - libpython3-dev
+      - libsqlite3-0
+      - libsqlite3-dev
+      - libstdc++-13-dev
+      - libxml2-dev
+      - libncurses-dev
+      - libz3-dev
+      - pkg-config
+      - tzdata
+      - unzip
+      - zip
+      - zlib1g-dev
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  tags: [swift]
+
+- name: Install official Swift tooling as the host user
+  become: true
+  become_user: "{{ host_user }}"
+  environment:
+    HOME: "{{ host_user_home }}"
+    SWIFTLY_HOME_DIR: "{{ host_user_home }}/.local/share/swiftly"
+    SWIFTLY_BIN_DIR: "{{ host_user_home }}/.local/share/swiftly/bin"
+    SWIFTLY_TOOLCHAINS_DIR: "{{ host_user_home }}/.local/share/swiftly/toolchains"
+  block:
+    - name: Create Swift installer cache
+      ansible.builtin.file:
+        path: "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}"
+        state: directory
+        mode: "0755"
+      tags: [swift]
+
+    - name: Download checksum-pinned swiftly archive
+      ansible.builtin.get_url:
+        url: >-
+          https://download.swift.org/swiftly/linux/swiftly-{{ swiftly_version }}-x86_64.tar.gz
+        dest: "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}/swiftly.tar.gz"
+        checksum: "sha256:{{ swiftly_archive_sha256 }}"
+        mode: "0644"
+        timeout: 60
+        validate_certs: true
+      tags: [swift]
+
+    - name: Check installed swiftly version
+      ansible.builtin.command:
+        argv: ["{{ host_user_home }}/.local/share/swiftly/bin/swiftly", "--version"]
+      register: swift_manager_check
+      failed_when: swift_manager_check.rc not in [0, 2]
+      changed_when: false
+      check_mode: false
+      tags: [swift]
+
+    - name: Extract verified swiftly installer when installation is needed
+      ansible.builtin.unarchive:
+        src: "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}/swiftly.tar.gz"
+        dest: "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}"
+        remote_src: true
+        creates: "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}/swiftly"
+      when: >-
+        swift_manager_check.rc != 0 or
+        swift_manager_check.stdout | trim != swiftly_version
+      tags: [swift]
+
+    - name: Initialize or upgrade swiftly without changing shell profiles
+      ansible.builtin.command:
+        argv:
+          - "{{ host_user_home }}/.cache/swiftly/{{ swiftly_version }}/swiftly"
+          - init
+          - --assume-yes
+          - --skip-install
+          - --no-modify-profile
+      when: >-
+        swift_manager_check.rc != 0 or
+        swift_manager_check.stdout | trim != swiftly_version
+      tags: [swift]
+
+    # Swiftly selects the first toolchain automatically; preserve later user choices.
+    - name: Install pinned Swift toolchain with signature verification
+      ansible.builtin.command:
+        argv:
+          - "{{ host_user_home }}/.local/share/swiftly/bin/swiftly"
+          - install
+          - "{{ swift_toolchain_version }}"
+          - --assume-yes
+          - --verify
+        chdir: "{{ host_user_home }}"
+      register: swift_toolchain_install
+      changed_when: "'already installed' not in swift_toolchain_install.stdout"
+      tags: [swift]
+
+    - name: Create shell snippet directories
+      ansible.builtin.file:
+        path: "{{ host_user_home }}/.config/{{ item }}"
+        state: directory
+        mode: "0755"
+      loop: [bash, zsh]
+      tags: [swift]
+
+    - name: Load swiftly in interactive shells after other PATH configuration
+      ansible.builtin.copy:
+        dest: "{{ host_user_home }}/.config/{{ item.directory }}/zz-swift.{{ item.extension }}"
+        content: |
+          # Keep the official Swift toolchain ahead of Nix and system binaries.
+          if [ -r {{ (host_user_home + '/.local/share/swiftly/env.sh') | quote }} ]; then
+            . {{ (host_user_home + '/.local/share/swiftly/env.sh') | quote }}
+          fi
+        mode: "0644"
+      loop:
+        - { directory: bash, extension: bash }
+        - { directory: zsh, extension: zsh }
+      tags: [swift]
+
+    - name: Verify Swift and its bundled language server
+      ansible.builtin.command:
+        argv: ["{{ host_user_home }}/.local/share/swiftly/bin/{{ item.name }}", "{{ item.option }}"]
+        chdir: "{{ host_user_home }}"
+      loop:
+        - { name: swift, option: --version }
+        - { name: sourcekit-lsp, option: --help }
+      changed_when: false
+      tags: [swift]
+  tags: [swift]

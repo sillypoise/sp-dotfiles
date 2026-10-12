@@ -121,6 +121,18 @@ from a separate locked `nixos-unstable` input. Run `dotfiles -t nix` after sourc
 changes; `dotfiles -t update` refreshes the inputs of the deployed flake thereafter.
 A missing unstable Claude Code package fails evaluation rather than silently skipping installation.
 
+### Swift Development
+
+`dotfiles -t swift` installs official Swift outside Nix using checksum-pinned Swiftly and
+signature-verified toolchains. The role also runs by default and currently supports only
+Ubuntu 24.04 x86_64. Unsupported default runs skip it; explicit requests fail before installation.
+Versions and the installer checksum live in `group_vars/all.yml`.
+Interactive Bash/Zsh snippets load Swiftly's environment.
+Repeat runs preserve user-selected defaults and existing toolchains. See `roles/swift/README.md`
+for the installation contract, update procedure, and scratch-package smoke test.
+The separate `~/.config/nvim` repository owns SourceKit LSP configuration.
+Run `/usr/bin/python3 -m unittest discover -s tests -p test_swift_role.py -v` for isolated checks.
+
 ### OpenCode Integration Workflow
 
 Run `dotfiles -t opencode` to install OpenCode and clone shared guides into the local user

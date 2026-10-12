@@ -12,6 +12,7 @@ default_roles:
   - ufw
   - tailscale
   - c
+  - swift
   - btop
   - nvim
   - opencode
@@ -34,6 +35,12 @@ tailscale_accept_dns: true
 # Nix/Home Manager releases
 nixpkgs_release: "nixos-26.05"
 home_manager_release: "release-26.05"
+
+# Official Swift tooling (outside Nix).
+swiftly_version: "1.2.0"
+# SHA-256 of the archive fetched from download.swift.org over HTTPS.
+swiftly_archive_sha256: "0b26b568811404374c7d7f07276b6aad4145db5d1893a45f307de6a94ca8d9c3"
+swift_toolchain_version: "6.4.0"
 
 # Media tools releases
 media_tools_yt_dlp_version: "2026.02.21"
