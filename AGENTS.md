@@ -141,7 +141,9 @@ without a Mac, by running omarchy-apple-dev's installer at a pinned commit. The 
 toolchain. The Xcode `.xip` must be downloaded by hand to `ios_xcode_xip`; until then the role
 succeeds and reports `iOS SDK pending`. libimobiledevice is built from pinned commits into a
 private prefix so the packaged `usbmuxd` keeps its system libraries. Pins live in
-`group_vars/all.yml`. See `roles/ios/README.md` for the contract and what is still unverified.
+`group_vars/all.yml`. The device tools run in a virtualenv on Nix's Python 3.13, because the iPhone
+tunnel needs it. See `roles/ios/README.md` for the contract and `roles/ios/PLAYBOOK.md` for the
+whole procedure and what is still unverified.
 Run `/usr/bin/python3 -m unittest discover -s tests -p test_ios_role.py -v` for isolated checks.
 
 ### OpenCode Integration Workflow

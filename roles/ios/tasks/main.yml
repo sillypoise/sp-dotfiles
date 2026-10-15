@@ -6,6 +6,12 @@
   register: ios_swift_toolchain
   tags: [ios]
 
+- name: Check the Python interpreter for the device tools
+  ansible.builtin.stat:
+    path: "{{ ios_python }}"
+  register: ios_python_interpreter
+  tags: [ios]
+
 - name: Require supported iOS toolchain platform, pinned sources, and the Swift toolchain
   ansible.builtin.assert:
     that:
@@ -17,9 +23,10 @@
       - ios_imobiledevice_sources | map(attribute='ref') | select('match', '^[a-f0-9]{40}$') | list | length == 4
       - ios_pymobiledevice3_version is match('^[0-9]+\.[0-9]+\.[0-9]+$')
       - ios_swift_toolchain.stat.exists
+      - ios_python_interpreter.stat.exists
     fail_msg: >-
-      iOS development requires Ubuntu 24.04 x86_64, commit-pinned sources, and Swift
-      {{ swift_toolchain_version }} from `dotfiles -t swift`.
+      iOS development requires Ubuntu 24.04 x86_64, commit-pinned sources, Swift
+      {{ swift_toolchain_version }} from `dotfiles -t swift`, and {{ ios_python }} from `dotfiles -t nix`.
   tags: [ios]
 
 - name: Install the iOS toolchain

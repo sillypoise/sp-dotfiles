@@ -3,8 +3,12 @@
 Owner: the dotfiles `ios` role. Run `dotfiles -t ios` to install what builds, signs, and installs
 iOS apps from this machine without a Mac: xtool, the Darwin Swift SDK, and the device tools. The
 role is opt-in and absent from `default_roles`: its first run compiles for about 15 minutes.
-Only Ubuntu 24.04 x86_64 is supported, and the `swift` role must have installed
-`swift_toolchain_version` first. Any other state fails before installation.
+Only Ubuntu 24.04 x86_64 is supported. The `swift` role must have installed
+`swift_toolchain_version` and the `nix` role must have installed `ios_python` first. Any other
+state fails before installation.
+
+`PLAYBOOK.md` in this directory is the whole procedure from a fresh machine to an app on a phone,
+with what each tool is for and which stages are proven.
 
 The work is done by [omarchy-apple-dev](https://github.com/joshuaswarren/omarchy-apple-dev)'s
 `install-toolchain.sh` in full mode, at a pinned commit. That project targets Arch; this role
@@ -31,7 +35,7 @@ Outputs under the host user's home:
 - `.cache/ios-dev/src/`: their source checkouts.
 - `.local/share/omarchy-apple-dev/`: the installer's checkout, with `device-run.sh` and `ship.sh`.
 - `.local/bin/xtool`, `rcodesign`, `ipsw`; `.local/lib/omarchy-apple-dev/xtool-<commit>/`.
-- `pymobile3-venv/`: pymobiledevice3 at the pinned version.
+- `pymobile3-venv/`: pymobiledevice3 at the pinned version, on `ios_python`.
 - `.swiftpm/swift-sdks/darwin.artifactbundle` and `.cache/xtool/`: the Darwin SDK.
 - `.config/omarchy-apple-dev/mode` and `.local/state/ios-dev/installed-<commit>-swift-<version>`.
 
@@ -48,6 +52,9 @@ The installer also edits three build-setting defaults inside the swiftly toolcha
   Swiftly's `swift` is a proxy, so the role puts `ios_swift_bin` first while it runs.
 - **Pinned pymobiledevice3.** The installer takes the latest release; the role installs the
   pinned one first, which the installer then leaves alone.
+- **Device tools on Python 3.13.** The installer builds the virtualenv with the system `python3`,
+  which is 3.12 on Ubuntu 24.04 and lacks the `ssl` PSK callbacks the iPhone tunnel needs. The role
+  builds it with `ios_python` first, and replaces a virtualenv whose Python lacks them.
 - **Full mode only.** Packages needed only for Flutter or the no-Xcode mode are not installed.
   Full mode still needs `liblzma-dev` and `zlib1g-dev`: xtool's unxip dependency imports the
   system LZMA and zlib headers on Linux. SwiftPM's apt provider hints do not install them.
@@ -81,14 +88,18 @@ xtool dev build            # builds xtool/Hello.app for arm64 iOS
 
 ## Verification status
 
-The role's branching and required unxip development packages are covered by `tests/test_ios_role.py`,
-which uses fake sources and a fake installer. On 2026-10-12 the real role completed on this Ubuntu
-24.04 machine after adding the missing `liblzma-dev` prerequisite: the private library stack was
-reused, xtool built against swiftly, and xtool, rcodesign, and ipsw passed their executable checks.
-The original unxip LZMA and zlib modules also passed an isolated Swift compiler import check.
-The role reported `iOS SDK pending`: SDK extraction, app builds, signing, and device installation
-remain unverified until the Xcode archive is supplied and the interactive steps are completed.
-Upstream verified Ubuntu 24.04 in a container in its no-Xcode mode only.
+The role's branching, required unxip development packages, and virtualenv replacement are covered
+by `tests/test_ios_role.py`, which uses fake sources and a fake installer.
+
+On 2026-10-12 the real role completed twice on this Ubuntu 24.04 machine. The first run, after
+adding the missing `liblzma-dev` prerequisite, built the private library stack and xtool against
+swiftly, and xtool, rcodesign, and ipsw passed their executable checks. The second run, with an
+Xcode 27.1 RC archive, extracted and registered the Darwin SDK (iOS 27.1, built with Apple Swift
+6.4). A SwiftUI app with a local SwiftPM dependency then built for arm64 iOS with `xtool dev build`.
+
+Not yet run for real: the Python 3.13 virtualenv change (a virtualenv made by hand with
+`ios_python` installed the pinned pymobiledevice3 and imported its tunnel service), signing, and
+device installation. Upstream verified Ubuntu 24.04 in a container in its no-Xcode mode only.
 
 ```sh
 /usr/bin/python3 -m unittest discover -s tests -p test_ios_role.py -v

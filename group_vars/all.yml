@@ -58,6 +58,9 @@ ios_imobiledevice_sources:
   - name: "libimobiledevice"
     ref: "fa0f79190142bc309307967c058f89c1b36eb6b8"
 ios_pymobiledevice3_version: "11.26.0"
+# The device tunnel needs Python 3.13 or newer (TLS-PSK in the ssl module); Ubuntu 24.04 ships 3.12.
+# Home Manager installs this interpreter (roles/nix).
+ios_python: "{{ host_user_home }}/.nix-profile/bin/python3.13"
 # The Xcode whose Swift matches swift_toolchain_version: 27 for 6.4, 26 for 6.3.
 ios_xcode_major: "27"
 # Downloaded by hand from developer.apple.com; the role never fetches it.

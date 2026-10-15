@@ -132,12 +132,32 @@
         label: "{{ item.path | basename }}"
       tags: [ios]
 
+    # device-run.sh opens the iPhone tunnel with this venv's Python, which must have ssl PSK callbacks.
+    - name: Check the device-tools virtualenv interpreter
+      ansible.builtin.command:
+        argv:
+          - "{{ host_user_home }}/pymobile3-venv/bin/python"
+          - -c
+          - "import ssl, sys; sys.exit(0 if hasattr(ssl.SSLContext, 'set_psk_client_callback') else 3)"
+      register: ios_venv_interpreter
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      tags: [ios]
+
+    - name: Remove a device-tools virtualenv whose Python cannot open the tunnel
+      ansible.builtin.file:
+        path: "{{ host_user_home }}/pymobile3-venv"
+        state: absent
+      when: ios_venv_interpreter.rc == 3
+      tags: [ios]
+
     # The installer leaves an existing venv and an installed package as they are.
     - name: Install pinned pymobiledevice3 into the device-tools virtualenv
       ansible.builtin.pip:
         name: "pymobiledevice3=={{ ios_pymobiledevice3_version }}"
         virtualenv: "{{ host_user_home }}/pymobile3-venv"
-        virtualenv_command: /usr/bin/python3 -m venv
+        virtualenv_command: "{{ ios_python }} -m venv"
       tags: [ios]
 
     - name: Check for the Xcode archive

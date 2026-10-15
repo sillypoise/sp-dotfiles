@@ -103,6 +103,7 @@ class IosRoleTests(unittest.TestCase):
             "ios_toolchain_ref": installer,
             "ios_imobiledevice_repo_base": str(self.root / "repositories"),
             "ios_imobiledevice_sources": sources,
+            "ios_python": "/usr/bin/python3",
         })
         self.tasks = yaml.safe_load((ROOT / "roles/ios/tasks/main.yml").read_text())
         ubuntu_tasks = yaml.safe_load((ROOT / "roles/ios/tasks/ubuntu.yml").read_text())
@@ -112,8 +113,9 @@ class IosRoleTests(unittest.TestCase):
         block = ubuntu_tasks[1]["block"]
         package = next(index for index, task in enumerate(block) if "ansible.builtin.pip" in task)
         block[package] = {"name": "Simulate pip", "ansible.builtin.debug": {"msg": "pip"}, "tags": ["ios"]}
-        self.tasks[2].pop("ansible.builtin.import_tasks")
-        self.tasks[2]["block"] = ubuntu_tasks
+        install = next(task for task in self.tasks if "ansible.builtin.import_tasks" in task)
+        install.pop("ansible.builtin.import_tasks")
+        install["block"] = ubuntu_tasks
 
     def repository(self, name, script, content):
         directory = self.root / "repositories" / name
@@ -191,6 +193,7 @@ class IosRoleTests(unittest.TestCase):
                             ("ios_toolchain_ref", "main"),
                             ("ios_imobiledevice_sources", [{"name": "libplist", "ref": "master"}]),
                             ("ios_pymobiledevice3_version", "latest"),
+                            ("ios_python", "/nonexistent/python3.13"),
                             ("swift_toolchain_version", "9.9.9")):
             with self.subTest(name=name):
                 original = self.variables[name]
@@ -200,6 +203,22 @@ class IosRoleTests(unittest.TestCase):
                 self.assertNotIn("TASK [Simulate apt]", output)
                 self.assertEqual(sorted(str(path) for path in self.home.rglob("*")), before)
                 self.variables[name] = original
+
+    def test_virtualenv_without_tunnel_support_is_replaced(self):
+        virtualenv = self.home / "pymobile3-venv"
+        (virtualenv / "bin").mkdir(parents=True)
+        (virtualenv / "bin/python").write_text("#!/bin/sh\nexit 3\n")
+        (virtualenv / "bin/python").chmod(0o755)
+        status, output = self.run_role()
+        self.assertEqual(status, 0, output)
+        # Pip is simulated here, so a removed virtualenv stays absent.
+        self.assertFalse(virtualenv.exists())
+        (virtualenv / "bin").mkdir(parents=True)
+        (virtualenv / "bin/python").write_text("#!/bin/sh\nexit 0\n")
+        (virtualenv / "bin/python").chmod(0o755)
+        status, output = self.run_role()
+        self.assertEqual(status, 0, output)
+        self.assertTrue((virtualenv / "bin/python").exists())
 
     def test_installer_failure_fails_the_role_without_a_marker(self):
         status, output = self.run_role("install")
