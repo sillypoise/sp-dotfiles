@@ -10,6 +10,30 @@
     - git
     - config
 
+- name: Ensure jj config directory exists
+  ansible.builtin.file:
+    path: "{{ host_user_home }}/.config/jj"
+    state: directory
+    mode: '0755'
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+  tags:
+    - git
+    - jj
+    - config
+
+- name: Copy jj config file
+  ansible.builtin.copy:
+    src: jjconfig.toml
+    dest: "{{ host_user_home }}/.config/jj/config.toml"
+    owner: "{{ host_user }}"
+    group: "{{ host_user }}"
+    mode: '0644'
+  tags:
+    - git
+    - jj
+    - config
+
 - name: Ensure gh config directory exists
   ansible.builtin.file:
     path: "{{ host_user_home }}/.config/gh"
