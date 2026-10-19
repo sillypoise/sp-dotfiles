@@ -1,3 +1,13 @@
 [user]
 name = "sillypoise"
 email = "somewhatjose@gmail.com"
+
+# Sign with the same SSH key as git, but only when pushing.
+[signing]
+behavior = "drop"
+backend = "ssh"
+key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE7zA/iy0C5VOt/TKDX2msds7r/kTBaJ/gWG9oTQLxR6"
+backends.ssh.program = "/usr/bin/ssh-keygen"
+
+[git]
+sign-on-push = true
