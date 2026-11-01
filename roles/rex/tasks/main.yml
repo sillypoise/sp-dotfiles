@@ -1,0 +1,29 @@
+---
+# Unsupported default runs skip Rex so Arch hosts keep working.
+# Explicit requests fail before side effects rather than pretending to install it.
+- name: Require supported Rex platform
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == 'Ubuntu'
+      - ansible_architecture in ['x86_64', 'aarch64']
+      - rex_channel in ['stable', 'preview', 'snapshot']
+      - rex_keyring_sha256 is match('^[a-f0-9]{64}$')
+      - rex_tailscale_hostname is match('^[a-z0-9][a-z0-9-]*$')
+    fail_msg: "Rex requires Ubuntu on x86_64 or aarch64, a known channel, a keyring checksum, and a valid hostname."
+  when: >-
+    'rex' in ansible_run_tags or
+    (ansible_distribution == 'Ubuntu' and ansible_architecture in ['x86_64', 'aarch64'])
+  tags: [rex]
+
+- name: Install and run Rex on the supported platform
+  ansible.builtin.import_tasks: ubuntu.yml
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ansible_architecture in ['x86_64', 'aarch64']
+  tags: [rex]
+
+- name: Report skipped Rex provisioning on unsupported default runs
+  ansible.builtin.debug:
+    msg: "Skipping Rex: this role currently supports only Ubuntu on x86_64 or aarch64."
+  when: ansible_distribution != 'Ubuntu' or ansible_architecture not in ['x86_64', 'aarch64']
+  tags: [rex]

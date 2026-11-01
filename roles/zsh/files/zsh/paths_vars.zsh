@@ -6,6 +6,8 @@ addToPath "$HOME/.local/bin"
 
 # Add Nix to PATH if available
 sourceIfExists "/etc/profile.d/nix.sh"
+# Home Manager owns runtime trust-store settings as well as installed packages.
+sourceIfExists "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
 
 # # Add op plugins NOT UNTIL WE FIGURE OUT RDS
 # sourceIfExists "$HOME/.config/op/plugins.sh"

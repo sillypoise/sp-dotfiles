@@ -111,6 +111,28 @@ or run autoremove. Review any reboot requirements yourself. Other installers (np
 AUR helpers, etc.) are outside this role's scope. Upgrade checks require network and package-manager
 locks; duration and download size depend on the available updates.
 
+### TLS trust-store mitigation (eMudhra, October 2026)
+
+Home Manager owns runtime trust settings in `roles/nix/files/sillypoise/home.nix`.
+Node uses `--use-openssl-ca` (not the additive `--use-system-ca`), Deno uses the system
+store, and uv uses `UV_SYSTEM_CERTS=true`. Pip temporarily uses legacy-certs mode with
+an explicit system bundle, because its default mode also trusts its bundled certifi.
+Remove that pip workaround once Nix deploys pip 26.2.2 or later and rejection tests pass.
+These settings require an updated distro CA store; they do not patch old container images.
+
+After deploying, start a fresh login session and restart applications. For an existing shell:
+
+```bash
+unset __HM_SESS_VARS_SOURCED
+. "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+```
+
+Existing processes retain their prior environment and may retain loaded certificates.
+Bun is **not mitigated** by these settings: 1.3.13 and checksum-verified 1.4.3 accepted the
+incident test chain, including with tested CA flags. Avoid Bun for outbound HTTPS/package
+installation until a verified fix is available; use system-backed Node/npm or uv instead.
+No TLS verification bypass is enabled. The unused Electron checkout is intentionally unchanged.
+
 ### Nixpkgs 26.05 package compatibility
 
 The managed package list no longer includes Neofetch/Fastfetch. Datasette is temporarily omitted

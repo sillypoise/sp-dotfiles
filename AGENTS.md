@@ -133,6 +133,16 @@ for the installation contract, update procedure, and scratch-package smoke test.
 The separate `~/.config/nvim` repository owns SourceKit LSP configuration.
 Run `/usr/bin/python3 -m unittest discover -s tests -p test_swift_role.py -v` for isolated checks.
 
+### Rex Server
+
+`dotfiles -t rex` installs Rex from its apt repository and runs a personal server as a systemd
+user unit (`~/.config/systemd/user/rex.service`, linger enabled) with built-in Tailscale, named
+`rex_tailscale_hostname` (`sp-dev-rex`). It runs by default and supports only Ubuntu;
+unsupported default runs skip it. Unit changes never restart a running server unless
+`rex_restart_on_change` is set, because a restart ends programs in Rex sessions.
+New machines sign in once through the link in `rex server status`. See `roles/rex/README.md`.
+Run `/usr/bin/python3 -m unittest discover -s tests -p test_rex_role.py -v` for isolated checks.
+
 ### iOS Development
 
 `dotfiles -t ios` installs xtool, the Darwin Swift SDK, and device tools for building iOS apps

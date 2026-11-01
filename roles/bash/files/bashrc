@@ -2,3 +2,8 @@
 for file in $HOME/.config/bash/*.bash; do
     [ -r "$file" ] && source "$file"
 done
+
+# Home Manager owns runtime trust-store settings as well as installed packages.
+if [ -r "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+    . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+fi

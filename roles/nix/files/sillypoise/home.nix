@@ -11,6 +11,19 @@
     # Allow unfree packages (needed for claude-code)
     nixpkgs.config.allowUnfree = true;
 
+    # Bundled roots can retain distrusted CAs; system additions alone are insufficient.
+    home.sessionVariables = {
+      NODE_OPTIONS = "--use-openssl-ca";
+      SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+      SSL_CERT_DIR = "/etc/ssl/certs";
+      DENO_TLS_CA_STORE = "system";
+      UV_SYSTEM_CERTS = "true";
+      # Temporary eMudhra mitigation owned here; remove after pip >= 26.2.2 is deployed.
+      # Pip's default truststore mode unions system roots with its vulnerable vendor bundle.
+      PIP_USE_DEPRECATED = "legacy-certs";
+      PIP_CERT = "/etc/ssl/certs/ca-certificates.crt";
+    };
+
     # Package Management
     home.packages = with pkgs; [
       (python313.withPackages (ps: [

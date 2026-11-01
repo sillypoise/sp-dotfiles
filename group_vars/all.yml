@@ -11,6 +11,7 @@ default_roles:
   - openssh
   - ufw
   - tailscale
+  - rex
   - c
   - swift
   - btop
@@ -41,6 +42,16 @@ swiftly_version: "1.2.0"
 # SHA-256 of the archive fetched from download.swift.org over HTTPS.
 swiftly_archive_sha256: "0b26b568811404374c7d7f07276b6aad4145db5d1893a45f307de6a94ca8d9c3"
 swift_toolchain_version: "6.4.0"
+
+# Rex personal server (Ubuntu only). See roles/rex/README.md.
+# Channels: stable, preview, snapshot. Only snapshot has builds today.
+rex_channel: "snapshot"
+# SHA-256 of keys/rex-archive-keyring.gpg; a changed key fails the role instead of being trusted.
+rex_keyring_sha256: "07a92e758ac2fc189efa17c24bf3df70d75e4216f6c262283a5c812377deb83e"
+# Tailnet device name of the server's embedded Tailscale node (sp-dev-rex on sp-dev).
+rex_tailscale_hostname: "{{ system_hostname }}-rex"
+# Restarting ends every running program in Rex sessions, so unit changes wait for a manual restart.
+rex_restart_on_change: false
 
 # iOS development on Linux (opt-in: `dotfiles -t ios`). See roles/ios/README.md.
 # The installer pins xtool, OpenAppleMacros, rcodesign, and ipsw itself.

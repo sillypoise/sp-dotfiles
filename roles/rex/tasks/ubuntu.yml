@@ -1,0 +1,176 @@
+---
+# Repository setup mirrors pkgs.superlogical.com/rex/install.sh for apt.
+- name: Create apt keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [rex]
+
+- name: Download checksum-pinned Rex signing key
+  ansible.builtin.get_url:
+    url: https://pkgs.superlogical.com/rex/keys/rex-archive-keyring.gpg
+    dest: /etc/apt/keyrings/rex-archive-keyring.gpg
+    checksum: "sha256:{{ rex_keyring_sha256 }}"
+    owner: root
+    group: root
+    mode: "0644"
+    timeout: 60
+    validate_certs: true
+  become: true
+  tags: [rex]
+
+# Ubuntu ships an unrelated Perl tool also named rex; the pin keeps apt on this repository.
+- name: Pin the rex package to the Rex repository
+  ansible.builtin.copy:
+    dest: /etc/apt/preferences.d/rex
+    content: |
+      Package: rex
+      Pin: origin pkgs.superlogical.com
+      Pin-Priority: 1001
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [rex]
+
+- name: Add Rex apt repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/rex.sources
+    content: |
+      Types: deb
+      URIs: https://pkgs.superlogical.com/rex/apt
+      Suites: {{ rex_channel }}
+      Components: main
+      Architectures: {{ 'arm64' if ansible_architecture == 'aarch64' else 'amd64' }}
+      Signed-By: /etc/apt/keyrings/rex-archive-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  register: rex_repository
+  tags: [rex]
+
+- name: Install Rex with apt
+  ansible.builtin.apt:
+    name: rex
+    state: present
+    update_cache: "{{ rex_repository is changed }}"
+  become: true
+  tags: [rex]
+
+# Fails if a stronger apt rule installed the Perl rex instead.
+- name: Verify the installed rex is the Rex server
+  ansible.builtin.command:
+    argv: [/usr/bin/rex, server, --help]
+  changed_when: false
+  check_mode: false
+  tags: [rex]
+
+- name: Look up host user ID
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ host_user }}"
+  tags: [rex]
+
+- name: Set Rex user service paths
+  ansible.builtin.set_fact:
+    rex_runtime_dir: "/run/user/{{ ansible_facts['getent_passwd'][host_user][1] }}"
+  tags: [rex]
+
+# Linger starts the user manager at boot, so the server runs without a login.
+- name: Enable linger for host user
+  ansible.builtin.command:
+    argv: [loginctl, enable-linger, "{{ host_user }}"]
+    creates: "/var/lib/systemd/linger/{{ host_user }}"
+  become: true
+  tags: [rex]
+
+- name: Start host user's systemd manager
+  ansible.builtin.systemd_service:
+    name: "user@{{ ansible_facts['getent_passwd'][host_user][1] }}.service"
+    state: started
+  become: true
+  tags: [rex]
+
+- name: Manage Rex user service as the host user
+  become: true
+  become_user: "{{ host_user }}"
+  environment:
+    XDG_RUNTIME_DIR: "{{ rex_runtime_dir }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path={{ rex_runtime_dir }}/bus"
+  block:
+    - name: Check whether the Rex user service is running
+      ansible.builtin.command:
+        argv: [systemctl, --user, is-active, rex.service]
+      register: rex_service_before
+      changed_when: false
+      failed_when: false
+      check_mode: false
+      tags: [rex]
+
+    - name: Create systemd user unit directory
+      ansible.builtin.file:
+        path: "{{ host_user_home }}/.config/systemd/user"
+        state: directory
+        mode: "0755"
+      tags: [rex]
+
+    - name: Install Rex user service
+      ansible.builtin.template:
+        src: rex.service.j2
+        dest: "{{ host_user_home }}/.config/systemd/user/rex.service"
+        mode: "0644"
+      register: rex_unit
+      tags: [rex]
+
+    - name: Enable and start Rex user service
+      ansible.builtin.systemd_service:
+        name: rex.service
+        scope: user
+        enabled: true
+        state: started
+        daemon_reload: "{{ rex_unit is changed }}"
+      tags: [rex]
+
+    - name: Restart Rex user service to apply unit changes
+      ansible.builtin.systemd_service:
+        name: rex.service
+        scope: user
+        state: restarted
+      when:
+        - rex_unit is changed
+        - rex_service_before.stdout == 'active'
+        - rex_restart_on_change | bool
+      tags: [rex]
+
+    - name: Report pending Rex restart
+      ansible.builtin.debug:
+        msg: >-
+          rex.service changed while running and was not restarted, because a restart ends every
+          program in its sessions. Apply it with: systemctl --user restart rex.service
+      when:
+        - rex_unit is changed
+        - rex_service_before.stdout == 'active'
+        - not (rex_restart_on_change | bool)
+      tags: [rex]
+
+    # A new node prints a Tailscale sign-in link here until it is enrolled.
+    - name: Read Rex server status
+      ansible.builtin.command:
+        argv: [rex, --autostart=false, server, status]
+      register: rex_status
+      until: rex_status.rc == 0
+      retries: 10
+      delay: 1
+      changed_when: false
+      check_mode: false
+      tags: [rex]
+
+    - name: Show Rex server status
+      ansible.builtin.debug:
+        msg: "{{ rex_status.stdout_lines }}"
+      tags: [rex]

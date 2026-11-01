@@ -1,0 +1,12 @@
+# Managed by sp-dotfiles (roles/rex). Local edits are overwritten.
+[Unit]
+Description=Rex personal server
+Documentation=https://www.superlogical.com/rex/docs/linux/remote-access
+
+[Service]
+ExecStart=/usr/bin/rex server run --listen unix://%t/rex/server.sock --tailscale --tailscale-hostname {{ rex_tailscale_hostname }} --log-format text
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
