@@ -308,6 +308,7 @@
         if (pi_guides_source is match('^.*@v?[0-9]+(\.[0-9]+)+$'))
         else ''
       }}
+    pi_guides_resolved_source: "{{ pi_guides_source }}"
     pi_guides_git_install_path: "{{ host_user_home }}/.pi/agent/git/github.com/sillypoise/pi-guides"
     pi_guides_git_remote_url: "git@github.com:sillypoise/pi-guides.git"
     pi_guides_git_remote_url_normalized: "git@github.com:sillypoise/pi-guides"
@@ -363,6 +364,82 @@
     - pi_guides_enable_global
     - pi_guides_source_kind == 'git'
     - pi_guides_manifest_stat.stat.exists
+  tags:
+    - pi
+    - config
+    - packages
+
+# An unpinned git source follows the newest vX.Y.Z tag, so unreleased commits on main never install.
+- name: pi | list pi-guides release tags
+  ansible.builtin.command:
+    argv: [git, ls-remote, --tags, --refs, --sort=-v:refname, "{{ pi_guides_git_remote_url }}"]
+  register: pi_guides_release_tags
+  changed_when: false
+  failed_when: false
+  check_mode: false
+  become: true
+  become_user: "{{ host_user }}"
+  when:
+    - pi_guides_enable_global
+    - pi_guides_source_kind == 'git'
+    - "'@' not in pi_guides_source.split(':')[-1]"
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | pick latest pi-guides release
+  ansible.builtin.set_fact:
+    pi_guides_latest_tag: >-
+      {{
+        pi_guides_release_tags.stdout_lines
+        | map('regex_replace', '^.*refs/tags/', '')
+        | select('match', '^v[0-9]+\.[0-9]+\.[0-9]+$')
+        | first | default('')
+      }}
+  when: pi_guides_release_tags.stdout_lines is defined
+  tags:
+    - pi
+    - config
+    - packages
+
+# Offline runs keep the installed release instead of failing; a fresh machine has nothing to keep.
+- name: pi | fail when no pi-guides release can be resolved
+  ansible.builtin.fail:
+    msg: >-
+      Could not find a vX.Y.Z release tag on {{ pi_guides_git_remote_url }} and no pi-guides
+      package is installed. git said: {{ pi_guides_release_tags.stderr | default('') | trim }}
+  when:
+    - pi_guides_latest_tag is defined
+    - pi_guides_latest_tag | length == 0
+    - pi_guides_installed_version | default('') | length == 0
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | warn when keeping the installed pi-guides release
+  ansible.builtin.debug:
+    msg: >-
+      Could not list pi-guides releases; keeping installed v{{ pi_guides_installed_version }}.
+      git said: {{ pi_guides_release_tags.stderr | default('') | trim }}
+  when:
+    - pi_guides_latest_tag is defined
+    - pi_guides_latest_tag | length == 0
+  tags:
+    - pi
+    - config
+    - packages
+
+- name: pi | pin pi-guides source to the resolved release
+  ansible.builtin.set_fact:
+    pi_guides_resolved_source: "{{ pi_guides_source }}@{{ pi_guides_resolved_tag }}"
+    pi_guides_expected_version: "{{ pi_guides_resolved_tag[1:] }}"
+  vars:
+    pi_guides_resolved_tag: >-
+      {{ pi_guides_latest_tag if pi_guides_latest_tag | length > 0
+      else 'v' ~ pi_guides_installed_version }}
+  when: pi_guides_latest_tag is defined
   tags:
     - pi
     - config
@@ -424,7 +501,7 @@
 
     - name: pi | install managed global pi-guides package
       ansible.builtin.command:
-        cmd: /usr/local/bin/pi install {{ pi_guides_source }}
+        cmd: /usr/local/bin/pi install {{ pi_guides_resolved_source }}
       become: true
       become_user: "{{ host_user }}"
       register: pi_guides_install_result
@@ -511,7 +588,7 @@
         | combine(
           {
             'packages': (
-              ([pi_guides_source] if pi_guides_enable_global else []) +
+              ([pi_guides_resolved_source] if pi_guides_enable_global else []) +
               (pi_managed_source_packages | map(attribute='package_path') | list) +
               pi_extra_packages
             )
@@ -590,7 +667,7 @@
         pi_guides_expected_version)
     fail_msg: >-
       Managed global pi-guides package does not match the desired source.
-      Source={{ pi_guides_source }}
+      Source={{ pi_guides_resolved_source }}
       Remote={{ pi_guides_verified_remote_check.stdout | default('missing') | trim }}
       Version={{ ((pi_guides_verified_manifest_slurp.content | b64decode | from_json).version)
       if (pi_guides_verified_manifest_stat.stat.exists) else 'missing' }}

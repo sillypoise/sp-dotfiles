@@ -101,7 +101,9 @@ When global guides are enabled, the role manages both:
 - shared system prompt additions in `~/.pi/agent/APPEND_SYSTEM.md`
 - installed global package state under `~/.pi/agent/git/...`
 
-That keeps pinned package updates converged instead of relying on manual `pi remove` or
+An unpinned `pi_guides_source` follows the newest `vX.Y.Z` tag; `@vX.Y.Z` pins one.
+
+That keeps package updates converged instead of relying on manual `pi remove` or
 `pi install` repair steps.
 
 When the package is globally available, initialize a personal repo with `/guide-init --no-settings`.

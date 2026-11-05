@@ -183,7 +183,9 @@ Current distribution model:
   - `pi_guides_enable_global`
   - `pi_guides_source`
 - when global guides are enabled, the `pi` role also refreshes and verifies the installed
-  `pi-guides` package checkout so package state matches the configured pinned source
+  `pi-guides` package checkout so package state matches the configured source
+- an unpinned `pi_guides_source` installs the newest `vX.Y.Z` tag on each run; append
+  `@vX.Y.Z` to pin one. If the tag lookup fails, the installed release is kept
 
 Recommended usage:
 
